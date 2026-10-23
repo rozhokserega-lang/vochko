@@ -35,6 +35,22 @@ node telegram/setup.mjs
 
 Скрипт выставит меню-кнопку «Играть» и описание бота. Токен нигде не сохраняется.
 
+### Вариант через GitHub Actions
+
+Если не хотите запускать скрипт локально, положите токен в секреты репозитория:
+
+```powershell
+gh secret set BOT_TOKEN          # вставьте токен по запросу, он не отобразится
+gh workflow run telegram-setup.yml
+gh run watch
+```
+
+Workflow `Telegram setup` выполнит тот же скрипт на раннере GitHub. URL по умолчанию — Pages-адрес репозитория; его можно переопределить переменной `WEBAPP_URL`:
+
+```powershell
+gh variable set WEBAPP_URL --body "https://rozhokserega-lang.github.io/vochko/"
+```
+
 ## 3. Открыть
 
 Зайдите в бота и нажмите кнопку **«Играть»** слева от поля ввода. На некоторых клиентах она спрятана в меню чата.
