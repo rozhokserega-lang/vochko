@@ -59,6 +59,9 @@ try {
   });
   console.log(`Меню-кнопка «Играть» → ${url}`);
 
+  const menu = await api('getChatMenuButton');
+  console.log('Проверка меню-кнопки:', JSON.stringify(menu));
+
   await api('setMyDescription', {
     description:
       'ВОЧКО — двадцать одно: карточный рогалик-колодострой. Три стола, общая колода, джокеры и боссы.',
