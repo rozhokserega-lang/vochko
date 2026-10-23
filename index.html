@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#070a10">
+<meta name="description" content="ВОЧКО — карточный рогалик-колодострой: три стола, лимит 21, джокеры и боссы.">
+<title>ВОЧКО — двадцать одно</title>
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ВОЧКО — двадцать одно">
+<meta property="og:description" content="Карточный рогалик-колодострой: три стола, лимит 21, джокеры и боссы.">
+<meta property="og:image" content="https://rozhokserega-lang.github.io/vochko/assets/icon-512.png">
+<script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+<style>
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+:root{
+  --bg:#070a10;
+  --panel:#121a26;
+  --panel-2:#0d141e;
+  --line:#26344a;
+  --line-soft:#1b2637;
+  --text:#e9eff8;
+  --muted:#8ea0b8;
+  --gold:#f2c14e;
+  --gold-dark:#7d611c;
+  --red:#ef4b57;
+  --blue:#5cc0ff;
+  --green:#5fd08a;
+  --purple:#a882ff;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:
+    radial-gradient(1100px 620px at 50% -12%, #1c4438 0%, #0c1a18 42%, #070a10 72%),
+    linear-gradient(#070a10,#05070b);
+  background-attachment:fixed;
+  min-height:100%;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+/* ---------- HUD ---------- */
+#hud{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:10px 18px;
+  border-bottom:1px solid var(--line-soft);
+  background:linear-gradient(180deg,rgba(12,19,29,.95),rgba(8,12,19,.75));
+  backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:30;
+}
+.hud-left,.hud-right{display:flex;align-items:center;gap:10px;flex:1}
+.hud-right{justify-content:flex-end}
+.hud-mid{flex:0 1 380px}
+.pill{
+  display:flex;flex-direction:column;gap:2px;
+  padding:6px 12px;border-radius:12px;
+  background:linear-gradient(180deg,#1a2332,#121926);
+  border:1px solid var(--line);
+  min-width:76px;
+}
+.pill .label{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
+.pill .val{font-size:18px;font-weight:800;line-height:1.1}
+.pill .val.small{font-size:13px;letter-spacing:.3px;text-transform:uppercase;padding-top:3px}
+.pill.gold{border-color:#5b4a1d;background:linear-gradient(180deg,#241d0e,#171208)}
+.pill.gold .val{color:var(--gold)}
+.pill.money .val{color:var(--green)}
+.pill.money .val::before{content:"$";opacity:.6;margin-right:1px}
+
+.hud-target{display:flex;flex-direction:column;gap:5px}
+.hud-target .row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.hud-target .label{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}
+.hud-target .val{font-size:22px;font-weight:900;color:var(--gold);line-height:1}
+.bar{height:7px;border-radius:99px;background:#151d2a;border:1px solid #223049;overflow:hidden}
+.bar > i{display:block;height:100%;width:0%;border-radius:99px;
+  background:linear-gradient(90deg,#c79a2e,#f7d477);transition:width .35s ease}
+.bar.hot > i{background:linear-gradient(90deg,#c23b47,#ff8b78)}
+.hud-btn{
+  width:34px;height:34px;border-radius:10px;cursor:pointer;
+  background:#141c28;border:1px solid var(--line);color:var(--muted);
+  font-size:15px;display:grid;place-items:center;
+}
+.hud-btn:hover{color:var(--text);border-color:#3a4a63}
+
+/* ---------- brand ---------- */
+.brand{display:flex;align-items:center;gap:7px;padding-right:2px;user-select:none}
+.brand-spade{font-size:21px;line-height:1;color:var(--gold);text-shadow:0 0 16px rgba(242,193,78,.5)}
+.brand-name{
+  font-size:15px;font-weight:900;letter-spacing:2.6px;line-height:1;
+  background:linear-gradient(180deg,#fff2c9 0%,#f2c14e 48%,#a97c1c 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+
+/* ---------- layout ---------- */
+main{
+  display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;
+  max-width:1180px;margin:0 auto;padding:16px 18px 8px;
+}
+#table{
+  position:relative;display:flex;flex-direction:column;gap:12px;
+  padding:16px 18px 16px;
+  border:1px solid #275044;border-radius:22px;
+  background:
+    radial-gradient(700px 300px at 50% -10%, rgba(45,120,99,.35), transparent 70%),
+    linear-gradient(180deg,#113029,#0a1d19 75%);
+  box-shadow:inset 0 0 90px rgba(0,0,0,.6), var(--shadow);
+  min-height:520px;
+}
+#table::after{
+  content:"";position:absolute;inset:8px;border-radius:16px;
+  border:1px solid rgba(95,208,138,.09);pointer-events:none;
+}
+#table-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.limit-badge{
+  font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:#9fd8bc;
+  background:rgba(9,26,22,.7);border:1px solid #2b5849;border-radius:99px;
+  padding:5px 12px;
+}
+.limit-badge b{font-size:16px;color:#dcffef;margin-left:4px}
+.seats-dots{display:flex;gap:6px}
+.seat-dot{width:11px;height:11px;border-radius:50%;background:#1b3a31;border:1px solid #2f5a4c}
+.seat-dot.on{background:linear-gradient(180deg,#8ff0bb,#3fae77);border-color:#8ff0bb;box-shadow:0 0 10px rgba(95,208,138,.45)}
+
+/* ---------- hand ---------- */
+#hand{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:10px;
+  min-height:190px;padding:10px 0;
+}
+.hand-empty{color:#4f7a6b;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+.card{
+  position:relative;width:96px;height:134px;flex:0 0 auto;
+  border-radius:11px;border:2px solid #05080d;
+  background:linear-gradient(160deg,#ffffff,#e6e9f0);
+  color:#10151d;
+  box-shadow:0 7px 0 rgba(0,0,0,.4), 0 14px 26px rgba(0,0,0,.35);
+  transform:rotate(var(--rot,0deg)) translateY(var(--lift,0px));
+  transition:transform .18s ease, box-shadow .18s ease;
+  will-change:transform;
+}
+.card:hover{transform:rotate(var(--rot,0deg)) translateY(calc(var(--lift,0px) - 8px));
+  box-shadow:0 12px 0 rgba(0,0,0,.4), 0 20px 34px rgba(0,0,0,.45)}
+.card .c-rank{position:absolute;top:5px;left:9px;font-size:27px;font-weight:900;line-height:1;letter-spacing:-1px}
+.card .c-suit{position:absolute;inset:0;display:grid;place-items:center;font-size:46px;line-height:1;opacity:.9;padding-top:14px}
+.card .c-chips{
+  position:absolute;right:5px;bottom:5px;font-size:10px;font-weight:700;
+  padding:1px 5px;border-radius:5px;background:rgba(10,16,24,.08);color:#364255;
+  font-family:ui-monospace,Menlo,monospace;
+}
+.card.red{color:#d3323f}
+.card.black{color:#111722}
+.card.bust{animation:bustShake .5s ease both;box-shadow:0 7px 0 rgba(120,0,0,.45),0 0 0 3px rgba(239,75,87,.55)}
+@keyframes bustShake{
+  0%,100%{transform:rotate(var(--rot,0deg)) translateX(0)}
+  25%{transform:rotate(var(--rot,0deg)) translateX(-6px)}
+  50%{transform:rotate(var(--rot,0deg)) translateX(5px)}
+  75%{transform:rotate(var(--rot,0deg)) translateX(-3px)}
+}
+
+/* ---------- seat stats ---------- */
+#seat-stats{display:flex;flex-direction:column;align-items:center;gap:8px}
+.total-wrap{display:flex;align-items:center;gap:10px}
+.total-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7fae9c}
+.total{
+  font-size:56px;font-weight:900;line-height:.95;letter-spacing:-2px;
+  font-family:ui-monospace,Menlo,monospace;color:#eafff5;
+  text-shadow:0 4px 0 rgba(0,0,0,.35);
+}
+.total.soft{color:#9fe6ff}
+.total.bust{color:var(--red);text-shadow:0 0 26px rgba(239,75,87,.55)}
+.formula{display:flex;align-items:center;gap:8px;opacity:.98}
+.fbox{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  min-width:74px;padding:5px 10px;border-radius:10px;border:1px solid;
+}
+.fbox .f-label{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;opacity:.75}
+.fbox .f-val{font-size:21px;font-weight:900;line-height:1.05;font-family:ui-monospace,Menlo,monospace}
+.fbox.chips{background:rgba(30,78,120,.35);border-color:#2f5f8c;color:#bfe3ff}
+.fbox.mult{background:rgba(120,32,46,.35);border-color:#8a3546;color:#ffc3cb}
+.fbox.result{background:rgba(122,95,26,.28);border-color:#8a6d24;color:#ffe3a0;min-width:104px}
+.op{font-size:18px;font-weight:800;color:#7fa595}
+.preview-note{font-size:10px;color:#7fae9c;letter-spacing:.4px;min-height:12px}
+#tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:20px}
+.tag{font-size:10px;padding:3px 8px;border-radius:99px;background:rgba(168,130,255,.14);
+  border:1px solid rgba(168,130,255,.35);color:#cbb6ff;letter-spacing:.2px}
+
+/* ---------- actions ---------- */
+#actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:2px}
+.btn{
+  position:relative;cursor:pointer;border-radius:13px;padding:12px 20px;
+  font-weight:900;font-size:13px;letter-spacing:.8px;text-transform:uppercase;
+  color:#eaf3ff;background:linear-gradient(180deg,#28344a,#1a2331);
+  border:2px solid #3a4a66;box-shadow:0 4px 0 #070b12, 0 8px 18px rgba(0,0,0,.3);
+  transition:transform .08s ease, box-shadow .08s ease, filter .12s;
+}
+.btn kbd{
+  font-family:inherit;font-size:9px;font-weight:700;opacity:.65;margin-left:6px;
+  border:1px solid rgba(255,255,255,.18);border-radius:4px;padding:1px 4px;
+  vertical-align:2px;
+}
+.btn:hover{filter:brightness(1.12)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #070b12}
+.btn:disabled{opacity:.3;filter:grayscale(1);cursor:not-allowed;transform:none;box-shadow:0 4px 0 #070b12}
+.btn.draw{background:linear-gradient(180deg,#2f8f63,#1c6045);border-color:#5fd08a;color:#eafff4}
+.btn.stand{background:linear-gradient(180deg,#c9a13c,#8a6a1c);border-color:#f2c14e;color:#1a1405}
+.btn.stop-table{background:linear-gradient(180deg,#4d7591,#29475c);border-color:#78b5d9;color:#eef9ff}
+.btn.double{background:linear-gradient(180deg,#6c4bb8,#43307a);border-color:#a882ff}
+#hint{min-height:16px;text-align:center;font-size:11px;letter-spacing:.4px;color:#ffb3ba;opacity:0;transition:opacity .2s}
+#hint.on{opacity:1}
+
+/* ---------- jokers ---------- */
+#jokers-bar{
+  max-width:1180px;margin:0 auto;padding:4px 18px 20px;
+  display:flex;align-items:flex-start;gap:14px;
+}
+.jlabel{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding-top:40px;writing-mode:vertical-rl}
+#jokers{display:flex;gap:9px;flex-wrap:wrap}
+.joker{
+  position:relative;width:100px;height:112px;border-radius:12px;overflow:visible;
+  background:linear-gradient(180deg,#221a33,#141020);
+  border:2px solid #4b3a76;box-shadow:0 4px 0 #08060d;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  padding:6px;text-align:center;cursor:default;
+}
+.joker .j-emoji{font-size:26px;line-height:1}
+.joker .j-name{font-size:9.5px;font-weight:800;line-height:1.15;letter-spacing:.1px}
+.joker .j-price{position:absolute;top:-7px;right:-7px;background:#1b1428;border:1px solid #4b3a76;
+  color:#cbb6ff;font-size:9px;font-weight:800;border-radius:99px;padding:1px 6px}
+.joker .tip{
+  position:absolute;bottom:calc(100% + 12px);left:50%;width:206px;
+  transform:translateX(-50%) translateY(6px);
+  background:#0b111c;border:1px solid #33425c;border-radius:10px;padding:9px 10px;
+  font-size:11px;line-height:1.35;color:#cfdcef;font-weight:500;text-align:left;
+  opacity:0;pointer-events:none;transition:.15s ease;z-index:25;box-shadow:var(--shadow);
+}
+.joker:hover .tip{opacity:1;transform:translateX(-50%) translateY(0)}
+.joker.empty{
+  background:rgba(11,17,26,.5);border:2px dashed #253349;box-shadow:none;
+  color:#3f4d63;font-size:22px;font-weight:300;
+}
+.joker .j-sell{position:absolute;top:-8px;left:-8px;background:#2a1620;border:1px solid #7a3542;
+  color:#ffb3ba;font-size:9px;font-weight:800;border-radius:99px;padding:1px 6px}
+
+/* ---------- sidebar ---------- */
+#side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel{
+  background:linear-gradient(180deg,#101825,#0c121c);
+  border:1px solid var(--line-soft);border-radius:14px;padding:12px 13px;
+}
+.panel h4{margin:0 0 9px;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);font-weight:800}
+.kv{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px}
+.kv + .kv{border-top:1px solid #17202e}
+.kv span:first-child{color:var(--muted)}
+.kv b{font-size:13px;font-variant-numeric:tabular-nums}
+.boss-box{
+  border:1px solid #7a3542;border-radius:12px;padding:10px 11px;
+  background:linear-gradient(180deg,rgba(74,20,29,.55),rgba(28,12,17,.55));
+}
+.boss-box .boss-name{font-size:13px;font-weight:900;color:#ff9aa5;letter-spacing:.2px;margin-bottom:4px}
+.boss-box .boss-desc{font-size:11px;line-height:1.4;color:#e3b9bf}
+#log{display:flex;flex-direction:column;gap:6px;font-size:11px;line-height:1.35;max-height:190px;overflow:hidden}
+.log-row{padding-left:8px;border-left:2px solid #2a3a52;color:#b9c7da}
+.log-row.good{border-color:var(--green);color:#bdf3d4}
+.log-row.bad{border-color:var(--red);color:#ffc0c6}
+.log-row.gold{border-color:var(--gold);color:#ffe6ab}
+.next-card{display:flex;align-items:center;gap:10px;margin-top:4px}
+.mini-card{
+  width:42px;height:58px;border-radius:7px;background:linear-gradient(160deg,#fff,#e6e9f0);
+  border:1.5px solid #05080d;color:#111722;display:grid;place-items:center;
+  font-weight:900;font-size:17px;box-shadow:0 3px 0 rgba(0,0,0,.35);
+}
+.mini-card.red{color:#d3323f}
+.next-card .hint-txt{font-size:10px;color:var(--muted);line-height:1.3}
+
+/* ---------- overlay ---------- */
+#overlay{
+  position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:18px;
+  background:rgba(4,7,12,.78);backdrop-filter:blur(7px);
+  animation:fade .18s ease both;
+}
+#overlay.hidden{display:none}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{
+  width:min(560px,96vw);max-height:90vh;overflow:auto;
+  background:linear-gradient(180deg,#101827,#0a0f18);
+  border:1px solid #2b3a52;border-radius:20px;padding:24px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04);
+  animation:rise .22s cubic-bezier(.2,.9,.3,1.1) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.modal.wide{width:min(960px,96vw)}
+.kicker{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.modal h2{margin:0 0 6px;font-size:28px;letter-spacing:-.6px;line-height:1.05}
+.modal h2 .thin{color:var(--muted);font-weight:500}
+.modal p{margin:8px 0;color:#b8c6d9;font-size:13px;line-height:1.5}
+.modal .sub{color:var(--muted)}
+.target-big{
+  font-size:64px;font-weight:900;letter-spacing:-3px;line-height:1;color:var(--gold);
+  font-family:ui-monospace,Menlo,monospace;margin:6px 0 2px;
+  text-shadow:0 0 40px rgba(242,193,78,.25);
+}
+.target-big small{font-size:20px;letter-spacing:0;color:#a98a3d;font-weight:800;margin-left:6px}
+.intro-brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 14px;user-select:none}
+.intro-brand .ib-spade{font-size:30px;line-height:1;color:var(--gold);text-shadow:0 0 22px rgba(242,193,78,.55)}
+.intro-brand .ib-name{
+  font-size:38px;font-weight:900;letter-spacing:6px;line-height:1;
+  background:linear-gradient(180deg,#fff2c9 0%,#f2c14e 46%,#9d7318 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.intro-brand .ib-sub{font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:#8ea0b8;font-weight:700}
+.primary{
+  width:100%;margin-top:18px;cursor:pointer;border-radius:13px;padding:14px 18px;
+  font-weight:900;font-size:14px;letter-spacing:1px;text-transform:uppercase;
+  color:#1a1405;background:linear-gradient(180deg,#f7d477,#c9a13c);
+  border:2px solid #ffe6a6;box-shadow:0 5px 0 #6b5216;
+}
+.primary:active{transform:translateY(3px);box-shadow:0 2px 0 #6b5216}
+.ghost{
+  cursor:pointer;border-radius:12px;padding:11px 16px;font-weight:800;font-size:12px;
+  letter-spacing:.6px;text-transform:uppercase;color:#c6d4e6;
+  background:#141c28;border:1px solid #2e3d55;
+}
+.ghost:hover{border-color:#48607f;color:#fff}
+.ghost:disabled{opacity:.35;cursor:not-allowed}
+.row-btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.row-btns .primary{margin-top:0;flex:1}
+.boss-note{
+  margin-top:14px;border:1px solid #7a3542;border-radius:12px;padding:11px 13px;
+  background:linear-gradient(180deg,rgba(74,20,29,.5),rgba(28,12,17,.4));
+}
+.boss-note .bn-title{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:#ff9aa5;font-weight:800;margin-bottom:4px}
+.boss-note .bn-desc{font-size:12px;color:#e3b9bf;line-height:1.45}
+
+/* ---------- shop ---------- */
+.reward-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin:12px 0 16px;padding:11px 14px;border-radius:12px;
+  background:linear-gradient(90deg,rgba(95,208,138,.12),rgba(95,208,138,.03));
+  border:1px solid #2c5c46;
+}
+.reward-banner .r-main{font-size:13px;color:#bdf3d4}
+.reward-banner .r-main b{font-size:19px;color:#8ff0bb;font-family:ui-monospace,Menlo,monospace}
+.reward-banner .r-break{font-size:10.5px;color:#79ab96;letter-spacing:.2px}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.shop-item{
+  display:flex;flex-direction:column;gap:6px;min-height:186px;
+  padding:12px;border-radius:14px;border:1px solid #2a3a52;
+  background:linear-gradient(180deg,#151d2b,#101622);
+}
+.shop-item.joker-item{border-color:#4b3a76;background:linear-gradient(180deg,#221a33,#141020)}
+.shop-item.sold{opacity:.35;align-items:center;justify-content:center;min-height:186px}
+.shop-item .si-emoji{font-size:26px;line-height:1}
+.shop-item .si-kind{font-size:8.5px;letter-spacing:1.6px;text-transform:uppercase;color:#8ea0b8}
+.shop-item .si-name{font-size:14px;font-weight:900;line-height:1.15}
+.shop-item .si-desc{font-size:11px;line-height:1.4;color:#a9bad0;flex:1}
+.shop-item .buy{
+  width:100%;cursor:pointer;border-radius:9px;padding:8px 10px;
+  font-weight:800;font-size:11px;letter-spacing:.5px;
+  color:#1a1405;background:linear-gradient(180deg,#f2c14e,#b8902e);
+  border:1px solid #ffe6a6;
+}
+.shop-item .buy:disabled{opacity:.35;cursor:not-allowed}
+.shop-item .buy:not(:disabled):hover{filter:brightness(1.1)}
+.owned-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.owned{
+  display:flex;align-items:center;gap:8px;padding:6px 8px 6px 10px;border-radius:10px;
+  background:#161223;border:1px solid #3b2f5c;font-size:11px;
+}
+.owned button{
+  cursor:pointer;border-radius:7px;padding:3px 7px;font-size:10px;font-weight:800;
+  background:#26182a;border:1px solid #6b3a46;color:#ffb3ba;
+}
+.owned button:hover{background:#3a1f26}
+.shop-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+.shop-foot .money-now{font-size:12px;color:var(--muted)}
+.shop-foot .money-now b{color:var(--green);font-size:16px;font-family:ui-monospace,Menlo,monospace}
+.shop-foot .primary{width:auto;flex:0 0 auto;min-width:180px}
+
+/* ---------- rules ---------- */
+.rules{display:grid;gap:10px}
+.rules .rule{display:flex;gap:10px;font-size:12.5px;line-height:1.45;color:#bccadd}
+.rules .rule b{color:#eaf3ff}
+.rules .num{
+  flex:0 0 22px;height:22px;border-radius:7px;display:grid;place-items:center;
+  background:#1b2333;border:1px solid #2f3f59;font-size:10px;font-weight:900;color:var(--gold)
+}
+.mult-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.mult-table td{padding:5px 8px;border-bottom:1px solid #1b2637}
+.mult-table td:last-child{text-align:right;font-family:ui-monospace,Menlo,monospace;font-weight:800;color:#ffd98c}
+.mult-table tr:last-child td{border-bottom:none}
+.mult-table tr.bad td{color:#ffb3ba}
+.mult-table tr.bad td:last-child{color:#ff8b94}
+
+/* ---------- misc ---------- */
+.footer-note{
+  max-width:1180px;margin:0 auto;padding:0 18px 26px;
+  font-size:10.5px;color:#5c6b82;letter-spacing:.2px;
+}
+.good{color:var(--green)}
+.bad{color:var(--red)}
+.gold-t{color:var(--gold)}
+.big-stat{font-size:44px;font-weight:900;letter-spacing:-1.5px;line-height:1;font-family:ui-monospace,Menlo,monospace}
+.stat-line{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1a2434;font-size:13px}
+.stat-line:last-child{border-bottom:none}
+.stat-line span{color:var(--muted)}
+.stat-line b{font-variant-numeric:tabular-nums}
+
+@media (max-width:920px){
+  main{grid-template-columns:1fr;padding:12px}
+  #side{order:2}
+  #table{min-height:auto}
+  .hud-mid{order:3;flex:1 1 100%}
+  #hud{flex-wrap:wrap}
+  .card{width:80px;height:112px}
+  .card .c-suit{font-size:38px}
+  .card .c-rank{font-size:22px}
+  .total{font-size:46px}
+  .jlabel{display:none}
+  #jokers-bar{padding:0 12px 18px}
+  .joker{width:88px;height:100px}
+}
+
+@media (max-width:600px){
+  #hud{padding:8px 10px;gap:8px}
+  .hud-left,.hud-right{flex:0 0 auto;gap:6px}
+  .hud-right{justify-content:flex-end}
+  .hud-mid{flex:1 1 100%;order:3}
+  .pill{min-width:0;padding:5px 9px;border-radius:10px}
+  .pill .label{font-size:8px;letter-spacing:1.1px}
+  .pill .val{font-size:16px}
+  .pill .val.small{font-size:11px;padding-top:2px}
+  .hud-btn{width:30px;height:30px;border-radius:9px}
+  .brand-name{display:none}
+  .brand-spade{font-size:18px}
+  .intro-brand{gap:7px;margin-bottom:10px}
+  .intro-brand .ib-spade{font-size:24px}
+  .intro-brand .ib-name{font-size:30px;letter-spacing:4px}
+  .intro-brand .ib-sub{font-size:9px;letter-spacing:1.8px}
+  .hud-target .val{font-size:19px}
+  main{padding:10px}
+  #table{padding:12px;border-radius:18px}
+  #hand{min-height:150px;gap:7px}
+  .card{width:74px;height:104px}
+  .card .c-rank{font-size:20px;top:4px;left:7px}
+  .card .c-suit{font-size:32px;padding-top:10px}
+  .card .c-chips{font-size:9px}
+  .total{font-size:44px}
+  .formula{gap:5px}
+  .fbox{min-width:62px;padding:4px 7px}
+  .fbox .f-val{font-size:17px}
+  .fbox.result{min-width:84px}
+  .op{font-size:14px}
+  .btn{padding:10px 13px;font-size:11px;letter-spacing:.5px}
+  .btn kbd{display:none}
+  .joker{width:84px;height:96px}
+  .joker .j-name{font-size:8.5px}
+  .joker .j-emoji{font-size:22px}
+  #jokers-bar{padding:0 10px 16px}
+  .footer-note{padding:0 12px 20px}
+}
+
+.card{cursor:pointer}
+#cons{display:flex;gap:8px;justify-content:center;min-height:32px;align-items:center}
+.cons-btn{padding:6px 12px;border-radius:9px;border:1px solid var(--line);background:#141c28;color:var(--text);cursor:pointer;font-size:12px}
+.cons-btn.on{border-color:var(--blue);color:var(--blue)}
+.card.mini{width:64px;height:90px}
+.card.mini .c-rank{font-size:18px;left:6px}.card.mini .c-suit{font-size:28px;padding-top:8px}
+.card.back{background:repeating-linear-gradient(45deg,#24406e,#24406e 6px,#1b3258 6px,#1b3258 12px);cursor:default}
+#dealer{display:flex;gap:8px;justify-content:center;align-items:center;min-height:96px}
+.dlabel{color:#9fd8bc;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin-right:8px}
+.joker.show .tip{opacity:1;transform:translateX(-50%) translateY(0)}
+html{-webkit-text-size-adjust:100%}
+html,body{touch-action:manipulation;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+.card,.btn,.cons-btn,.joker,.pill{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);min-height:var(--tg-viewport-stable-height,100dvh)}
+.btn{min-height:48px}.cons-btn{min-height:44px;padding:8px 14px;font-size:13px}.hud-btn{min-width:36px;min-height:36px}
+@media (hover:none){
+  .card:hover{transform:rotate(var(--rot,0deg)) translateY(var(--lift,0px))}
+  .btn:hover,.shop-item .buy:hover{filter:none}
+  .joker .tip{display:none}.joker.show .tip{display:block;opacity:1;transform:translateX(-50%) translateY(0)}
+  .hud-btn:hover,.ghost:hover{color:inherit}
+}
+@media (max-width:480px){
+  #hand{gap:5px;flex-wrap:nowrap}
+  .card{width:calc((100vw - 64px)/5);max-width:74px;height:auto;aspect-ratio:5/7}
+  .card .c-rank{font-size:calc(100vw/20)}.card .c-suit{font-size:calc(100vw/10)}
+  .card .c-chips{font-size:9px}
+  #cons{flex-wrap:wrap}
+}
+.pile{position:relative;width:64px;height:90px;margin-bottom:22px}
+.pile .card{position:absolute;left:0;top:0;cursor:default}
+.pile .p2{left:3px;top:-3px}.pile .p3{left:6px;top:-6px}
+.pile.empty{border:2px dashed #3a5a4c;border-radius:10px}
+.pcount{position:absolute;top:96px;left:-30px;right:-30px;text-align:center;font-size:11px;color:#9fd8bc;white-space:nowrap}
+.card.fromdeck{animation:fromDeck .38s cubic-bezier(.2,.9,.3,1.1) both}
+@keyframes fromDeck{from{opacity:0;transform:translate(0,-190px) scale(.65) rotate(-12deg)}to{opacity:1;transform:none}}
+.c-mod{position:absolute;top:4px;right:6px;font-size:15px;line-height:1}
+.card.m-gold{box-shadow:inset 0 0 0 3px #e3b341}
+.card.m-glass{box-shadow:inset 0 0 0 3px #62b6ff}
+.card.m-wild{box-shadow:inset 0 0 0 3px #c77dff}
+.card.m-heavy{box-shadow:inset 0 0 0 3px #9aa5b4}
+.card.scoring{animation:cardScore .62s cubic-bezier(.2,.8,.2,1) both;z-index:3}
+@keyframes cardScore{0%{transform:translateY(0) scale(1);filter:brightness(1)}35%{transform:translateY(-18px) scale(1.08);filter:brightness(1.45);box-shadow:0 0 28px rgba(242,193,78,.75)}100%{transform:translateY(0) scale(1);filter:brightness(1)}}
+#table.score-burst{animation:tableBurst .72s ease-out}
+@keyframes tableBurst{0%{box-shadow:inset 0 0 90px rgba(0,0,0,.6),var(--shadow)}35%{box-shadow:inset 0 0 90px rgba(0,0,0,.35),0 0 0 2px rgba(242,193,78,.75),0 0 48px rgba(242,193,78,.28)}100%{box-shadow:inset 0 0 90px rgba(0,0,0,.6),var(--shadow)}}
+.score-float{position:absolute;left:50%;top:38%;z-index:10;pointer-events:none;font-size:clamp(24px,4vw,42px);font-weight:1000;color:#ffe7a1;text-shadow:0 3px 0 #6b4b12,0 0 24px rgba(242,193,78,.75);animation:scoreFloat .95s cubic-bezier(.15,.8,.25,1) forwards}
+@keyframes scoreFloat{0%{opacity:0;transform:translate(-50%,18px) scale(.65)}18%{opacity:1;transform:translate(-50%,0) scale(1.12)}70%{opacity:1;transform:translate(-50%,-34px) scale(1)}100%{opacity:0;transform:translate(-50%,-58px) scale(.95)}}
+.fbox.chips.pulse,.fbox.mult.pulse,.fbox.result.pulse{animation:statPulse .45s ease-out}
+@keyframes statPulse{0%{filter:brightness(1);transform:scale(1)}45%{filter:brightness(1.8);transform:scale(1.08)}100%{filter:brightness(1);transform:scale(1)}}
+.tables{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.tbl{border:2px solid #2c5a47;border-radius:14px;padding:8px;min-height:150px;cursor:pointer;background:rgba(0,0,0,.18);display:flex;flex-direction:column;gap:4px;transition:border-color .2s,box-shadow .2s}
+.tbl.ok{border-color:#e3b341;box-shadow:0 0 16px rgba(227,179,65,.45)}
+.tbl.dead{opacity:.45;border-color:#b34a55}
+.tbl.can{border-style:dashed;border-color:#9fd8bc}
+.tbl.active{border-color:#9fd8bc;box-shadow:0 0 0 2px rgba(159,216,188,.35),0 0 18px rgba(95,208,138,.2)}
+.tbl.active .t-head{color:#dcffef}
+.t-head{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:#9fd8bc;text-transform:uppercase;letter-spacing:1px}
+.t-sum{font-size:28px;color:#fff;letter-spacing:0}
+.t-state{min-height:14px;font-size:11px;color:#ffe7a1;letter-spacing:1px}
+.t-cards{display:flex;flex-wrap:wrap;gap:4px;min-height:72px;align-content:flex-start}
+.t-cards .card.mini{width:46px;height:64px}
+.t-cards .card.mini .c-rank{font-size:15px;left:5px;top:3px}.t-cards .card.mini .c-suit{font-size:22px;padding-top:8px}
+.t-score{font-size:13px;color:#ffe7a1;font-weight:800;margin-top:auto}
+@media (max-width:480px){
+  .tables{gap:5px}.tbl{padding:5px;min-height:130px}.t-sum{font-size:20px}
+  .t-cards .card.mini{width:34px;height:48px}.t-cards .card.mini .c-rank{font-size:12px;left:3px}.t-cards .card.mini .c-suit{font-size:16px;padding-top:6px}
+}
+
+
+/* ---------- compact shop + mobile-first tuning ---------- */
+.shop-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.shop-item{min-height:148px;padding:9px;gap:4px;border-radius:11px}
+.shop-item.sold{min-height:148px}
+.shop-item .si-emoji{font-size:22px}
+.shop-item .si-kind{font-size:8px;letter-spacing:1px}
+.shop-item .si-name{font-size:12px;line-height:1.15}
+.shop-item .si-desc{font-size:10px;line-height:1.28}
+.shop-item .buy{padding:7px 8px;font-size:10px}
+.reward-banner{margin:8px 0 10px;padding:8px 10px;gap:8px}
+.reward-banner .r-main{font-size:12px}
+.reward-banner .r-main b{font-size:16px}
+.reward-banner .r-break{font-size:9px;line-height:1.4}
+.shop-foot{margin-top:10px;gap:8px}
+.shop-foot .primary{min-width:0}
+.modal:has(.shop-grid){padding:16px;max-height:94vh;max-height:94dvh}
+.modal:has(.shop-grid) h2{font-size:24px}
+.modal:has(.shop-grid) .kicker{margin-bottom:5px;font-size:9px}
+.modal:has(.shop-grid) h4{margin:10px 0 6px!important}
+.modal:has(.shop-grid) .owned-list{gap:5px}
+.modal:has(.shop-grid) .owned{padding:4px 6px;font-size:10px;gap:5px}
+.modal:has(.shop-grid) .owned button{padding:3px 5px}
+@media (max-width:920px){
+  main{gap:10px}
+  #side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #side .panel{padding:9px}
+  #log{max-height:120px}
+  #jokers{gap:6px}
+}
+@media (max-width:600px){
+  #hud{position:sticky;top:0}
+  .hud-target .row{gap:6px}
+  main{padding:7px;gap:8px}
+  #table{padding:9px;gap:8px;border-radius:14px}
+  #table-top{gap:5px;flex-wrap:wrap}
+  .limit-badge{font-size:9px;padding:4px 8px;letter-spacing:.8px}
+  .limit-badge b{font-size:13px}
+  #hand{min-height:118px;padding:5px 0}
+  #actions{gap:6px}
+  .btn{flex:1 1 calc(50% - 6px);padding:10px 7px;font-size:10px;min-width:0;white-space:normal}
+  .row-btns{gap:6px;margin-top:9px}
+  .row-btns .primary{padding:11px 10px;font-size:11px}
+  .ghost{padding:9px 10px;font-size:10px}
+  .tables{gap:4px}
+  .tbl{min-width:0;padding:4px;min-height:112px;border-radius:9px;gap:3px}
+  .t-head{font-size:9px;letter-spacing:.4px}
+  .t-sum{font-size:18px}
+  .t-state{font-size:9px;line-height:1.15;min-height:12px}
+  .t-cards{gap:2px;min-height:42px}
+  .t-cards .card.mini{width:27px;height:38px;border-width:1px;border-radius:4px}
+  .t-cards .card.mini .c-rank{font-size:10px;left:2px;top:2px}
+  .t-cards .card.mini .c-suit{font-size:13px;padding-top:5px}
+  .t-score{font-size:10px}
+  #side{grid-template-columns:1fr;gap:7px}
+  #side .panel{padding:8px 10px}
+  #side .panel h4{margin-bottom:5px}
+  #log{max-height:90px}
+  #jokers-bar{gap:6px;padding:0 7px 12px}
+  #jokers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:5px}
+  .joker{width:100%;height:76px;min-width:0;padding:4px;gap:3px;border-radius:8px}
+  .joker .j-emoji{font-size:19px}
+  .joker .j-name{font-size:8px}
+  .joker .j-price{font-size:8px;top:-5px;right:-4px}
+  .joker .tip{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));top:auto;width:auto;max-width:none;transform:none;z-index:80}
+  .joker.show .tip{display:block;opacity:1;transform:none}
+  .modal,.modal.wide{width:100%;max-width:100%;padding:16px;border-radius:15px;max-height:94vh;max-height:94dvh}
+  .modal h2{font-size:23px}
+  #overlay{padding:7px;align-items:center}
+  .modal:has(.shop-grid){padding:10px;border-radius:12px}
+  .modal:has(.shop-grid) h2{font-size:21px;margin-bottom:4px}
+  .shop-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .shop-item,.shop-item.sold{min-height:0;padding:7px;gap:3px;border-radius:9px}
+  .shop-item .si-emoji{font-size:19px}
+  .shop-item .si-kind{font-size:7px;letter-spacing:.7px}
+  .shop-item .si-name{font-size:11px;line-height:1.12}
+  .shop-item .si-desc{font-size:9px;line-height:1.2;min-height:0}
+  .shop-item .buy{font-size:9px;padding:7px 4px;letter-spacing:0}
+  .reward-banner{margin:6px 0 8px;padding:7px}
+  .reward-banner .r-main{font-size:11px}
+  .reward-banner .r-main b{font-size:14px}
+  .reward-banner .r-break{font-size:8px}
+  .modal:has(.shop-grid) h4{font-size:8px!important;margin:8px 0 5px!important}
+  .modal:has(.shop-grid) .owned-list{gap:4px}
+  .modal:has(.shop-grid) .owned{font-size:9px;padding:3px 5px}
+  .shop-foot{align-items:stretch;flex-direction:column;margin-top:8px;gap:7px}
+  .shop-foot .money-now{font-size:11px}
+  .shop-foot .row-btns{width:100%}
+  .shop-foot .row-btns button{flex:1 1 0;min-width:0;padding:10px 7px;font-size:10px}
+}
+
+</style>
+</head>
+<body>
+
+<h1 class="sr-only">ВОЧКО — двадцать одно</h1>
+
+<header id="hud">
+  <div class="hud-left">
+    <div class="brand" aria-label="ВОЧКО"><span class="brand-spade">♠</span><span class="brand-name">ВОЧКО</span></div>
+    <div class="pill"><span class="label">Анте</span><span class="val" id="hud-ante">1</span></div>
+    <div class="pill"><span class="label">Блайнд</span><span class="val small" id="hud-blind">Малый</span></div>
+  </div>
+  <div class="hud-mid">
+    <div class="hud-target">
+      <div class="row"><span class="label">Цель блайнда</span><span class="val" id="hud-target">3300</span></div>
+      <div class="bar"><i id="hud-bar"></i></div>
+    </div>
+  </div>
+  <div class="hud-right">
+    <div class="pill gold"><span class="label">Счёт</span><span class="val" id="hud-score">0</span></div>
+    <div class="pill money"><span class="label">Касса</span><span class="val" id="hud-money">4</span></div>
+    <button class="hud-btn" id="btn-rules" title="Правила">?</button>
+    <button class="hud-btn" id="btn-restart" title="Новый забег">⟳</button>
+  </div>
+</header>
+
+<main>
+  <section id="table">
+    <div id="table-top">
+      <div class="limit-badge">цель места <b id="tbl-limit">21</b></div>
+      <div class="seats-dots" id="seats-dots"></div>
+    </div>
+
+    <div id="dealer"></div>
+    <div id="hand"></div>
+
+    <div id="seat-stats">
+      <div class="total-wrap">
+        <div class="total-label">точных</div>
+        <div class="total" id="total-box">—</div>
+      </div>
+      <div class="formula">
+        <div class="fbox chips"><span class="f-label">чипы</span><span class="f-val" id="chips-box">0</span></div>
+        <span class="op">×</span>
+        <div class="fbox mult"><span class="f-label">множитель</span><span class="f-val" id="mult-box">0</span></div>
+        <span class="op">=</span>
+        <div class="fbox result"><span class="f-label">если стоп</span><span class="f-val" id="score-box">0</span></div>
+      </div>
+      <div class="preview-note" id="preview-note"></div>
+      <div id="tags"></div>
+    </div>
+
+    <div id="actions">
+      <button class="btn draw" id="btn-draw">Сбросить <kbd>Space</kbd></button>
+      <button class="btn stop-table" id="btn-stop-table">Стоп на столе <kbd>D</kbd></button>
+      <button class="btn stand" id="btn-stand">Сыграть <kbd>S</kbd></button>
+    </div>
+    <div id="hint"></div>
+    <div id="cons"></div>
+  </section>
+
+  <aside id="side">
+    <div class="panel">
+      <h4>Забег</h4>
+      <div class="kv"><span>Цель места</span><b id="side-limit">21</b></div>
+      <div class="kv"><span>Колода</span><b id="side-deck">52 / 52</b></div>
+      <div class="kv"><span>Лучшее место</span><b id="side-best">0</b></div>
+    </div>
+    <div class="panel" id="boss-panel"></div>
+    <div class="panel" id="next-panel" style="display:none">
+      <h4>Следующая карта</h4>
+      <div class="next-card" id="next-card"></div>
+    </div>
+    <div class="panel">
+      <h4>Журнал</h4>
+      <div id="log"></div>
+    </div>
+  </aside>
+</main>
+
+<footer id="jokers-bar">
+  <div class="jlabel">джокеры</div>
+  <div id="jokers"></div>
+</footer>
+
+<div class="footer-note">
+  Space — взять карту, D — стоп на столе, S — сыграть. Расходник: выбери его, затем 1·2·3 или клик по столу. Усилители и срезы меняют сумму, чтобы попасть точно в цель.
+</div>
+
+<div id="overlay" class="hidden"></div>
+
+<script>
+/* ============================================================
+   ДВАДЦАТЬ ОДНО — рогалик-колодострой
+   Ядро: чипы x множитель, но множитель даёт близость к лимиту.
+   ============================================================ */
+'use strict';
+
+const CONFIG = {
+  seats: 4,
+  baseTarget: 3300,
+  growth: 1.3,
+  blindMult: [1, 1.3, 1.62],
+  startMoney: 4,
+  maxJokers: 5,
+  discards: 2,
+  consSlots: 3,
+  baseReward: 4,
+  interestCap: 5,
+  rerollPrice: 2,
+  maxAnte: 8,
+};
+
+const BLIND_NAMES = ['Малый блайнд', 'Большой блайнд', 'Босс-блайнд'];
+const BLIND_SHORT = ['Малый', 'Большой', 'Босс'];
+
+const SUITS = [
+  { sym: '♠', color: 'black' },
+  { sym: '♥', color: 'red' },
+  { sym: '♦', color: 'red' },
+  { sym: '♣', color: 'black' },
+];
+
+const RANKS = [
+  ['2', 2], ['3', 3], ['4', 4], ['5', 5], ['6', 6], ['7', 7],
+  ['8', 8], ['9', 9], ['10', 10], ['J', 10], ['Q', 10], ['K', 10], ['A', 11],
+];
+
+const JOKERS = [
+  { id: 'ace', name: 'Туз в рукаве', emoji: '🅰️', price: 5, desc: 'Каждый сыгранный туз даёт +40 чипов и +0,5 множителя.' },
+  { id: 'six', name: 'Шестёрка', emoji: '6️⃣', price: 4, desc: 'Карты 2–6 дают +40 чипов.' },
+  { id: 'lucky7', name: 'Счастливая семёрка', emoji: '7️⃣', price: 4, desc: 'Каждая семёрка даёт +80 чипов.' },
+  { id: 'redblack', name: 'Красное / чёрное', emoji: '♦️', price: 5, desc: 'Красные карты: +0,25 множителя. Чёрные: +15 чипов.' },
+  { id: 'tips', name: 'Чаевые', emoji: '🪙', price: 4, desc: '+$1 за точное попадание в цель и +$1 за каждое неиспользованное место.' },
+  { id: 'counter', name: 'Счётчик', emoji: '🧮', price: 6, desc: '+0,25 множителя за каждую сыгранную за забег карту 2–5. Максимум +3.' },
+  { id: 'cushion', name: 'Подушка', emoji: '🛏️', price: 6, desc: 'Перелёт на 1 над целью не считается перебором (множитель как за расстояние 1).' },
+  { id: 'gambler', name: 'Азартный', emoji: '🎲', price: 5, desc: '+0,5 множителя за каждую карту в руке сверх второй.' },
+  { id: 'miser', name: 'Скряга', emoji: '👛', price: 5, desc: '+0,5 множителя за каждый неиспользованный расходник.' },
+  { id: 'insurer', name: 'Страховщик', emoji: '🧾', price: 4, desc: '+$2 за каждый перебор.' },
+  { id: 'face', name: 'Портретист', emoji: '👑', price: 4, desc: 'Каждые J, Q, K дают +30 чипов.' },
+  { id: 'streak', name: 'Точный ритм', emoji: '🎯', price: 5, desc: 'Каждое точное попадание в цель за забег навсегда даёт +0,1 к множителю (максимум +3).' },
+  { id: 'hearts', name: 'Сердечный договор', emoji: '♥️', price: 4, desc: 'Каждая черва даёт +25 чипов. Три и больше червей в руке — ещё +1 к множителю.' },
+  { id: 'triple', name: 'Тройной удар', emoji: '🔱', price: 6, desc: 'Ровно 3 карты в руке дают +60 чипов и +0,5 к множителю.' },
+  { id: 'precision', name: 'Джокер точности', emoji: '🎯', price: 6, desc: 'Каждый стол ровно в цель даёт +25% к очкам всего места.' },
+  { id: 'suits', name: 'Джокер масти', emoji: '♥️', price: 5, desc: 'Червы на разных столах: +15% к очкам места за каждый стол с червой (от двух столов).' },
+  { id: 'risk', name: 'Джокер риска', emoji: '⚠️', price: 6, desc: 'Если хотя бы один стол перебрал, остальные столы приносят x1.5.' },
+  { id: 'refund', name: 'Джокер перебора', emoji: '♻️', price: 5, desc: 'За каждый перебитый стол возвращает 25% очков лучшего стола.' },
+  { id: 'sync', name: 'Синхронизация', emoji: '🔗', price: 7, desc: 'Если все три стола закрыты (точно в цель, перебор или полный), очки места x1.5.' },
+  { id: 'pair', name: 'Пара', emoji: '👯', price: 7, desc: 'Если среди сыгранных карт есть две одного номинала — очки x2.' },
+  { id: 'wide', name: 'Широкий стол', emoji: '🃏', price: 7, desc: 'В руке можно держать 5 карт вместо 4. Срезы спасут сумму.' },
+  { id: 'xray', name: 'Сканер', emoji: '👁️', price: 5, desc: 'Видишь следующую карту колоды. Хватает на 5 мест, потом сгорает.' },
+];
+const MODS = {
+  gold: { name: 'Золотая', emoji: '💰', desc: '+$2 при розыгрыше руки (без перебора).' },
+  glass: { name: 'Стеклянная', emoji: '🔷', desc: 'Очки руки x2, но после розыгрыша карта разбивается с шансом 25%.' },
+  wild: { name: 'Дикая', emoji: '🌈', desc: 'Значение подбирается автоматически от 1 до 11.' },
+  heavy: { name: 'Тяжёлая', emoji: '⚖️', desc: 'Чипы карты удваиваются.' },
+};
+const CONS = {
+  freeze: { kind: 'freeze', n: 0, name: 'Заморозка', price: 5, desc: 'Фиксирует сумму руки. Следующие карты дают чипы, но не меняют сумму.' },
+  minus2: { kind: 'minus', n: 2, name: 'Срез −2', price: 2, desc: '−2 к сумме руки. Чипы остаются.' },
+  minus4: { kind: 'minus', n: 4, name: 'Срез −4', price: 4, desc: '−4 к сумме руки. Чипы остаются.' },
+  plus2: { kind: 'plus', n: 2, name: 'Усилитель +2', price: 3, desc: '+2 к сумме руки и +20 чипов.' },
+  pct30: { kind: 'pct', n: 0.3, name: 'Срез 30%', price: 5, desc: 'Уменьшает сумму руки на 30% (с округлением вверх). Чипы остаются.' },
+  peek: { kind: 'peek', n: 0, name: 'Подсмотреть', price: 2, desc: 'Показывает следующую карту колоды на это место.' },
+  swap: { kind: 'swap', n: 0, name: 'Подмена', price: 4, desc: 'Заменяет последнюю взятую карту новой.' },
+  plus4: { kind: 'plus', n: 4, name: 'Усилитель +4', price: 5, desc: '+4 к сумме руки и +40 чипов.' },
+};
+const BOSSES = {
+  odd: { name: 'Чётный дом', desc: 'Нечётные карты (3, 5, 7, 9) дают 0 чипов, но считаются в сумму.' },
+  ace11: { name: 'Тузобой', desc: 'Тузы всегда 11 — единицей их не сыграть.' },
+  nocons: { name: 'Печать', desc: 'Расходники на этом блайнде не работают.' },
+  max3: { name: 'Теснота', desc: 'Не больше 3 карт в руке.' },
+  hot: { name: 'Горячая цель', desc: 'Цель места выше на 2.' },
+  thin: { name: 'Один расходник', desc: 'На каждое место можно применить только один расходник.' },
+  noplus: { name: 'Без усилителей', desc: 'Усилители (+N) на этом блайнде не работают.' },
+  lowLimit: { name: 'Урезанная цель', desc: 'Цель места снижена на 3.' },
+};
+const BOSS_KEYS = Object.keys(BOSSES);
+
+/* ---------------- состояние ---------------- */
+let G = null;
+let cardSeq = 0;
+let lastBoss = null;
+let hintTimer = null;
+
+/* ---------------- утилиты ---------------- */
+const $ = (sel) => document.querySelector(sel);
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ru-RU');
+}
+
+function fmtMult(x) {
+  const r = Math.round(x * 100) / 100;
+  return Number.isInteger(r) ? String(r) : String(r).replace('.', ',');
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function makeDeck() {
+  const deck = [];
+  for (const [rank, val] of RANKS) {
+    for (const suit of SUITS) {
+      deck.push({ id: ++cardSeq, rank, val, suit: suit.sym, color: suit.color, up: 0 });
+    }
+  }
+  return deck;
+}
+
+function log(html, cls = '') {
+  G.log.unshift({ html, cls });
+  if (G.log.length > 7) G.log.pop();
+}
+
+function flashHint(text) {
+  const el = $('#hint');
+  el.textContent = text;
+  el.classList.add('on');
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => el.classList.remove('on'), 1700);
+}
+
+/* ---------------- правила ---------------- */
+function limitNow() {
+  return G.boss === 'lowLimit' ? G.limit - 3 : G.boss === 'hot' ? G.limit + 2 : G.limit;
+}
+function hasJoker(id) { return G.jokers.some((j) => j.id === id); }
+function multBaseFor(d) {
+  if (d <= 0) return 8;
+  if (d === 1) return 4;
+  if (d === 2) return 2.5;
+  if (d === 3) return 1.5;
+  if (d <= 5) return 1;
+  return 0.5;
+}
+function cv(c) { return c.val + (c.up || 0) + (c.dv || 0); }
+function cardChips(c) {
+  if (G.boss === 'odd' && ['3', '5', '7', '9'].includes(c.rank)) return 0;
+  let v = (c.val + (c.up || 0) + (c.dc || 0)) * 10;
+  if (hasJoker('six') && c.val >= 2 && c.val <= 6) v += 40;
+  if (hasJoker('ace') && c.rank === 'A') v += 40;
+  if (hasJoker('lucky7') && c.rank === '7') v += 80;
+  if (hasJoker('redblack') && c.color === 'black') v += 15;
+  if (hasJoker('face') && ['J', 'Q', 'K'].includes(c.rank)) v += 30;
+  if (hasJoker('hearts') && c.suit === '♥') v += 25;
+  if (c.mod === 'heavy') v *= 2;
+  return v;
+}
+function scorePlay(cards, sum, lim, xc) {
+  const d = sum - lim;
+  if (d > 0 && !(hasJoker('cushion') && d === 1)) {
+    let bc = xc || 0;
+    for (const c of cards) bc += cardChips(c);
+    return { chips: bc, mult: 0, score: 0, tags: ['ПЕРЕБОР: 0 очков'], sum, bust: true };
+  }
+  const base = multBaseFor(Math.abs(d));
+  let chips = xc || 0;
+  for (const c of cards) chips += cardChips(c);
+  let add = 0, mul = 1;
+  const tags = [];
+  if (hasJoker('ace')) {
+    const a = cards.filter((c) => c.rank === 'A').length;
+    if (a) { add += 0.5 * a; tags.push('тузы +' + fmtMult(0.5 * a)); }
+  }
+  if (hasJoker('counter')) {
+    const b = Math.min(3, G.lowCardsRun * 0.25);
+    if (b > 0) { add += b; tags.push('счётчик +' + fmtMult(b)); }
+  }
+  if (hasJoker('redblack')) {
+    const r = cards.filter((c) => c.color === 'red').length;
+    if (r) { add += r * 0.25; tags.push('красные +' + fmtMult(r * 0.25)); }
+  }
+  if (hasJoker('gambler') && cards.length > 2) { add += 0.5 * (cards.length - 2); tags.push('азарт +' + fmtMult(0.5 * (cards.length - 2))); }
+  if (hasJoker('miser') && G.cons.length) { add += 0.5 * G.cons.length; tags.push('скряга +' + fmtMult(0.5 * G.cons.length)); }
+  if (hasJoker('streak') && G.stats.pushes > 0) { const b = Math.min(3, G.stats.pushes * 0.1); add += b; tags.push('точный ритм +' + fmtMult(b)); }
+  if (hasJoker('hearts') && cards.filter((c) => c.suit === '♥').length >= 3) { add += 1; tags.push('три червы +1'); }
+  if (hasJoker('triple') && cards.length === 3) { chips += 60; add += 0.5; tags.push('тройной удар +60 / +0,5'); }
+  if (cards.length === 2 && sum === lim) { mul *= 2; tags.push('натуральное x2'); }
+  const mult = (base + add) * mul;
+  let score = Math.round(chips * mult);
+  if (hasJoker('pair') && cards.some((c, i) => cards.some((e, j) => j > i && e.rank === c.rank))) {
+    score *= 2; tags.push('пара x2');
+  }
+  const gl = cards.filter((c) => c.mod === 'glass').length;
+  if (gl) { score *= Math.pow(2, gl); tags.push('стекло x' + Math.pow(2, gl)); }
+  return { chips, mult, score, tags, sum };
+}
+function evalPlay(cards, adj) {
+  adj = adj || { dv: 0, dc: 0 };
+  const lim = limitNow();
+  const sc = adj.fz ? cards.slice(0, adj.fz) : cards;
+  const wilds = sc.filter((c) => c.mod === 'wild').length;
+  const norm = sc.filter((c) => c.mod !== 'wild');
+  const aces = norm.filter((c) => c.rank === 'A').length;
+  const kmax = G.boss === 'ace11' ? 0 : aces;
+  const raw = norm.reduce((a, c) => a + cv(c), 0) + adj.dv;
+  let best = null;
+  for (let k = 0; k <= kmax; k++) {
+    for (let t = wilds; t <= 11 * wilds; t++) {
+      const r = scorePlay(cards, raw - 10 * k + t, lim, adj.dc * 10);
+      if (!best || r.score > best.score || (r.score === best.score && r.sum < best.sum)) best = r;
+    }
+  }
+  if (adj.fz) best.tags = best.tags.concat('❄ сумма заморожена');
+  return best;
+}
+function maxPlay() { return G.boss === 'max3' ? 3 : 4 + (hasJoker('wide') ? 1 : 0); }
+
+/* ============================================================
+   ПОТОК ЗАБЕГА
+   ============================================================ */
+
+function targetFor(ante, blind) {
+  return Math.round(CONFIG.baseTarget * Math.pow(CONFIG.growth, ante - 1) * CONFIG.blindMult[blind]);
+}
+
+function pickBoss() {
+  const pool = BOSS_KEYS.filter((k) => k !== lastBoss);
+  const key = pick(pool);
+  lastBoss = key;
+  return key;
+}
+
+function newGame() {
+  G = {
+    ante: 1,
+    blind: 0,
+    money: CONFIG.startMoney,
+    limit: 21,
+    target: 0,
+    score: 0,
+    seatsLeft: CONFIG.seats,
+    deck: [],
+    discard: [],
+    runDeck: makeDeck(),
+    jokers: [],
+    cons: [CONS.minus2, CONS.minus4],
+    boss: null,
+    seat: null,
+    phase: 'intro',
+    log: [],
+    lowCardsRun: 0,
+    pushThisBlind: 0,
+    shop: null,
+    lastReward: null,
+    stats: { blinds: 0, pushes: 0, busts: 0, bestSeat: 0 },
+  };
+  lastBoss = null;
+  tgClosingConfirmation(true);
+  startBlind();
+}
+
+function startBlind() {
+  G.score = 0;
+  G.seatsLeft = CONFIG.seats;
+  G.pushThisBlind = 0;
+  G.seat = null;
+  G.deck = shuffle(G.runDeck.map((c) => ({ ...c })));
+  G.discard = [];
+  G.boss = G.blind === 2 ? pickBoss() : null;
+  G.limit = 21 + (G.ante - 1);
+  G.target = targetFor(G.ante, G.blind);
+  G.phase = 'intro';
+  render();
+  showBlindIntro();
+}
+
+function newTable() { return { cards: [], adj: { dv: 0, dc: 0 }, locked: false, dead: false, stood: false }; }
+function startSeat() {
+  G.seat = { tables: [newTable(), newTable(), newTable()], sel: null, used: false, peek: false, locked: false };
+  G.phase = 'play';
+  render();
+}
+
+function drawFromDeck() {
+  if (!G.deck.length) {
+    if (!G.discard.length) return null;
+    G.deck = shuffle(G.discard.splice(0, G.discard.length));
+  }
+  return G.deck.pop() || null;
+}
+
+function tableOpen(t) { return !t.locked && !t.dead && !t.stood && t.cards.length < maxPlay(); }
+
+// Игрок заполняет столы по очереди: сначала первый, затем второй и третий.
+function activeTableIndex(s) {
+  return s.tables.findIndex((t) => tableOpen(t));
+}
+
+function canSaveTable(s, t) {
+  if (G.boss === 'nocons') return false;
+  const usable = G.cons.filter((k) => (k.kind === 'minus' || k.kind === 'pct' || k.kind === 'swap') && !(G.boss === 'thin' && s.used));
+  const seen = new Set();
+  function search(hand, adj, mask, usedAny, sw) {
+    const r = evalPlay(hand, adj);
+    if (!r.bust) return true;
+    if (usedAny && G.boss === 'thin') return false;
+    const sig = mask + '|' + adj.dv + '|' + adj.dc + '|' + (adj.fz || 0) + '|' + hand.map((c) => c.id + ':' + c.val + ':' + (c.mod || '')).join(',');
+    if (seen.has(sig)) return false;
+    seen.add(sig);
+    for (let i = 0; i < usable.length; i++) {
+      if (mask & (1 << i)) continue;
+      const k = usable[i], m = mask | (1 << i);
+      if (k.kind === 'minus') { if (search(hand, { ...adj, dv: adj.dv - k.n }, m, true, sw)) return true; }
+      else if (k.kind === 'pct') { if (search(hand, { ...adj, dv: adj.dv - Math.ceil(Math.max(0, r.sum) * k.n) }, m, true, sw)) return true; }
+      else if (k.kind === 'swap' && hand.length && !(adj.fz && hand.length <= adj.fz)) {
+        const next = G.deck.length > sw ? G.deck[G.deck.length - 1 - sw] : null;
+        const tries = next ? [next] : RANKS.map(([rank, val]) => ({ id: -1000 - val, rank, val, up: 0, suit: '♠', color: 'black' }));
+        for (const nc of tries) { if (search(hand.slice(0, -1).concat({ ...nc }), adj, m, true, sw + 1)) return true; }
+      }
+    }
+    return false;
+  }
+  return search(t.cards, { ...t.adj }, 0, false, 0);
+}
+
+function refreshTables(s) {
+  const lim = limitNow();
+  s.tables.forEach((t) => {
+    if (!t.cards.length) { t.locked = false; return; }
+    const r = evalPlay(t.cards, t.adj);
+    t.locked = !t.stood && !r.bust && r.sum === lim;
+    if (r.bust && !t.dead && !canSaveTable(s, t)) t.dead = true;
+  });
+}
+
+function evalSeat(s) {
+  const lim = limitNow();
+  const T = s.tables.map((t) => {
+    if (!t.cards.length) return { empty: true, score: 0, chips: 0, mult: 0, sum: 0, bust: false, exact: false };
+    const r = evalPlay(t.cards, t.adj);
+    r.exact = !r.bust && r.sum === lim;
+    return r;
+  });
+  const live = T.filter((r) => !r.empty && !r.bust);
+  const exact = T.filter((r) => r.exact).length;
+  const bust = T.filter((r) => !r.empty && r.bust).length;
+  let total = live.reduce((a, r) => a + r.score, 0);
+  const chips = live.reduce((a, r) => a + r.chips, 0);
+  const tags = [];
+  if (hasJoker('precision') && exact) { total = Math.round(total * (1 + 0.25 * exact)); tags.push('точность x' + (1 + 0.25 * exact)); }
+  if (hasJoker('suits')) {
+    const ht = s.tables.filter((t) => t.cards.some((c) => c.suit === '♥')).length;
+    if (ht >= 2) { total = Math.round(total * (1 + 0.15 * ht)); tags.push('масти x' + fmtMult(1 + 0.15 * ht)); }
+  }
+  if (hasJoker('risk') && bust && live.length) { total = Math.round(total * 1.5); tags.push('риск x1.5'); }
+  if (hasJoker('refund') && bust && live.length) {
+    const back = Math.round(Math.max(...live.map((r) => r.score)) * 0.25 * bust);
+    total += back; tags.push('возврат +' + fmt(back));
+  }
+  const closed = s.tables.every((t) => t.cards.length && (t.locked || t.dead || t.stood || t.cards.length >= maxPlay()));
+  if (hasJoker('sync') && closed) { total = Math.round(total * 1.5); tags.push('синхронизация x1.5'); }
+  if (bust) tags.push('перебор столов: ' + bust);
+  return { tables: T, total, exact, bust, chips, tags, closed };
+}
+
+function autoFinish(s) {
+  if (s.tables.every((t) => t.cards.length && (t.locked || t.dead || t.stood || t.cards.length >= maxPlay()))) stand();
+}
+
+// Игрок может остановить набор на текущем столе, например на 18 очках,
+// после чего розыгрыш автоматически продолжится на следующем столе.
+function stopCurrentTable() {
+  const s = G.seat;
+  if (G.phase !== 'play' || !s || s.locked) return;
+  const ti = activeTableIndex(s);
+  if (ti === -1) { flashHint('Нет открытого стола'); return; }
+  const t = s.tables[ti];
+  if (!t.cards.length) { flashHint('Сначала положи хотя бы одну карту на стол'); return; }
+  t.stood = true;
+  log('Стол ' + (ti + 1) + ' остановлен на ' + evalPlay(t.cards, t.adj).sum, 'gold');
+  render();
+  autoFinish(s);
+}
+
+function applyCons(ti) {
+  const s = G.seat, t = s.tables[ti], i = s.sel, k = G.cons[i];
+  if (!k) { s.sel = null; return; }
+  if (t.dead) { flashHint('Этот стол выбыл'); return; }
+  if (t.locked) { flashHint('Стол уже зафиксирован точной суммой'); return; }
+  if (G.boss === 'nocons') { flashHint('Печать: расходники не работают'); return; }
+  if (G.boss === 'noplus' && k.kind === 'plus') { flashHint('Усилители на этом блайнде не работают'); return; }
+  if (G.boss === 'thin' && s.used) { flashHint('Один расходник на место'); return; }
+  if (!t.cards.length) { flashHint('Сначала положи карту на этот стол'); return; }
+  if (k.kind === 'swap' && t.adj.fz && t.cards.length <= t.adj.fz) { flashHint('Нельзя: карта уже заморожена в сумме'); return; }
+  if (k.kind === 'freeze' && t.adj.fz) { flashHint('Сумма стола уже заморожена'); return; }
+  if (k.kind === 'plus') { t.adj.dv += k.n; t.adj.dc += k.n; }
+  else if (k.kind === 'minus') t.adj.dv -= k.n;
+  else if (k.kind === 'pct') t.adj.dv -= Math.ceil(Math.max(0, evalPlay(t.cards, t.adj).sum) * k.n);
+  else if (k.kind === 'freeze') t.adj.fz = t.cards.length;
+  else if (k.kind === 'swap') {
+    const c = drawFromDeck();
+    if (!c) { flashHint('Колода пуста'); return; }
+    G.discard.push(t.cards.pop());
+    t.cards.push(c);
+    G.lastDrawn = c.id;
+  }
+  s.used = true;
+  log(k.name + ' → стол ' + (ti + 1) + ': ' + evalPlay(t.cards, t.adj).sum, 'gold');
+  G.cons.splice(i, 1);
+  s.sel = null;
+  refreshTables(s);
+  render();
+  G.lastDrawn = null;
+  autoFinish(s);
+}
+
+function pickCons(i) {
+  const s = G.seat, k = G.cons[i];
+  if (G.phase !== 'play' || !s || !k || s.locked) return;
+  if (k.kind === 'peek') {
+    if (G.boss === 'nocons') { flashHint('Печать: расходники не работают'); return; }
+    if (G.boss === 'thin' && s.used) { flashHint('Один расходник на место'); return; }
+    s.peek = true; s.used = true; G.cons.splice(i, 1); s.sel = null; render(); return;
+  }
+  s.sel = s.sel === i ? null : i;
+  if (s.sel !== null) flashHint('Выбери стол для «' + k.name + '»');
+  render();
+}
+
+function hit() {
+  const s = G.seat;
+  if (G.phase !== 'play' || !s || s.locked) return;
+  const ti = activeTableIndex(s);
+  if (ti === -1) { flashHint('Свободных столов нет'); return; }
+  const c = drawFromDeck();
+  if (!c) { flashHint('Колода пуста'); return; }
+  // Карта автоматически отправляется на текущий открытый стол.
+  s.tables[ti].cards.push(c);
+  s.sel = null;
+  G.lastDrawn = c.id;
+  refreshTables(s);
+  render();
+  G.lastDrawn = null;
+  tgHaptic('light');
+  autoFinish(s);
+}
+
+function tableClick(ti) {
+  const s = G.seat;
+  if (G.phase !== 'play' || !s || s.locked) return;
+  const t = s.tables[ti];
+  if (!t) return;
+  // Стол нажимается только для выбора цели расходника.
+  if (s.sel !== null) applyCons(ti);
+}
+
+function stand() {
+  const s = G.seat;
+  if (G.phase !== 'play' || !s || s.locked) return;
+  if (!s.tables.some((t) => t.cards.length)) { flashHint('Положи хотя бы одну карту'); return; }
+  const res = evalSeat(s);
+  s.locked = true;
+  tgHaptic('medium');
+  render();
+  setTimeout(() => { if (G.seat === s) finishSeat(res); }, res.total > 0 ? 520 : 900);
+}
+
+function showScoreBurst(r) {
+  const table = $('#table');
+  if (!table) return;
+  table.classList.remove('score-burst');
+  void table.offsetWidth;
+  table.classList.add('score-burst');
+  const old = table.querySelector('.score-float');
+  if (old) old.remove();
+  const pop = document.createElement('div');
+  pop.className = 'score-float';
+  pop.textContent = r.bust ? 'ПЕРЕБОР' : '+' + fmt(r.score);
+  if (r.bust) { pop.style.color = '#ff8c96'; pop.style.textShadow = '0 3px 0 #721b27,0 0 24px rgba(239,75,87,.8)'; }
+  table.appendChild(pop);
+  setTimeout(() => { pop.remove(); table.classList.remove('score-burst'); }, 1050);
+}
+
+function finishSeat(res) {
+  const s = G.seat;
+  G.score += res.total;
+  if (res.total > G.stats.bestSeat) G.stats.bestSeat = res.total;
+  G.pushThisBlind += res.exact; G.stats.pushes += res.exact; G.stats.busts += res.bust;
+  const goodCards = [];
+  s.tables.forEach((t, i) => { if (!res.tables[i].empty && !res.tables[i].bust) goodCards.push(...t.cards); });
+  G.lowCardsRun += goodCards.filter((c) => c.val >= 2 && c.val <= 5).length;
+  if (res.bust && hasJoker('insurer')) { G.money += 2 * res.bust; log('Страховщик: +$' + 2 * res.bust, 'gold'); }
+  const gold = goodCards.filter((c) => c.mod === 'gold').length;
+  if (gold) { G.money += 2 * gold; log('Золотые карты: +$' + 2 * gold, 'gold'); }
+  const broken = goodCards.filter((c) => c.mod === 'glass' && Math.random() < 0.25);
+  if (broken.length) {
+    G.runDeck = G.runDeck.filter((c) => !broken.some((b) => b.id === c.id));
+    log('Стекло разбилось: ' + broken.map((c) => c.rank + c.suit).join(', '), 'bad');
+  }
+  const sums = res.tables.map((r) => (r.empty ? '—' : r.bust ? r.sum + '✗' : r.sum)).join(' · ');
+  log((res.exact ? '<b>Точных столов: ' + res.exact + '</b> · ' : '') + 'столы ' + sums + ' (цель ' + limitNow() + ') — ' + fmt(res.total), res.exact ? 'gold' : (res.total ? '' : 'bad'));
+  s.tables.forEach((t) => G.discard.push(...t.cards.filter((c) => !broken.includes(c))));
+  const xj = G.jokers.find((j) => j.id === 'xray');
+  if (xj) {
+    xj.charges = (xj.charges || 5) - 1;
+    if (xj.charges <= 0) { G.jokers = G.jokers.filter((j) => j !== xj); log('Сканер сгорел', 'bad'); }
+  }
+  showScoreBurst({ score: res.total, bust: res.bust > 0 && res.total === 0 });
+  if (res.total === 0) tgHaptic('error');
+  else if (res.exact > 0) tgHaptic('success');
+  G.seatsLeft = Math.max(0, G.seatsLeft - 1);
+  G.seat = null;
+  checkEnd();
+  render();
+}
+
+function checkEnd() {
+  if (G.score >= G.target) { winBlind(); return; }
+  if (G.seatsLeft <= 0) { loseRun(); return; }
+  startSeat();
+}
+
+function winBlind() {
+  G.phase = 'shop';
+  const unused = Math.max(0, G.seatsLeft);
+  const interest = Math.min(CONFIG.interestCap, Math.floor(G.money / 5));
+  const tips = hasJoker('tips') ? unused + G.pushThisBlind : 0;
+  const reward = CONFIG.baseReward + unused + interest + G.pushThisBlind + tips;
+  G.money += reward;
+  G.stats.blinds++;
+  G.lastReward = {
+    base: CONFIG.baseReward,
+    unused,
+    interest,
+    pushes: G.pushThisBlind,
+    tips,
+    total: reward,
+  };
+  log('<b>Блайнд пройден!</b> +$' + reward, 'good');
+  tgHaptic('success');
+  render();
+  setTimeout(() => openShop(), 420);
+}
+
+function loseRun() {
+  G.phase = 'over';
+  tgClosingConfirmation(false);
+  tgHaptic('error');
+  render();
+  setTimeout(() => {
+    if (G.phase === 'over') showGameOver();
+  }, 350);
+}
+
+function victory() {
+  G.phase = 'won';
+  tgClosingConfirmation(false);
+  render();
+  setTimeout(() => {
+    if (G.phase === 'won') showVictory();
+  }, 300);
+}
+
+function nextBlind() {
+  hideOverlay();
+  G.blind++;
+  if (G.blind > 2) {
+    G.blind = 0;
+    G.ante++;
+  }
+  if (G.ante > CONFIG.maxAnte) {
+    victory();
+    return;
+  }
+  startBlind();
+}
+
+/* ============================================================
+   МАГАЗИН
+   ============================================================ */
+
+function pickUpRank() {
+  const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10'].filter((r) => G.runDeck.some((c) => c.rank === r && (c.up || 0) < 3));
+  return ranks.length ? pick(ranks) : null;
+}
+
+function pickModCard() {
+  const free = G.runDeck.filter((c) => !c.mod);
+  return free.length ? { card: pick(free), mod: pick(Object.keys(MODS)) } : null;
+}
+
+function buildShopItems() {
+  const owned = new Set(G.jokers.map((j) => j.id));
+  const offers = shuffle(JOKERS.filter((j) => !owned.has(j.id))).slice(0, 3);
+  const items = offers.map((j) => ({ kind: 'joker', joker: j, price: j.price, sold: false }));
+  const key = pick(Object.keys(CONS));
+  items.push({ kind: 'cons', key, price: CONS[key].price, sold: false });
+  const rank = pickUpRank();
+  if (rank) items.push({ kind: 'up', price: 5, rank, sold: false });
+  const mc = pickModCard();
+  if (mc) items.push({ kind: 'mod', price: 6, mod: mc.mod, card: mc.card, sold: false });
+  return items;
+}
+
+function openShop() {
+  if (G.phase !== 'shop') return;
+  G.shop = { items: buildShopItems() };
+  renderShop();
+}
+
+function shopItemHTML(it, i) {
+  if (it.sold) {
+    return '<div class="shop-item sold"><div class="si-kind">куплено</div></div>';
+  }
+  let kind = '';
+  let emoji = '';
+  let name = '';
+  let desc = '';
+  let extraClass = '';
+  if (it.kind === 'joker') {
+    kind = 'Джокер';
+    emoji = it.joker.emoji;
+    name = it.joker.name;
+    desc = it.joker.desc;
+    extraClass = 'joker-item';
+  } else if (it.kind === 'cons') {
+    const k = CONS[it.key];
+    kind = 'Расходник'; emoji = k.kind === 'plus' ? '➕' : '✂️'; name = k.name; desc = k.desc + ' Слоты: ' + G.cons.length + '/' + CONFIG.consSlots + '.';
+  } else if (it.kind === 'up') {
+    kind = 'Закалка'; emoji = '🔨'; name = 'Все «' + it.rank + '» +1 навсегда';
+    desc = 'Значение и чипы всех карт «' + it.rank + '» в колоде растут на 1 (максимум +3).';
+  } else if (it.kind === 'mod') {
+    kind = 'Печать'; emoji = MODS[it.mod].emoji; name = MODS[it.mod].name + ': ' + it.card.rank + it.card.suit;
+    desc = MODS[it.mod].desc;
+  }
+  const full = (it.kind === 'joker' && G.jokers.length >= CONFIG.maxJokers) || (it.kind === 'cons' && G.cons.length >= CONFIG.consSlots);
+  const disabled = G.money < it.price || full ? 'disabled' : '';
+  const label = full ? 'Нет слота' : 'Купить · $' + it.price;
+  return (
+    '<div class="shop-item ' + extraClass + '">' +
+      '<div class="si-emoji">' + emoji + '</div>' +
+      '<div class="si-kind">' + kind + '</div>' +
+      '<div class="si-name">' + name + '</div>' +
+      '<div class="si-desc">' + desc + '</div>' +
+      '<button class="buy" data-buy="' + i + '" ' + disabled + '>' + label + '</button>' +
+    '</div>'
+  );
+}
+
+function renderShop() {
+  if (!G.shop) return;
+  const r = G.lastReward;
+  const rewardHTML = r
+    ? '<div class="reward-banner"><div>' +
+        '<div class="r-main">Блайнд пройден. Награда <b>+$' + r.total + '</b></div>' +
+        '<div class="r-break">база $' + r.base +
+          ' · места $' + r.unused +
+          ' · процент $' + r.interest +
+          (r.pushes ? ' · точных $' + r.pushes : '') +
+          (r.tips ? ' · чаевые $' + r.tips : '') +
+        '</div>' +
+      '</div></div>'
+    : '';
+
+  const ownedHTML = G.jokers.length
+    ? G.jokers.map((j) =>
+        '<div class="owned">' + j.emoji + ' ' + j.name +
+          '<button data-sell="' + j.id + '">+$' + Math.floor(j.price / 2) + '</button></div>'
+      ).join('')
+    : '<div class="owned" style="border-style:dashed;opacity:.6">Пока пусто</div>';
+
+  showOverlay(
+    '<div class="kicker">Анте ' + G.ante + ' · ' + BLIND_NAMES[G.blind] + ' пройден</div>' +
+    '<h2>Магазин</h2>' +
+    rewardHTML +
+    '<div class="shop-grid">' + G.shop.items.map(shopItemHTML).join('') + '</div>' +
+    '<h4 style="margin:18px 0 8px;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#8ea0b8">Твои джокеры' +
+      ' <span style="opacity:.6">(' + G.jokers.length + '/' + CONFIG.maxJokers + ')</span></h4>' +
+    '<div class="owned-list">' + ownedHTML + '</div>' +
+    '<div class="shop-foot">' +
+      '<div class="money-now">В кармане <b>$' + G.money + '</b></div>' +
+      '<div class="row-btns" style="margin:0">' +
+        '<button class="ghost" id="btn-shop-rules">Правила</button>' +
+        '<button class="ghost" id="btn-reroll" ' + (G.money < CONFIG.rerollPrice ? 'disabled' : '') + '>Реролл · $' + CONFIG.rerollPrice + '</button>' +
+        '<button class="primary" style="flex:0 0 auto;padding:11px 22px" id="btn-next">Дальше →</button>' +
+      '</div>' +
+    '</div>',
+    true
+  );
+
+  const ov = $('#overlay');
+  ov.querySelectorAll('[data-buy]').forEach((btn) => {
+    btn.onclick = () => buyItem(Number(btn.dataset.buy));
+  });
+  ov.querySelectorAll('[data-sell]').forEach((btn) => {
+    btn.onclick = () => sellJoker(btn.dataset.sell);
+  });
+  $('#btn-shop-rules').onclick = showRules;
+  $('#btn-reroll').onclick = rerollShop;
+  $('#btn-next').onclick = nextBlind;
+}
+
+function buyItem(index) {
+  if (G.phase !== 'shop' || !G.shop) return;
+  const it = G.shop.items[index];
+  if (!it || it.sold) return;
+  if (G.money < it.price) {
+    flashHint('Не хватает денег');
+    return;
+  }
+  if (it.kind === 'joker') {
+    if (G.jokers.length >= CONFIG.maxJokers) {
+      flashHint('Нет свободного слота под джокера');
+      return;
+    }
+    G.jokers.push(it.joker.id === 'xray' ? { ...it.joker, charges: 5 } : it.joker);
+    log('Куплен джокер «' + it.joker.name + '»', 'gold');
+  } else if (it.kind === 'cons') {
+    if (G.cons.length >= CONFIG.consSlots) { flashHint('Нет слота под расходник'); return; }
+    G.cons.push(CONS[it.key]);
+    log('Куплен расходник «' + CONS[it.key].name + '»', 'gold');
+  } else if (it.kind === 'up') {
+    G.runDeck.forEach((c) => { if (c.rank === it.rank) c.up = (c.up || 0) + 1; });
+    log('Закалка: все «' + it.rank + '» +1', 'gold');
+  } else if (it.kind === 'mod') {
+    it.card.mod = it.mod;
+    log('Печать «' + MODS[it.mod].name + '» на ' + it.card.rank + it.card.suit, 'gold');
+  }
+  G.money -= it.price;
+  it.sold = true;
+  tgHaptic('light');
+  renderShop();
+  render();
+}
+
+function sellJoker(id) {
+  if (G.phase !== 'shop') return;
+  const idx = G.jokers.findIndex((j) => j.id === id);
+  if (idx < 0) return;
+  const j = G.jokers[idx];
+  const price = Math.floor(j.price / 2);
+  G.jokers.splice(idx, 1);
+  G.money += price;
+  log('Продан «' + j.name + '» за $' + price, '');
+  renderShop();
+  render();
+}
+
+function rerollShop() {
+  if (G.phase !== 'shop' || !G.shop) return;
+  if (G.money < CONFIG.rerollPrice) {
+    flashHint('Не хватает денег на реролл');
+    return;
+  }
+  G.money -= CONFIG.rerollPrice;
+  const keep = G.shop.items.filter((it) => it.kind !== 'joker' && !it.sold);
+  const owned = new Set(G.jokers.map((j) => j.id));
+  const offers = shuffle(JOKERS.filter((j) => !owned.has(j.id)))
+    .slice(0, 3)
+    .map((j) => ({ kind: 'joker', joker: j, price: j.price, sold: false }));
+  G.shop.items = offers.concat(keep);
+  renderShop();
+  render();
+}
+
+/* ============================================================
+   ОВЕРЛЕИ
+   ============================================================ */
+
+function showOverlay(html, wide) {
+  const ov = $('#overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML = '<div class="modal' + (wide ? ' wide' : '') + '">' + html + '</div>';
+}
+
+function hideOverlay() {
+  const ov = $('#overlay');
+  ov.classList.add('hidden');
+  ov.innerHTML = '';
+  tgShowBack(false);
+}
+
+// Закрывает оверлей и возвращает тот экран, который соответствует текущей фазе.
+function closeOverlay() {
+  hideOverlay();
+  if (G.phase === 'intro') showBlindIntro();
+  else if (G.phase === 'shop') renderShop();
+  else if (G.phase === 'over') showGameOver();
+  else if (G.phase === 'won') showVictory();
+}
+
+function showBlindIntro() {
+  const boss = G.boss ? BOSSES[G.boss] : null;
+  const names = BLIND_NAMES;
+  showOverlay(
+    '<div class="intro-brand"><span class="ib-spade">♠</span><span class="ib-name">ВОЧКО</span><span class="ib-sub">двадцать одно · рогалик</span></div>' +
+    '<div class="kicker">Анте ' + G.ante + ' · ' + names[G.blind] + '</div>' +
+    '<h2>' + names[G.blind] + ' <span class="thin">/ цель места ' + limitNow() + '</span></h2>' +
+    '<div class="target-big">' + fmt(G.target) + '</div>' +
+    '<p class="sub">Собери эту сумму за ' + CONFIG.seats + ' места. Каждое место — отдельная раздача: три стола и общая колода. Взятая карта всегда идёт на текущий открытый стол, так что твоя задача — вовремя сказать «Стоп на столе» и «Сыграть». Неиспользованные места принесут деньги.</p>' +
+    (boss
+      ? '<div class="boss-note"><div class="bn-title">Правило дома: ' + boss.name + '</div><div class="bn-desc">' + boss.desc + '</div></div>'
+      : '') +
+    '<div class="row-btns"><button class="ghost" id="ov-rules">Правила</button><button class="primary" id="ov-start">Начать</button></div>'
+  );
+  $('#ov-start').onclick = () => {
+    hideOverlay();
+    startSeat();
+  };
+  $('#ov-rules').onclick = showRules;
+}
+
+function showGameOver() {
+  showOverlay(
+    '<div class="kicker">Забег окончен · анте ' + G.ante + '</div>' +
+    '<h2>Дом <span class="thin">забрал своё</span></h2>' +
+    '<p class="sub">Цель блайнда не взята. В 21 нельзя выигрывать каждый раз — но всегда можно было остановиться раньше.</p>' +
+    '<div style="margin:16px 0 4px">' +
+      '<div class="stat-line"><span>Дошёл до</span><b>' + G.ante + ' анте · ' + BLIND_SHORT[G.blind] + '</b></div>' +
+      '<div class="stat-line"><span>Блайндов пройдено</span><b>' + G.stats.blinds + '</b></div>' +
+      '<div class="stat-line"><span>Точных столов</span><b>' + G.stats.pushes + '</b></div>' +
+      '<div class="stat-line"><span>Лучшее место</span><b>' + fmt(G.stats.bestSeat) + '</b></div>' +
+      '<div class="stat-line"><span>Лимит в конце</span><b>' + limitNow() + '</b></div>' +
+    '</div>' +
+    '<div class="row-btns"><button class="primary" id="ov-restart">Новый забег</button></div>'
+  );
+  $('#ov-restart').onclick = newGame;
+}
+
+function showVictory() {
+  showOverlay(
+    '<div class="kicker">Анте ' + CONFIG.maxAnte + ' · босс повержен</div>' +
+    '<h2>Ты <span class="thin">сломал дом</span></h2>' +
+    '<p class="sub">Восемь анте позади. Казино больше не может тебя обыграть — самое время придумать следующее правило.</p>' +
+    '<div style="margin:16px 0 4px">' +
+      '<div class="stat-line"><span>Блайндов пройдено</span><b>' + G.stats.blinds + '</b></div>' +
+      '<div class="stat-line"><span>Точных столов</span><b>' + G.stats.pushes + '</b></div>' +
+      '<div class="stat-line"><span>Лучшее место</span><b>' + fmt(G.stats.bestSeat) + '</b></div>' +
+      '<div class="stat-line"><span>Финальный лимит</span><b>' + limitNow() + '</b></div>' +
+    '</div>' +
+    '<div class="row-btns"><button class="primary" id="ov-restart">Ещё забег</button></div>'
+  );
+  $('#ov-restart').onclick = newGame;
+}
+
+function showRules() {
+  showOverlay(
+    '<div class="kicker">Как это работает</div>' +
+    '<h2>Двадцать одно <span class="thin">/ срезы и усилители</span></h2>' +
+    '<div class="rules" style="margin-top:14px">' +
+      '<div class="rule"><span class="num">1</span><div>Пройди <b>8 анте</b> по три блайнда. В каждом набери сумму очков за <b>4 места</b>.</div></div>' +
+      '<div class="rule"><span class="num">2</span><div>На место у тебя <b>3 стола</b> и общая колода. Взятая карта <b>автоматически ложится на текущий открытый стол</b>. Когда решишь, что хватит, — «Стоп на столе», и карты пойдут на следующий. Убрать карту нельзя. Точная сумма фиксирует стол, перебор его убивает.</div></div>' +
+      '<div class="rule"><span class="num">3</span><div>Сумма руки сравнивается с <b>целью места</b> (21, растёт с анте). Чем ближе, тем выше множитель. <b>Перебор</b> (сумма выше цели) — это <b>0 очков</b> и сгоревшее место: срезай сумму расходниками.</div></div>' +
+      '<div class="rule"><span class="num">4</span><div><b>Срез −N</b> уменьшает сумму руки (чипы остаются). <b>Усилитель +N</b> добавляет к сумме и чипам. Выбери расходник, затем <b>стол</b>. Тратятся.</div></div>' +
+      '<div class="rule"><span class="num">5</span><div>Чипы x множитель = очки. Набрал цель блайнда — деньги за оставшиеся места. В магазине: джокеры, расходники, закалка и печати на картах (💰 золотая, 🔷 стеклянная, 🌈 дикая, ⚖️ тяжёлая).</div></div>' +
+    '</div>' +
+    '<table class="mult-table" style="margin-top:14px"><tr><td>Ровно в цель</td><td>x8</td></tr><tr><td>на 1</td><td>x4</td></tr><tr><td>на 2</td><td>x2,5</td></tr><tr><td>на 3</td><td>x1,5</td></tr><tr><td>на 4–5</td><td>x1</td></tr><tr><td>на 6+</td><td>x0,5</td></tr></table>' +
+    '<p class="sub" style="margin-top:14px">Расстояние считается только вниз от цели. Две карты ровно в цель — натуральное, x2. Туз считается 11 или 1.</p>' +
+    '<div class="row-btns"><button class="primary" id="ov-close">Понятно</button></div>'
+  );
+  $('#ov-close').onclick = closeOverlay;
+  tgShowBack(true);
+}
+
+/* ============================================================
+   РЕНДЕР
+   ============================================================ */
+
+function cardElement(c, o) {
+  o = o || {};
+  return '<div class="card ' + c.color + (o.mini ? ' mini' : '') + (G.lastDrawn === c.id ? ' fromdeck' : '') + (o.scoring ? ' scoring' : '') + (c.mod ? ' m-' + c.mod : '') + '" data-id="' + c.id + '" style="--rot:0deg;--lift:0px">' +
+    '<span class="c-rank">' + c.rank + '</span><span class="c-suit">' + c.suit + '</span>' +
+    (o.mini ? '' : '<span class="c-chips">' + (c.mod === 'wild' ? '1–11' : cv(c)) + ' · ' + cardChips(c) + '</span>') + (c.mod && !o.mini ? '<span class="c-mod">' + MODS[c.mod].emoji + '</span>' : '') + '</div>';
+}
+
+function renderHUD() {
+  $('#hud-ante').textContent = G.ante;
+  $('#hud-blind').textContent = BLIND_SHORT[G.blind];
+  $('#hud-target').textContent = fmt(G.target);
+  $('#hud-money').textContent = G.money;
+  $('#hud-score').textContent = fmt(G.score);
+  const pct = G.target ? Math.max(0, Math.min(100, (G.score / G.target) * 100)) : 0;
+  const bar = $('#hud-bar');
+  bar.style.width = pct + '%';
+  bar.parentElement.classList.toggle('hot', G.score >= G.target);
+}
+
+function tableHTML(s, t, ti) {
+  const lim = limitNow();
+  const r = t.cards.length ? evalPlay(t.cards, t.adj) : null;
+  const active = activeTableIndex(s);
+  const can = (s.sel !== null && !t.dead && !t.locked && t.cards.length) || (G.phase === 'play' && s.sel === null && ti === active && tableOpen(t));
+  const activeClass = G.phase === 'play' && s.sel === null && ti === active && tableOpen(t) ? ' active' : '';
+  const cls = 'tbl' + activeClass + (t.locked ? ' ok' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
+  const state = t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? lim + '!' : r && r.bust ? 'перебор?' : t.cards.length >= maxPlay() ? 'полон' : '';
+  return '<div class="' + cls + '" data-t="' + ti + '"><div class="t-head"><span>Стол ' + (ti + 1) + '</span><b class="t-sum">' + (r ? r.sum : '—') + '</b></div>' +
+    '<div class="t-state">' + state + '</div>' +
+    '<div class="t-cards">' + t.cards.map((c) => cardElement(c, { mini: 1, scoring: s.locked && !t.dead })).join('') + '</div>' +
+    '<div class="t-score">' + (r && !r.bust ? '+' + fmt(r.score) : '') + '</div></div>';
+}
+
+function renderTable() {
+  $('#tbl-limit').textContent = limitNow();
+  let dots = '';
+  for (let i = 0; i < CONFIG.seats; i++) dots += '<span class="seat-dot' + (i < G.seatsLeft ? ' on' : '') + '"></span>';
+  $('#seats-dots').innerHTML = dots;
+  const s = G.seat;
+  const nx = G.deck.length ? G.deck[G.deck.length - 1] : null;
+  const n = G.deck.length, layers = n > 20 ? 3 : n > 8 ? 2 : n > 0 ? 1 : 0;
+  let pile = '<div class="pile' + (n ? '' : ' empty') + '">';
+  for (let k = layers; k >= 1; k--) pile += '<div class="card back mini p' + k + '"><span></span></div>';
+  pile += '<span class="pcount">' + n + ' в колоде' + (G.discard.length ? ' · сброс ' + G.discard.length : '') + '</span></div>';
+  $('#dealer').innerHTML = G.phase === 'play' || s
+    ? pile + (s && (hasJoker('xray') || s.peek) && nx ? '<span class="dlabel">Следующая</span>' + cardElement(nx, { mini: 1 }) : '')
+    : '';
+  $('#hand').innerHTML = s ? '<div class="tables">' + s.tables.map((t, i) => tableHTML(s, t, i)).join('') + '</div>' : '<div class="hand-empty">Место не начато</div>';
+}
+
+function renderStats() {
+  const s = G.seat;
+  if (!s) {
+    $('#total-box').textContent = '—'; $('#total-box').className = 'total';
+    $('#chips-box').textContent = '0'; $('#mult-box').textContent = '0'; $('#score-box').textContent = '0';
+    $('#preview-note').textContent = ''; $('#tags').innerHTML = '';
+    return;
+  }
+  const res = evalSeat(s);
+  $('#total-box').textContent = res.exact + '/3'; $('#total-box').className = 'total' + (res.bust && !res.total ? ' bust' : '');
+  const statValues = [fmt(res.chips), 'x' + fmtMult(res.chips ? res.total / res.chips : 0), fmt(res.total)];
+  const statEls = [$('#chips-box'), $('#mult-box'), $('#score-box')];
+  statEls.forEach((el, i) => {
+    const changed = el.textContent !== statValues[i];
+    el.textContent = statValues[i];
+    if (changed) { const box = el.parentElement; box.classList.remove('pulse'); void box.offsetWidth; box.classList.add('pulse'); }
+  });
+  const active = activeTableIndex(s);
+  $('#preview-note').textContent = s.sel !== null ? 'выбери стол для расходника'
+    : (active === -1 ? 'все столы заполнены' : 'карты автоматически идут на стол ' + (active + 1)) + ' · столы: ' + res.tables.map((r) => (r.empty ? '—' : r.sum)).join(' · ') + ' · цель ' + limitNow();
+  $('#tags').innerHTML = res.tags.map((t) => '<span class="tag">' + t + '</span>').join('');
+}
+
+function renderActions() {
+  const s = G.seat;
+  const play = G.phase === 'play' && !!s && !s.locked;
+  $('#btn-draw').disabled = !play || activeTableIndex(s) === -1;
+  $('#btn-draw').innerHTML = 'Взять карту <kbd>Space</kbd>'; 
+  $('#btn-stand').disabled = !play;
+  $('#btn-stand').innerHTML = 'Сыграть <kbd>S</kbd>';
+  $('#btn-stop-table').disabled = !play || activeTableIndex(s) === -1 || !s.tables[activeTableIndex(s)].cards.length;
+  $('#btn-stop-table').innerHTML = 'Стоп на столе <kbd>D</kbd>';
+  $('#cons').innerHTML = G.cons.length
+    ? G.cons.map((k, i) => '<button class="cons-btn' + (s && s.sel === i ? ' on' : '') + '" data-cons="' + i + '" title="' + k.desc + '">' + k.name + '</button>').join('')
+    : '<span class="hand-empty">нет расходников</span>';
+}
+
+function renderJokers() {
+  let html = '';
+  for (let i = 0; i < CONFIG.maxJokers; i++) {
+    const j = G.jokers[i];
+    if (j) {
+      html +=
+        '<div class="joker">' +
+          '<span class="j-price">$' + j.price + '</span>' +
+          '<span class="j-emoji">' + j.emoji + '</span>' +
+          '<span class="j-name">' + j.name + (j.charges ? ' · ' + j.charges : '') + '</span>' +
+          '<div class="tip"><b>' + j.name + '</b><br>' + j.desc + (j.charges ? '<br><i>Осталось мест: ' + j.charges + '</i>' : '') + '</div>' +
+        '</div>';
+    } else {
+      html += '<div class="joker empty">+</div>';
+    }
+  }
+  $('#jokers').innerHTML = html;
+}
+
+function renderSide() {
+  const boss = G.boss ? BOSSES[G.boss] : null;
+  $('#side-limit').textContent = limitNow() + (G.boss === 'lowLimit' ? ' (−3)' : '');
+  $('#side-deck').textContent = G.deck.length + ' / ' + G.runDeck.length;
+  $('#side-best').textContent = fmt(G.stats.bestSeat);
+
+  $('#boss-panel').innerHTML = '<h4>Правило дома</h4>' + (boss
+    ? '<div class="boss-box"><div class="boss-name">' + boss.name + '</div><div class="boss-desc">' + boss.desc + '</div></div>'
+    : '<div class="kv"><span>Босс</span><b>—</b></div><div style="font-size:11px;color:#6d7f97;line-height:1.4">Правило появится на босс-блайнде.</div>');
+
+  const nextPanel = $('#next-panel');
+  if (hasJoker('xray') && G.deck.length) {
+    const c = G.deck[G.deck.length - 1];
+    const xj = G.jokers.find((j) => j.id === 'xray');
+    nextPanel.style.display = 'block';
+    $('#next-card').innerHTML =
+      '<div class="mini-card ' + c.color + '">' + c.rank + '<span style="font-size:12px">' + c.suit + '</span></div>' +
+      '<div class="hint-txt">Сканер включён.<br>Зарядов: ' + (xj && xj.charges ? xj.charges : 0) + '</div>';
+  } else {
+    nextPanel.style.display = 'none';
+  }
+
+  $('#log').innerHTML = G.log.length
+    ? G.log.map((l) => '<div class="log-row ' + l.cls + '">' + l.html + '</div>').join('')
+    : '<div class="log-row">Пока тихо.</div>';
+}
+
+function render() {
+  if (!G) return;
+  renderHUD();
+  renderTable();
+  renderStats();
+  renderActions();
+  renderJokers();
+  renderSide();
+}
+
+/* ============================================================
+   СОБЫТИЯ
+   ============================================================ */
+
+function bindEvents() {
+  $('#btn-draw').onclick = hit;
+  $('#btn-stand').onclick = stand;
+  $('#btn-stop-table').onclick = stopCurrentTable;
+  $('#hand').onclick = (e) => { const t = e.target.closest('.tbl'); if (t) tableClick(Number(t.dataset.t)); };
+  $('#cons').onclick = (e) => { const b = e.target.closest('[data-cons]'); if (b) pickCons(Number(b.dataset.cons)); };
+  $('#btn-rules').onclick = showRules;
+  $('#btn-restart').onclick = () => {
+    if (window.confirm('Начать новый забег? Текущий прогресс сгорит.')) newGame();
+  };
+
+  document.addEventListener('keydown', (e) => {
+    const overlay = $('#overlay');
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+
+    if (!overlay.classList.contains('hidden')) {
+      if (e.key === 'Enter' && !overlay.querySelector('.shop-grid')) {
+        const primary = overlay.querySelector('.primary');
+        if (primary) {
+          e.preventDefault();
+          primary.click();
+        }
+      }
+      return;
+    }
+    if (e.code === 'Space') {
+      e.preventDefault();
+      hit();
+    } else if (['s', 'S', 'ы', 'Ы', 'Enter'].includes(e.key)) {
+      e.preventDefault();
+      stand();
+    } else if (['d', 'D', 'в', 'В'].includes(e.key)) {
+      e.preventDefault();
+      stopCurrentTable();
+    } else if (['1', '2', '3'].includes(e.key)) {
+      tableClick(Number(e.key) - 1);
+    }
+  });
+}
+
+/* ============================================================
+   TELEGRAM MINI APP
+   ============================================================ */
+
+function tg() {
+  return (window.Telegram && window.Telegram.WebApp) || null;
+}
+function tgIsReal() {
+  const wa = tg();
+  return !!(wa && wa.platform && wa.platform !== 'unknown');
+}
+function tgHaptic(kind) {
+  if (!tgIsReal()) return;
+  try {
+    const h = tg().HapticFeedback;
+    if (!h) return;
+    if (kind === 'light') h.impactOccurred('light');
+    else if (kind === 'medium') h.impactOccurred('medium');
+    else if (kind === 'success') h.notificationOccurred('success');
+    else if (kind === 'error') h.notificationOccurred('error');
+  } catch (e) {}
+}
+function tgShowBack(on) {
+  if (!tgIsReal()) return;
+  const bb = tg().BackButton;
+  if (!bb) return;
+  try { on ? bb.show() : bb.hide(); } catch (e) {}
+}
+function tgClosingConfirmation(on) {
+  if (!tgIsReal()) return;
+  const wa = tg();
+  try {
+    if (on && wa.enableClosingConfirmation) wa.enableClosingConfirmation();
+    if (!on && wa.disableClosingConfirmation) wa.disableClosingConfirmation();
+  } catch (e) {}
+}
+function initTelegram() {
+  const wa = tg();
+  if (!wa || !tgIsReal()) return;
+  try {
+    wa.ready();
+    wa.expand();
+    if (wa.setHeaderColor) wa.setHeaderColor('#0b1119');
+    if (wa.setBackgroundColor) wa.setBackgroundColor('#070a10');
+    if (wa.disableVerticalSwipes) wa.disableVerticalSwipes();
+  } catch (e) {}
+  tgClosingConfirmation(true);
+  const bb = wa.BackButton;
+  if (bb) {
+    try {
+      bb.onClick(() => {
+        if (!$('#overlay').classList.contains('hidden')) closeOverlay();
+      });
+    } catch (e) {}
+  }
+}
+document.addEventListener('DOMContentLoaded', initTelegram);
+
+bindEvents();
+document.addEventListener('click', (e) => {
+  const j = e.target.closest('.joker');
+  const tip = e.target.closest('.joker .tip');
+  document.querySelectorAll('.joker.show').forEach((x) => { if (x !== j) x.classList.remove('show'); });
+  if (tip) return;
+  if (j) j.classList.toggle('show');
+  else document.querySelectorAll('.joker.show').forEach((x) => x.classList.remove('show'));
+});
+newGame();
+
+</script>
+</body>
+</html>
