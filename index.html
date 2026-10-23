@@ -522,7 +522,9 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .tbl.active .t-head{color:#dcffef}
 .t-head{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:#9fd8bc;text-transform:uppercase;letter-spacing:1px}
 .t-sum{font-size:28px;color:#fff;letter-spacing:0}
-.t-state{min-height:14px;font-size:11px;color:#ffe7a1;letter-spacing:1px}
+.t-state{display:flex;justify-content:space-between;align-items:center;gap:4px;min-height:14px;font-size:11px;color:#ffe7a1;letter-spacing:1px}
+.t-cap{font-size:9px;line-height:1;letter-spacing:.4px;color:#9fd8bc;border:1px solid #2c5a47;border-radius:99px;padding:2px 5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.t-cap.closed{color:#6f8299;border-color:#2b3d52}
 .t-cards{display:flex;flex-wrap:wrap;gap:4px;min-height:72px;align-content:flex-start}
 .t-cards .card.mini{width:46px;height:64px}
 .t-cards .card.mini .c-rank{font-size:15px;left:5px;top:3px}.t-cards .card.mini .c-suit{font-size:22px;padding-top:8px}
@@ -581,6 +583,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
   .t-head{font-size:9px;letter-spacing:.4px}
   .t-sum{font-size:18px}
   .t-state{font-size:9px;line-height:1.15;min-height:12px}
+  .t-cap{font-size:8px;padding:1px 4px}
   .t-cards{gap:2px;min-height:42px}
   .t-cards .card.mini{width:27px;height:38px;border-width:1px;border-radius:4px}
   .t-cards .card.mini .c-rank{font-size:10px;left:2px;top:2px}
@@ -1576,7 +1579,7 @@ function showRules() {
     '<h2>Двадцать одно <span class="thin">/ срезы и усилители</span></h2>' +
     '<div class="rules" style="margin-top:14px">' +
       '<div class="rule"><span class="num">1</span><div>Пройди <b>8 анте</b> по три блайнда. В каждом набери сумму очков за <b>4 места</b>.</div></div>' +
-      '<div class="rule"><span class="num">2</span><div>На место у тебя <b>3 стола</b> и общая колода. Взятая карта <b>автоматически ложится на текущий открытый стол</b>. Когда решишь, что хватит, — «Стоп на столе», и карты пойдут на следующий. Убрать карту нельзя. Точная сумма фиксирует стол, перебор его убивает.</div></div>' +
+      '<div class="rule"><span class="num">2</span><div>На место у тебя <b>3 стола</b> и общая колода. Взятая карта <b>автоматически ложится на текущий открытый стол</b>. Когда решишь, что хватит, — «Стоп на столе», и карты пойдут на следующий. Убрать карту нельзя. На стол помещается 4 карты (джокер или босс могут изменить лимит) — счётчик на столе покажет, сколько уже лежит. Точная сумма фиксирует стол, перебор его убивает.</div></div>' +
       '<div class="rule"><span class="num">3</span><div>Сумма руки сравнивается с <b>целью места</b> (21, растёт с анте). Чем ближе, тем выше множитель. <b>Перебор</b> (сумма выше цели) — это <b>0 очков</b> и сгоревшее место: срезай сумму расходниками.</div></div>' +
       '<div class="rule"><span class="num">4</span><div><b>Срез −N</b> уменьшает сумму руки (чипы остаются). <b>Усилитель +N</b> добавляет к сумме и чипам. Выбери расходник, затем <b>стол</b>. Тратятся.</div></div>' +
       '<div class="rule"><span class="num">5</span><div>Чипы x множитель = очки. Набрал цель блайнда — деньги за оставшиеся места. В магазине: джокеры, расходники, закалка и печати на картах (💰 золотая, 🔷 стеклянная, 🌈 дикая, ⚖️ тяжёлая).</div></div>' +
@@ -1614,14 +1617,19 @@ function renderHUD() {
 
 function tableHTML(s, t, ti) {
   const lim = limitNow();
+  const cap = maxPlay();
   const r = t.cards.length ? evalPlay(t.cards, t.adj) : null;
   const active = activeTableIndex(s);
   const can = (s.sel !== null && !t.dead && !t.locked && t.cards.length) || (G.phase === 'play' && s.sel === null && ti === active && tableOpen(t));
   const activeClass = G.phase === 'play' && s.sel === null && ti === active && tableOpen(t) ? ' active' : '';
   const cls = 'tbl' + activeClass + (t.locked ? ' ok' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
-  const state = t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? lim + '!' : r && r.bust ? 'перебор?' : t.cards.length >= maxPlay() ? 'полон' : '';
+  const full = t.cards.length >= cap;
+  const closed = t.dead || t.stood || t.locked || full;
+  const state = t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? lim + '!' : r && r.bust ? 'перебор?' : full ? 'полон' : '';
+  const capCls = closed ? ' closed' : ' open';
+  const capTitle = closed ? 'Стол закрыт — карты больше не добавляются' : 'Можно добавить ещё ' + (cap - t.cards.length);
   return '<div class="' + cls + '" data-t="' + ti + '"><div class="t-head"><span>Стол ' + (ti + 1) + '</span><b class="t-sum">' + (r ? r.sum : '—') + '</b></div>' +
-    '<div class="t-state">' + state + '</div>' +
+    '<div class="t-state"><span>' + state + '</span><span class="t-cap' + capCls + '" title="' + capTitle + '">' + t.cards.length + '/' + cap + '</span></div>' +
     '<div class="t-cards">' + t.cards.map((c) => cardElement(c, { mini: 1, scoring: s.locked && !t.dead })).join('') + '</div>' +
     '<div class="t-score">' + (r && !r.bust ? '+' + fmt(r.score) : '') + '</div></div>';
 }
@@ -1661,8 +1669,9 @@ function renderStats() {
     if (changed) { const box = el.parentElement; box.classList.remove('pulse'); void box.offsetWidth; box.classList.add('pulse'); }
   });
   const active = activeTableIndex(s);
+  const activeLeft = active >= 0 ? Math.max(0, maxPlay() - s.tables[active].cards.length) : 0;
   $('#preview-note').textContent = s.sel !== null ? 'выбери стол для расходника'
-    : (active === -1 ? 'все столы заполнены' : 'карты автоматически идут на стол ' + (active + 1)) + ' · столы: ' + res.tables.map((r) => (r.empty ? '—' : r.sum)).join(' · ') + ' · цель ' + limitNow();
+    : (active === -1 ? 'все столы заполнены' : 'карты идут на стол ' + (active + 1) + ' · можно ещё ' + activeLeft) + ' · столы: ' + res.tables.map((r) => (r.empty ? '—' : r.sum)).join(' · ') + ' · цель ' + limitNow();
   $('#tags').innerHTML = res.tags.map((t) => '<span class="tag">' + t + '</span>').join('');
 }
 
