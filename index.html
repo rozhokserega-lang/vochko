@@ -626,6 +626,130 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
   .shop-foot .row-btns button{flex:1 1 0;min-width:0;padding:10px 7px;font-size:10px}
 }
 
+.shop-item.r-rare{border-color:#62b6ff;box-shadow:0 0 0 1px #62b6ff55}
+.shop-item.r-legendary{border-color:#ffb02e;box-shadow:0 0 18px #ffb02e66}
+
+/* ============ ГРАФИКА 4.0 ============ */
+body{background:radial-gradient(1200px 720px at 50% -14%,#20604a 0%,#0e2b25 38%,#070a10 74%),linear-gradient(#070a10,#05070b);background-attachment:fixed}
+body::before{content:"";position:fixed;inset:-10%;z-index:-2;pointer-events:none;opacity:.065;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27240%27%20height%3D%27240%27%3E%3Cg%20fill%3D%27white%27%20font-size%3D%2752%27%20font-family%3D%27serif%27%3E%3Ctext%20x%3D%2716%27%20y%3D%2764%27%3E%E2%99%A0%3C%2Ftext%3E%3Ctext%20x%3D%27140%27%20y%3D%27104%27%3E%E2%99%A5%3C%2Ftext%3E%3Ctext%20x%3D%2744%27%20y%3D%27196%27%3E%E2%99%A6%3C%2Ftext%3E%3Ctext%20x%3D%27164%27%20y%3D%27222%27%3E%E2%99%A3%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E");background-size:240px 240px;animation:suitDrift 150s linear infinite}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 42%,rgba(0,0,0,.6) 100%)}
+@keyframes suitDrift{to{background-position:480px 240px}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden}
+#fx i{position:absolute;display:block;border-radius:2px;will-change:transform,opacity}
+#hud{background:linear-gradient(180deg,rgba(15,23,36,.94),rgba(8,12,19,.8));border-bottom:1px solid rgba(242,193,78,.2);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.pill{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 10px rgba(0,0,0,.3)}
+.pill.gold{box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 18px rgba(242,193,78,.14)}
+.brand-name{filter:drop-shadow(0 0 8px rgba(242,193,78,.35))}
+.bar > i{background:linear-gradient(90deg,#b8841f,#ffd978 60%,#fff0b5);box-shadow:0 0 12px rgba(255,205,90,.55)}
+#table{border:1px solid rgba(143,240,187,.16);border-radius:28px;
+  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27180%27%20height%3D%27180%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%27.85%27%20numOctaves%3D%272%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20values%3D%270%200%200%200%201%200%200%200%200%201%200%200%200%200%201%200%200%200%20.09%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url%28%23n%29%27%2F%3E%3C%2Fsvg%3E"),radial-gradient(760px 340px at 50% -8%,rgba(70,165,128,.4),transparent 70%),radial-gradient(900px 500px at 50% 125%,rgba(0,0,0,.5),transparent 60%),linear-gradient(180deg,#15392f,#0a211c 78%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),inset 0 0 110px rgba(0,0,0,.65),0 0 0 4px #1a120a,0 0 0 6px #7a5a22,0 0 0 7px #2b1e0b,0 26px 60px rgba(0,0,0,.65)}
+.limit-badge{box-shadow:inset 0 1px 0 rgba(255,255,255,.06);background:rgba(7,22,18,.75)}
+.seat-dot.on{animation:dotPulse 2.4s ease-in-out infinite}
+@keyframes dotPulse{50%{box-shadow:0 0 16px rgba(95,208,138,.75)}}
+/* карты */
+.card{background:linear-gradient(145deg,#fff 0%,#f6f3ec 52%,#e6e0d3 100%);border:2px solid #0a0e14;border-radius:12px;
+  box-shadow:inset 0 1px 0 #fff,inset 0 -14px 22px rgba(70,45,10,.08),0 6px 0 rgba(0,0,0,.42),0 14px 24px rgba(0,0,0,.4)}
+.card .c-rank{font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:-1px;text-shadow:0 1px 0 rgba(255,255,255,.75)}
+.card .c-suit{font-size:52px;opacity:.95;text-shadow:0 2px 0 rgba(255,255,255,.75),0 5px 9px rgba(0,0,0,.2)}
+.card::after{content:attr(data-r) "\A" attr(data-s);white-space:pre;text-align:center;position:absolute;right:8px;bottom:6px;font:700 17px/1.05 Georgia,serif;transform:rotate(180deg);opacity:.85;pointer-events:none}
+.card .c-chips{right:auto;left:6px;bottom:6px}
+.card.mini::after{display:none}
+.card.face::before{content:attr(data-g);position:absolute;inset:18px 13px;display:grid;place-items:center;font-size:76px;opacity:.13;border:2px solid currentColor;border-radius:8px}
+.card.mini.face::before{display:none}
+.card.back{background:radial-gradient(circle at 50% 50%,rgba(242,193,78,.85) 0 2px,transparent 3px) 0 0/13px 13px,linear-gradient(135deg,#2a478a,#12224a);border-color:#0a0e14}
+.card.back::before{content:"";position:absolute;inset:5px;border:1px solid rgba(242,193,78,.6);border-radius:7px;opacity:1;font-size:0}
+.card.back::after{content:none}
+.card.m-gold{background:linear-gradient(115deg,#fff1b8 0%,#f7c948 30%,#fff3c4 50%,#d9a521 70%,#fff1b8 100%);background-size:240% 100%;animation:foil 3.6s linear infinite}
+.card.m-glass{background:linear-gradient(115deg,rgba(255,255,255,.96),rgba(176,224,255,.78) 40%,rgba(255,255,255,.92) 55%,rgba(150,205,255,.8))}
+.card.m-wild{background:linear-gradient(115deg,#ffd6f5,#d6e8ff,#d6ffe9,#fff4cc,#ffd6f5);background-size:320% 100%;animation:foil 5s linear infinite}
+.card.m-heavy{background:linear-gradient(145deg,#e4e8ee,#9aa5b4 60%,#cdd4de)}
+@keyframes foil{to{background-position:-240% 0}}
+.card.fromdeck{animation:none}
+.card.scoring{animation:cardScore .62s cubic-bezier(.2,.8,.2,1) both}
+/* столы */
+.tbl{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(0,0,0,.3)),radial-gradient(120% 80% at 50% 0%,rgba(100,200,160,.15),transparent 70%);
+  border:1px solid rgba(143,240,187,.2);border-radius:18px;position:relative;overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -22px 36px rgba(0,0,0,.35),0 8px 18px rgba(0,0,0,.35)}
+.tbl.active{border-color:#8ff0bb;animation:activePulse 2.2s ease-in-out infinite}
+@keyframes activePulse{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -22px 36px rgba(0,0,0,.35),0 8px 18px rgba(0,0,0,.35)}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -22px 36px rgba(0,0,0,.35),0 0 24px 2px rgba(143,240,187,.38)}}
+.tbl.ok{border-color:#ffd86b;background:linear-gradient(180deg,rgba(255,216,107,.16),rgba(0,0,0,.3));animation:okGlow 1.8s ease-in-out infinite}
+@keyframes okGlow{0%,100%{box-shadow:0 0 14px rgba(255,216,107,.35),0 8px 18px rgba(0,0,0,.35)}50%{box-shadow:0 0 30px 3px rgba(255,216,107,.6),0 8px 18px rgba(0,0,0,.35)}}
+.tbl.dead{opacity:1;border-color:#b34a55;background:linear-gradient(180deg,rgba(130,24,36,.32),rgba(0,0,0,.5));filter:saturate(.75)}
+.tbl.dead::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(239,75,87,.11) 14px 16px);pointer-events:none}
+.tbl.blocked{border-color:#6e7686;background:linear-gradient(180deg,rgba(40,46,58,.55),rgba(0,0,0,.55));cursor:not-allowed}
+.tbl.blocked::before{content:"🔒";position:absolute;inset:0;display:grid;place-items:center;font-size:46px;z-index:3;
+  background:repeating-linear-gradient(45deg,rgba(0,0,0,.5) 0 12px,rgba(242,193,78,.13) 12px 24px);filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))}
+.t-sum{font-size:30px;background:linear-gradient(180deg,#fff,#cfe9de);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.tbl.ok .t-sum{background:linear-gradient(180deg,#fff7d6,#ffd25f);-webkit-background-clip:text;background-clip:text}
+.tbl.dead .t-sum{background:linear-gradient(180deg,#ffd0d4,#ff6b76);-webkit-background-clip:text;background-clip:text}
+.t-score{background:rgba(255,216,107,.1);border:1px solid rgba(255,216,107,.25);border-radius:99px;padding:1px 9px;align-self:flex-start;width:max-content}
+.t-score:empty{display:none}
+.t-cards .card.mini{box-shadow:inset 0 1px 0 #fff,0 3px 0 rgba(0,0,0,.42),0 7px 11px rgba(0,0,0,.35)}
+.pile .card{box-shadow:0 2px 0 rgba(0,0,0,.55),0 8px 14px rgba(0,0,0,.45)}
+.pcount{left:50%;right:auto;transform:translateX(-50%);width:max-content;background:rgba(5,15,12,.72);border:1px solid rgba(143,240,187,.25);border-radius:99px;padding:3px 11px}
+.fbox{box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 18px rgba(0,0,0,.35)}
+.fbox .f-val{text-shadow:0 0 14px currentColor}
+#total-box{text-shadow:0 0 28px rgba(143,240,187,.45)}
+/* кнопки */
+.btn{border-radius:16px;position:relative;overflow:hidden;box-shadow:0 5px 0 #070b12,0 10px 22px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3)}
+.btn::before{content:"";position:absolute;inset:0 0 52% 0;background:linear-gradient(180deg,rgba(255,255,255,.24),transparent);pointer-events:none}
+@media (hover:hover){.btn.draw:not(:disabled):hover{box-shadow:0 5px 0 #070b12,0 0 28px rgba(95,208,138,.5),inset 0 1px 0 rgba(255,255,255,.3)}.btn.stand:not(:disabled):hover{box-shadow:0 5px 0 #070b12,0 0 28px rgba(242,193,78,.5),inset 0 1px 0 rgba(255,255,255,.3)}}
+.cons-btn{background:linear-gradient(180deg,#1c2740,#111a2d);border:1px solid #34456a;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 5px 12px rgba(0,0,0,.35)}
+/* джокеры */
+.joker{border-radius:12px;background:linear-gradient(180deg,#261e3c,#150f24);border:1px solid #4b3a76;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 6px 14px rgba(0,0,0,.4)}
+.joker.r-rare{border-color:#62b6ff;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 14px rgba(98,182,255,.4),0 6px 14px rgba(0,0,0,.4)}
+.joker.r-legendary{border-color:#ffb02e;background:linear-gradient(180deg,#3d2c0f,#1d1407);overflow:visible;animation:legendGlow 2.6s ease-in-out infinite}
+.joker.r-legendary::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);background-size:260% 100%;animation:sweep 3.2s linear infinite}
+@keyframes legendGlow{0%,100%{box-shadow:0 0 12px rgba(255,176,46,.35),0 6px 14px rgba(0,0,0,.4)}50%{box-shadow:0 0 26px rgba(255,176,46,.7),0 6px 14px rgba(0,0,0,.4)}}
+@keyframes sweep{from{background-position:160% 0}to{background-position:-100% 0}}
+.tip{background:rgba(12,16,28,.95);backdrop-filter:blur(8px);border:1px solid #3a4a6a;border-radius:12px;box-shadow:0 14px 30px rgba(0,0,0,.6)}
+.tip-rar{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;font-weight:900;margin-bottom:3px;color:#8ea0b8}
+.tip-rar.r-rare{color:#62b6ff}.tip-rar.r-legendary{color:#ffb02e}
+.tip-sell{margin-top:6px;font-size:10px;color:#9fd8bc}
+.joker-owned{position:relative;cursor:help;border:1px solid #3a2f5a}
+.joker-owned.r-rare{border-color:#62b6ff}
+.joker-owned.r-legendary{border-color:#ffb02e;box-shadow:0 0 14px rgba(255,176,46,.35)}
+.o-tip{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translate(-50%,6px);width:min(250px,70vw);opacity:0;pointer-events:none;z-index:6;padding:10px 12px;font-size:11.5px;line-height:1.4;text-align:left;color:#dbe5f3;transition:opacity .15s,transform .15s}
+.joker-owned:hover .o-tip,.joker-owned:focus-within .o-tip,.joker-owned.show .o-tip{opacity:1;transform:translate(-50%,0)}
+/* окна и магазин */
+.modal{background:linear-gradient(180deg,#131c2f,#0a0f1a);border:1px solid rgba(242,193,78,.22);border-radius:24px;box-shadow:0 40px 100px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06)}
+.modal::before{content:"";display:block;height:3px;margin:-24px -24px 20px;border-radius:24px 24px 0 0;background:linear-gradient(90deg,transparent,#f2c14e,transparent)}
+.modal h2{background:linear-gradient(180deg,#fff,#cdd8ea);-webkit-background-clip:text;background-clip:text;color:transparent}
+.modal h2 .thin{-webkit-text-fill-color:currentColor}
+.shop-item{border-radius:16px;background:linear-gradient(180deg,#18223a,#0f1626);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 8px 20px rgba(0,0,0,.35);transition:transform .15s,box-shadow .15s}
+@media (hover:hover){.shop-item:not(.sold):hover{transform:translateY(-4px)}}
+.shop-item .si-emoji{font-size:34px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.shop-item.r-rare{background:linear-gradient(180deg,#14284a,#0d1730)}
+.shop-item.r-legendary{background:linear-gradient(135deg,#3b2a0c,#1b1308 60%,#3b2a0c);animation:legendGlow 2.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media (max-width:480px){.card::after{display:none}.card .c-suit{font-size:40px}.t-sum{font-size:22px}.pile .card{box-shadow:0 2px 0 rgba(0,0,0,.55),0 5px 9px rgba(0,0,0,.45)}.modal::before{margin:-24px -24px 16px}}
+
+/* ===== путь, события, кузница, запуск ===== */
+.sec{margin:14px 0 6px;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#9fd8bc}
+.opt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.opt{display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid #2a3a58;background:linear-gradient(180deg,#18223a,#0f1626);color:var(--text);cursor:pointer;font:inherit;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.opt b{font-size:13px}.opt small{font-size:10.5px;line-height:1.3;color:#8ea0b8}.opt .o-e{font-size:20px;line-height:1}
+.opt.sel{border-color:#f2c14e;box-shadow:0 0 0 1px #f2c14e,0 0 18px rgba(242,193,78,.25)}
+.opt.locked{opacity:.5;cursor:not-allowed}
+.setup-rec{margin:12px 0 4px;font-size:11px;color:#6d7f97;text-align:center}
+.evt-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.evt-btn{padding:12px 14px;border-radius:14px;border:1px solid #34456a;background:linear-gradient(180deg,#1c2740,#111a2d);color:var(--text);font:inherit;font-size:13.5px;text-align:left;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.evt-btn:disabled{opacity:.4;cursor:not-allowed}
+.evt-rew{float:right;color:#8ff0bb;font-weight:800}
+@media (hover:hover){.evt-btn:not(:disabled):hover,.opt:not(.locked):hover{border-color:#f2c14e}}
+.shop-item.node-elite{background:linear-gradient(180deg,#3a1218,#1b0a0d);border-color:#b34a55}
+.shop-item.node-campfire{background:linear-gradient(180deg,#3a2410,#1c120a);border-color:#c9822a}
+.shop-item.node-contract{background:linear-gradient(180deg,#2a2144,#150f26);border-color:#7a5ac8}
+.forge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:8px;max-height:44vh;overflow:auto;padding:8px 4px;margin-top:8px}
+.forge-grid .card.mini{width:48px;height:68px;cursor:pointer;margin:auto}
+.forge-grid .card.mini:hover{transform:translateY(-4px)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:120;max-width:90vw;padding:10px 16px;border-radius:14px;background:linear-gradient(180deg,#3d2c0f,#1d1407);border:1px solid #ffb02e;color:#ffe7a1;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.6),0 0 20px rgba(255,176,46,.35);animation:toastIn .35s ease-out}
+.toast.out{opacity:0;transform:translateX(-50%) translateY(10px);transition:opacity .4s,transform .4s}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(16px)}}
+#dealer{gap:10px}
+#dealer>.card.mini{width:54px;height:76px}
+#dealer .dlabel{max-width:78px;text-align:center;line-height:1.25;margin:0 2px}
 </style>
 </head>
 <body>
@@ -695,6 +819,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
       <div class="kv"><span>Лучшее место</span><b id="side-best">0</b></div>
     </div>
     <div class="panel" id="boss-panel"></div>
+      <div class="panel" id="relic-panel"></div>
     <div class="panel" id="next-panel" style="display:none">
       <h4>Следующая карта</h4>
       <div class="next-card" id="next-card"></div>
@@ -718,6 +843,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <div id="overlay" class="hidden"></div>
 
 <script>
+const RNG0 = Math.random.bind(Math);
 /* ============================================================
    ДВАДЦАТЬ ОДНО — рогалик-колодострой
    Ядро: чипы x множитель, но множитель даёт близость к лимиту.
@@ -774,6 +900,18 @@ const JOKERS = [
   { id: 'risk', name: 'Джокер риска', emoji: '⚠️', price: 6, desc: 'Если хотя бы один стол перебрал, остальные столы приносят x1.5.' },
   { id: 'refund', name: 'Джокер перебора', emoji: '♻️', price: 5, desc: 'За каждый перебитый стол возвращает 25% очков лучшего стола.' },
   { id: 'sync', name: 'Синхронизация', emoji: '🔗', price: 7, desc: 'Если все три стола закрыты (точно в цель, перебор или полный), очки места x1.5.' },
+  { id: 'tandem', name: 'Тандем', emoji: '👯', price: 6, desc: 'Два стола с одинаковой суммой: очки каждого из них ×1,5.' },
+  { id: 'ladder', name: 'Лесенка', emoji: '🪜', price: 7, desc: 'Суммы трёх столов идут подряд (например 19, 20, 21): очки места ×2.' },
+  { id: 'relay', name: 'Эстафета', emoji: '🏃', price: 5, desc: 'Стол, идущий сразу после точного стола, получает +40 чипов.' },
+  { id: 'balance', name: 'Равновесие', emoji: '⚖️', price: 4, desc: 'Все три стола в пределах 2 очков от цели без перебора: очки места ×1,4.' },
+  { id: 'banker', name: 'Ростовщик', emoji: '🏧', price: 5, desc: '+0,15 множителя на каждом столе за каждые $10 в кармане (максимум +1,5).' },
+  { id: 'alchemist', name: 'Алхимик', emoji: '⚗️', price: 6, desc: 'Использованный расходник с шансом 35% не тратится.' },
+  { id: 'adrenaline', name: 'Адреналин', emoji: '💉', price: 6, desc: 'Каждый перебитый стол даёт +0,5 множителя столам следующих мест блайнда (максимум +3).' },
+  { id: 'surgeon', name: 'Хирург', emoji: '🔪', price: 5, desc: 'Срезы режут на 1 больше, усилители добавляют на 1 больше.' },
+  { id: 'ice', name: 'Лёд', emoji: '🧊', price: 4, desc: 'Замороженный стол приносит очки ×1,5.' },
+  { id: 'diplomat', name: 'Дипломат', emoji: '🕊️', price: 10, rarity: 'legendary', desc: 'Правило дома босса действует только на первые два места блайнда.' },
+  { id: 'allin', name: 'Всё или ничего', emoji: '🎰', price: 10, rarity: 'legendary', desc: 'Очки места ×2, но если хоть один стол перебрал, место приносит 0.' },
+  { id: 'phoenix', name: 'Феникс', emoji: '🔥', price: 10, rarity: 'legendary', desc: 'Раз за блайнд место, обнулённое переборами, не тратится.' },
   { id: 'pair', name: 'Пара', emoji: '👯', price: 7, desc: 'Если среди сыгранных карт есть две одного номинала — очки x2.' },
   { id: 'wide', name: 'Широкий стол', emoji: '🃏', price: 7, desc: 'В руке можно держать 5 карт вместо 4. Срезы спасут сумму.' },
   { id: 'xray', name: 'Сканер', emoji: '👁️', price: 5, desc: 'Видишь следующую карту колоды. Хватает на 5 мест, потом сгорает.' },
@@ -783,8 +921,47 @@ const MODS = {
   glass: { name: 'Стеклянная', emoji: '🔷', desc: 'Очки руки x2, но после розыгрыша карта разбивается с шансом 25%.' },
   wild: { name: 'Дикая', emoji: '🌈', desc: 'Значение подбирается автоматически от 1 до 11.' },
   heavy: { name: 'Тяжёлая', emoji: '⚖️', desc: 'Чипы карты удваиваются.' },
+  curse: { name: 'Проклятая', emoji: '💀', desc: 'Даёт значение, но 0 чипов. Убирается в кузнице.' },
 };
+const RELICS = {
+  vault: { name: 'Сейф', emoji: '🏦', desc: '+$3 к награде за каждый блайнд.' },
+  belt: { name: 'Пояс', emoji: '🎒', desc: '+1 слот расходников.' },
+  slot: { name: 'Запасной слот', emoji: '🃏', desc: '+1 слот джокера.' },
+  anvil: { name: 'Наковальня', emoji: '⚒️', desc: 'Каждая карта даёт +10 чипов.' },
+  crown: { name: 'Корона', emoji: '👑', desc: '+$2 за каждый стол ровно в цель.' },
+  prism: { name: 'Призма', emoji: '🔺', desc: '+0,5 множителя на каждом столе.' },
+  kit: { name: 'Аптечка', emoji: '🩹', desc: 'В начале каждого блайнда получаешь Срез −2.' },
+  piggy: { name: 'Копилка', emoji: '🐷', desc: 'Потолок процентов +5.' },
+  echo: { name: 'Эхо', emoji: '📣', desc: 'Неиспользованные места приносят вдвое больше.' },
+};
+const STAKES = [
+  { name: 'Белый', desc: 'Обычные правила.' },
+  { name: 'Бронза', desc: 'Цели блайндов +10%.' },
+  { name: 'Серебро', desc: 'Боссы получают второе правило дома.' },
+  { name: 'Золото', desc: 'Награда за блайнд на $1 меньше.' },
+  { name: 'Платина', desc: 'Три места на блайнд вместо четырёх.' },
+  { name: 'Алмаз', desc: 'Всё в магазине дороже на $1.' },
+];
+const BOSS_CLASH = { hot: 'lowLimit', lowLimit: 'hot', nocons: 'thin', thin: 'nocons' };
+function bossIs(k) {
+  if (!G || (G.boss !== k && G.boss2 !== k)) return false;
+  return !(hasJoker('diplomat') && seatsCount() - G.seatsLeft >= 2);
+}
+function hasRelic(id) { return !!(G && G.relics && G.relics.includes(id)); }
+function consSlots() { return CONFIG.consSlots + (hasRelic('belt') ? 1 : 0); }
+function maxJokers() { return CONFIG.maxJokers + (hasRelic('slot') ? 1 : 0); }
+function baseReward() { return CONFIG.baseReward - (G && G.stake >= 3 ? 1 : 0); }
+function seatsCount() { return CONFIG.seats - (G && G.stake >= 4 ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
+function unlockedStake() {
+  try { return Math.min(STAKES.length - 1, Number(localStorage.getItem('vochko.stake') || 0)); } catch (e) { return 0; }
+}
+function unlockStake(n) {
+  try { if (n > unlockedStake()) localStorage.setItem('vochko.stake', String(Math.min(STAKES.length - 1, n))); } catch (e) {}
+}
 const CONS = {
+  shuffle: { kind: 'shuffle', n: 0, name: 'Перетасовка', price: 3, desc: 'Тасует колоду вместе со сбросом: следующие карты изменятся.' },
+  peek3: { kind: 'peek3', n: 0, name: 'Дальновидность', price: 4, desc: 'Показывает 3 следующие карты колоды на это место.' },
+  burn: { kind: 'burn', n: 0, name: 'Сжечь', price: 2, desc: 'Сбрасывает верхнюю карту колоды (хорошо после «Подсмотреть»).' },
   freeze: { kind: 'freeze', n: 0, name: 'Заморозка', price: 5, desc: 'Фиксирует сумму руки. Следующие карты дают чипы, но не меняют сумму.' },
   minus2: { kind: 'minus', n: 2, name: 'Срез −2', price: 2, desc: '−2 к сумме руки. Чипы остаются.' },
   minus4: { kind: 'minus', n: 4, name: 'Срез −4', price: 4, desc: '−4 к сумме руки. Чипы остаются.' },
@@ -794,6 +971,22 @@ const CONS = {
   swap: { kind: 'swap', n: 0, name: 'Подмена', price: 4, desc: 'Заменяет последнюю взятую карту новой.' },
   plus4: { kind: 'plus', n: 4, name: 'Усилитель +4', price: 5, desc: '+4 к сумме руки и +40 чипов.' },
 };
+const RARITY = { common: { name: 'Обычный' }, rare: { name: 'Редкий' }, legendary: { name: 'Легендарный' } };
+const RARE_IDS = ['pair', 'precision', 'risk', 'refund', 'sync', 'triple', 'cushion', 'counter', 'wide', 'streak', 'tandem', 'ladder', 'alchemist', 'adrenaline'];
+JOKERS.forEach((j) => { if (!j.rarity) j.rarity = RARE_IDS.includes(j.id) ? 'rare' : 'common'; });
+function rollJokerOffers(n) {
+  const owned = new Set(G.jokers.map((j) => j.id));
+  let pool = JOKERS.filter((j) => !owned.has(j.id) && j.rarity !== 'legendary' && isUnlocked('joker', j.id));
+  const w = (j) => (j.rarity === 'rare' ? 3 + G.ante * 0.4 : 10);
+  const out = [];
+  while (out.length < n && pool.length) {
+    let r = Math.random() * pool.reduce((a, j) => a + w(j), 0);
+    const j = pool.find((x) => (r -= w(x)) < 0) || pool[pool.length - 1];
+    out.push(j); pool = pool.filter((x) => x !== j);
+  }
+  return out;
+}
+function consPower(k) { return k.n + (hasJoker('surgeon') && (k.kind === 'minus' || k.kind === 'plus') ? 1 : 0); }
 const BOSSES = {
   odd: { name: 'Чётный дом', desc: 'Нечётные карты (3, 5, 7, 9) дают 0 чипов, но считаются в сумму.' },
   ace11: { name: 'Тузобой', desc: 'Тузы всегда 11 — единицей их не сыграть.' },
@@ -802,6 +995,10 @@ const BOSSES = {
   hot: { name: 'Горячая цель', desc: 'Цель места выше на 2.' },
   thin: { name: 'Один расходник', desc: 'На каждое место можно применить только один расходник.' },
   noplus: { name: 'Без усилителей', desc: 'Усилители (+N) на этом блайнде не работают.' },
+  thief: { name: 'Вор', desc: 'В начале каждого места у тебя пропадает случайный расходник.' },
+  tax: { name: 'Налог', desc: 'Каждое сыгранное место отнимает $1.' },
+  dark: { name: 'Чёрная ночь', desc: 'Красные карты дают вдвое меньше чипов.' },
+  lock: { name: 'Замок', desc: 'На каждом месте один случайный стол заблокирован: карты на него не ложатся.' },
   lowLimit: { name: 'Урезанная цель', desc: 'Цель места снижена на 3.' },
 };
 const BOSS_KEYS = Object.keys(BOSSES);
@@ -861,7 +1058,7 @@ function flashHint(text) {
 
 /* ---------------- правила ---------------- */
 function limitNow() {
-  return G.boss === 'lowLimit' ? G.limit - 3 : G.boss === 'hot' ? G.limit + 2 : G.limit;
+  return bossIs('lowLimit') ? G.limit - 3 : bossIs('hot') ? G.limit + 2 : G.limit;
 }
 function hasJoker(id) { return G.jokers.some((j) => j.id === id); }
 function multBaseFor(d) {
@@ -874,8 +1071,10 @@ function multBaseFor(d) {
 }
 function cv(c) { return c.val + (c.up || 0) + (c.dv || 0); }
 function cardChips(c) {
-  if (G.boss === 'odd' && ['3', '5', '7', '9'].includes(c.rank)) return 0;
+  if (c.mod === 'curse') return 0;
+  if (bossIs('odd') && ['3', '5', '7', '9'].includes(c.rank)) return 0;
   let v = (c.val + (c.up || 0) + (c.dc || 0)) * 10;
+  if (hasRelic('anvil')) v += 10;
   if (hasJoker('six') && c.val >= 2 && c.val <= 6) v += 40;
   if (hasJoker('ace') && c.rank === 'A') v += 40;
   if (hasJoker('lucky7') && c.rank === '7') v += 80;
@@ -883,6 +1082,7 @@ function cardChips(c) {
   if (hasJoker('face') && ['J', 'Q', 'K'].includes(c.rank)) v += 30;
   if (hasJoker('hearts') && c.suit === '♥') v += 25;
   if (c.mod === 'heavy') v *= 2;
+  if (bossIs('dark') && c.color === 'red') v = Math.floor(v / 2);
   return v;
 }
 function scorePlay(cards, sum, lim, xc) {
@@ -913,6 +1113,9 @@ function scorePlay(cards, sum, lim, xc) {
   if (hasJoker('miser') && G.cons.length) { add += 0.5 * G.cons.length; tags.push('скряга +' + fmtMult(0.5 * G.cons.length)); }
   if (hasJoker('streak') && G.stats.pushes > 0) { const b = Math.min(3, G.stats.pushes * 0.1); add += b; tags.push('точный ритм +' + fmtMult(b)); }
   if (hasJoker('hearts') && cards.filter((c) => c.suit === '♥').length >= 3) { add += 1; tags.push('три червы +1'); }
+  if (hasJoker('banker')) { const b = Math.min(1.5, Math.floor(G.money / 10) * 0.15); if (b > 0) { add += b; tags.push('ростовщик +' + fmtMult(b)); } }
+  if (hasJoker('adrenaline') && G.adrenaline > 0) { const b = Math.min(3, G.adrenaline * 0.5); add += b; tags.push('адреналин +' + fmtMult(b)); }
+  if (hasRelic('prism')) { add += 0.5; tags.push('призма +0,5'); }
   if (hasJoker('triple') && cards.length === 3) { chips += 60; add += 0.5; tags.push('тройной удар +60 / +0,5'); }
   if (cards.length === 2 && sum === lim) { mul *= 2; tags.push('натуральное x2'); }
   const mult = (base + add) * mul;
@@ -931,7 +1134,7 @@ function evalPlay(cards, adj) {
   const wilds = sc.filter((c) => c.mod === 'wild').length;
   const norm = sc.filter((c) => c.mod !== 'wild');
   const aces = norm.filter((c) => c.rank === 'A').length;
-  const kmax = G.boss === 'ace11' ? 0 : aces;
+  const kmax = bossIs('ace11') ? 0 : aces;
   const raw = norm.reduce((a, c) => a + cv(c), 0) + adj.dv;
   let best = null;
   for (let k = 0; k <= kmax; k++) {
@@ -943,14 +1146,14 @@ function evalPlay(cards, adj) {
   if (adj.fz) best.tags = best.tags.concat('❄ сумма заморожена');
   return best;
 }
-function maxPlay() { return G.boss === 'max3' ? 3 : 4 + (hasJoker('wide') ? 1 : 0); }
+function maxPlay() { return bossIs('max3') ? 3 : 4 + (hasJoker('wide') ? 1 : 0); }
 
 /* ============================================================
    ПОТОК ЗАБЕГА
    ============================================================ */
 
 function targetFor(ante, blind) {
-  return Math.round(CONFIG.baseTarget * Math.pow(CONFIG.growth, ante - 1) * CONFIG.blindMult[blind]);
+  return Math.round(CONFIG.baseTarget * Math.pow(CONFIG.growth, ante - 1) * CONFIG.blindMult[blind]) * (G.stake >= 1 ? 1.1 : 1) | 0;
 }
 
 function pickBoss() {
@@ -960,15 +1163,35 @@ function pickBoss() {
   return key;
 }
 
-function newGame() {
+function newGame(stake, deckKey, opts) {
+  Math.random = RNG0;
+  const direct = typeof stake === 'number';
+  const daily = direct && opts && opts.daily ? dateKey() : null;
+  if (daily) { stake = 0; deckKey = 'classic'; }
+  if (!direct) stake = 0;
+  deckKey = DECKS[deckKey] ? deckKey : 'classic';
   G = {
+    stake,
+    deckKey,
+    daily,
+    endless: false,
+    metaDone: false,
+    relics: [],
+    boss2: null,
+    consUsed: 0,
+    elite: false,
+    contract: null,
+    nextElite: false,
+    nextContract: null,
+    nextTargetMod: null,
+    pending: null,
     ante: 1,
     blind: 0,
     money: CONFIG.startMoney,
     limit: 21,
     target: 0,
     score: 0,
-    seatsLeft: CONFIG.seats,
+    seatsLeft: seatsCount(),
     deck: [],
     discard: [],
     runDeck: makeDeck(),
@@ -986,27 +1209,55 @@ function newGame() {
   };
   lastBoss = null;
   tgClosingConfirmation(true);
+  if (!direct) { render(); showRunSetup(); return; }
+  if (daily) Math.random = mulberry32(hashStr(daily + '|start'));
+  applyStartDeck(deckKey);
   startBlind();
 }
 
+
 function startBlind() {
+  seedStage('blind');
+  G.pending = null;
+  G.elite = !!G.nextElite; G.nextElite = false;
+  G.contract = G.nextContract || null; G.nextContract = null;
+  G.consUsed = 0;
   G.score = 0;
-  G.seatsLeft = CONFIG.seats;
+  G.seatsLeft = seatsCount();
   G.pushThisBlind = 0;
   G.seat = null;
   G.deck = shuffle(G.runDeck.map((c) => ({ ...c })));
   G.discard = [];
-  G.boss = G.blind === 2 ? pickBoss() : null;
+  G.boss = (G.blind === 2 || G.elite) ? pickBoss() : ((G.contract && G.contract.boss) || null);
+  G.adrenaline = 0; G.phoenixUsed = false;
+  G.boss2 = null;
+  if (G.boss && G.blind === 2 && (G.stake >= 2 || G.ante >= 7)) {
+    G.boss2 = pick(BOSS_KEYS.filter((k) => k !== G.boss && BOSS_CLASH[G.boss] !== k));
+  }
   G.limit = 21 + (G.ante - 1);
   G.target = targetFor(G.ante, G.blind);
+  if (G.elite) G.target = Math.round(G.target * 1.35);
+  if (G.contract && G.contract.targetMul) G.target = Math.round(G.target * G.contract.targetMul);
+  if (G.nextTargetMod) { G.target = Math.round(G.target * G.nextTargetMod); G.nextTargetMod = null; }
+  if (hasRelic('kit') && G.cons.length < consSlots()) { G.cons.push(CONS.minus2); }
+  if (G.ante >= 4) unlockAch('ante4');
   G.phase = 'intro';
   render();
   showBlindIntro();
 }
 
-function newTable() { return { cards: [], adj: { dv: 0, dc: 0 }, locked: false, dead: false, stood: false }; }
+function newTable() { return { cards: [], adj: { dv: 0, dc: 0 }, locked: false, dead: false, stood: false, blocked: false }; }
+function makeTables() {
+  const t = [newTable(), newTable(), newTable()];
+  if (bossIs('lock')) t[Math.floor(Math.random() * 3)].blocked = true;
+  return t;
+}
 function startSeat() {
-  G.seat = { tables: [newTable(), newTable(), newTable()], sel: null, used: false, peek: false, locked: false };
+  if (bossIs('thief') && G.cons.length) {
+    const k = G.cons.splice(Math.floor(Math.random() * G.cons.length), 1)[0];
+    log('Вор украл «' + k.name + '»', 'bad');
+  }
+  G.seat = { tables: makeTables(), sel: null, used: false, peek: false, locked: false };
   G.phase = 'play';
   render();
 }
@@ -1019,7 +1270,7 @@ function drawFromDeck() {
   return G.deck.pop() || null;
 }
 
-function tableOpen(t) { return !t.locked && !t.dead && !t.stood && t.cards.length < maxPlay(); }
+function tableOpen(t) { return !t.blocked && !t.locked && !t.dead && !t.stood && t.cards.length < maxPlay(); }
 
 // Игрок заполняет столы по очереди: сначала первый, затем второй и третий.
 function activeTableIndex(s) {
@@ -1027,20 +1278,20 @@ function activeTableIndex(s) {
 }
 
 function canSaveTable(s, t) {
-  if (G.boss === 'nocons') return false;
-  const usable = G.cons.filter((k) => (k.kind === 'minus' || k.kind === 'pct' || k.kind === 'swap') && !(G.boss === 'thin' && s.used));
+  if (bossIs('nocons')) return false;
+  const usable = G.cons.filter((k) => (k.kind === 'minus' || k.kind === 'pct' || k.kind === 'swap') && !(bossIs('thin') && s.used));
   const seen = new Set();
   function search(hand, adj, mask, usedAny, sw) {
     const r = evalPlay(hand, adj);
     if (!r.bust) return true;
-    if (usedAny && G.boss === 'thin') return false;
+    if (usedAny && bossIs('thin')) return false;
     const sig = mask + '|' + adj.dv + '|' + adj.dc + '|' + (adj.fz || 0) + '|' + hand.map((c) => c.id + ':' + c.val + ':' + (c.mod || '')).join(',');
     if (seen.has(sig)) return false;
     seen.add(sig);
     for (let i = 0; i < usable.length; i++) {
       if (mask & (1 << i)) continue;
       const k = usable[i], m = mask | (1 << i);
-      if (k.kind === 'minus') { if (search(hand, { ...adj, dv: adj.dv - k.n }, m, true, sw)) return true; }
+      if (k.kind === 'minus') { if (search(hand, { ...adj, dv: adj.dv - consPower(k) }, m, true, sw)) return true; }
       else if (k.kind === 'pct') { if (search(hand, { ...adj, dv: adj.dv - Math.ceil(Math.max(0, r.sum) * k.n) }, m, true, sw)) return true; }
       else if (k.kind === 'swap' && hand.length && !(adj.fz && hand.length <= adj.fz)) {
         const next = G.deck.length > sw ? G.deck[G.deck.length - 1 - sw] : null;
@@ -1071,12 +1322,24 @@ function evalSeat(s) {
     r.exact = !r.bust && r.sum === lim;
     return r;
   });
+  const pre = [];
+  T.forEach((r, i) => { r.frozen = !!(s.tables[i].adj && s.tables[i].adj.fz); });
+  if (hasJoker('ice') && T.some((r) => !r.empty && !r.bust && r.frozen)) {
+    T.forEach((r) => { if (!r.empty && !r.bust && r.frozen) r.score = Math.round(r.score * 1.5); }); pre.push('лёд x1.5');
+  }
+  if (hasJoker('relay') && T.some((r, i) => i > 0 && !r.empty && !r.bust && T[i - 1].exact)) {
+    T.forEach((r, i) => { if (i > 0 && !r.empty && !r.bust && T[i - 1].exact) { r.chips += 40; r.score += Math.round(40 * r.mult); } }); pre.push('эстафета +40');
+  }
+  if (hasJoker('tandem')) {
+    const eq = (r, i) => !r.empty && !r.bust && T.some((o, j) => j !== i && !o.empty && !o.bust && o.sum === r.sum);
+    if (T.some(eq)) { T.forEach((r, i) => { if (eq(r, i)) r.score = Math.round(r.score * 1.5); }); pre.push('тандем x1.5'); }
+  }
   const live = T.filter((r) => !r.empty && !r.bust);
   const exact = T.filter((r) => r.exact).length;
   const bust = T.filter((r) => !r.empty && r.bust).length;
   let total = live.reduce((a, r) => a + r.score, 0);
   const chips = live.reduce((a, r) => a + r.chips, 0);
-  const tags = [];
+  const tags = pre.slice();
   if (hasJoker('precision') && exact) { total = Math.round(total * (1 + 0.25 * exact)); tags.push('точность x' + (1 + 0.25 * exact)); }
   if (hasJoker('suits')) {
     const ht = s.tables.filter((t) => t.cards.some((c) => c.suit === '♥')).length;
@@ -1087,14 +1350,23 @@ function evalSeat(s) {
     const back = Math.round(Math.max(...live.map((r) => r.score)) * 0.25 * bust);
     total += back; tags.push('возврат +' + fmt(back));
   }
-  const closed = s.tables.every((t) => t.cards.length && (t.locked || t.dead || t.stood || t.cards.length >= maxPlay()));
+  const closed = s.tables.every((t) => t.blocked || t.cards.length && (t.locked || t.dead || t.stood || t.cards.length >= maxPlay()));
   if (hasJoker('sync') && closed) { total = Math.round(total * 1.5); tags.push('синхронизация x1.5'); }
+  if (hasJoker('balance') && T.every((r) => !r.empty && !r.bust && r.sum >= lim - 2)) { total = Math.round(total * 1.4); tags.push('равновесие x1.4'); }
+  if (hasJoker('ladder') && live.length === 3) {
+    const sm = T.map((r) => r.sum).sort((a, b) => a - b);
+    if (sm[1] === sm[0] + 1 && sm[2] === sm[1] + 1) { total = Math.round(total * 2); tags.push('лесенка x2'); }
+  }
+  if (hasJoker('allin')) {
+    if (bust) { total = 0; tags.push('всё или ничего: 0'); }
+    else if (total) { total = Math.round(total * 2); tags.push('всё или ничего x2'); }
+  }
   if (bust) tags.push('перебор столов: ' + bust);
   return { tables: T, total, exact, bust, chips, tags, closed };
 }
 
 function autoFinish(s) {
-  if (s.tables.every((t) => t.cards.length && (t.locked || t.dead || t.stood || t.cards.length >= maxPlay()))) stand();
+  if (s.tables.every((t) => t.blocked || t.cards.length && (t.locked || t.dead || t.stood || t.cards.length >= maxPlay()))) stand();
 }
 
 // Игрок может остановить набор на текущем столе, например на 18 очках,
@@ -1117,14 +1389,14 @@ function applyCons(ti) {
   if (!k) { s.sel = null; return; }
   if (t.dead) { flashHint('Этот стол выбыл'); return; }
   if (t.locked) { flashHint('Стол уже зафиксирован точной суммой'); return; }
-  if (G.boss === 'nocons') { flashHint('Печать: расходники не работают'); return; }
-  if (G.boss === 'noplus' && k.kind === 'plus') { flashHint('Усилители на этом блайнде не работают'); return; }
-  if (G.boss === 'thin' && s.used) { flashHint('Один расходник на место'); return; }
+  if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
+  if (bossIs('noplus') && k.kind === 'plus') { flashHint('Усилители на этом блайнде не работают'); return; }
+  if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
   if (!t.cards.length) { flashHint('Сначала положи карту на этот стол'); return; }
   if (k.kind === 'swap' && t.adj.fz && t.cards.length <= t.adj.fz) { flashHint('Нельзя: карта уже заморожена в сумме'); return; }
   if (k.kind === 'freeze' && t.adj.fz) { flashHint('Сумма стола уже заморожена'); return; }
-  if (k.kind === 'plus') { t.adj.dv += k.n; t.adj.dc += k.n; }
-  else if (k.kind === 'minus') t.adj.dv -= k.n;
+  if (k.kind === 'plus') { t.adj.dv += consPower(k); t.adj.dc += consPower(k); }
+  else if (k.kind === 'minus') t.adj.dv -= consPower(k);
   else if (k.kind === 'pct') t.adj.dv -= Math.ceil(Math.max(0, evalPlay(t.cards, t.adj).sum) * k.n);
   else if (k.kind === 'freeze') t.adj.fz = t.cards.length;
   else if (k.kind === 'swap') {
@@ -1135,8 +1407,10 @@ function applyCons(ti) {
     G.lastDrawn = c.id;
   }
   s.used = true;
+  G.consUsed = (G.consUsed || 0) + 1;
   log(k.name + ' → стол ' + (ti + 1) + ': ' + evalPlay(t.cards, t.adj).sum, 'gold');
-  G.cons.splice(i, 1);
+  if (hasJoker('alchemist') && Math.random() < 0.35) log('Алхимик: «' + k.name + '» сохранён', 'gold');
+  else G.cons.splice(i, 1);
   s.sel = null;
   refreshTables(s);
   render();
@@ -1148,9 +1422,17 @@ function pickCons(i) {
   const s = G.seat, k = G.cons[i];
   if (G.phase !== 'play' || !s || !k || s.locked) return;
   if (k.kind === 'peek') {
-    if (G.boss === 'nocons') { flashHint('Печать: расходники не работают'); return; }
-    if (G.boss === 'thin' && s.used) { flashHint('Один расходник на место'); return; }
-    s.peek = true; s.used = true; G.cons.splice(i, 1); s.sel = null; render(); return;
+    if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
+    if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+    s.peek = true; s.used = true; G.consUsed = (G.consUsed || 0) + 1; G.cons.splice(i, 1); s.sel = null; render(); return;
+  }
+  if (k.kind === 'shuffle' || k.kind === 'peek3' || k.kind === 'burn') {
+    if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
+    if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+    if (k.kind === 'shuffle') G.deck = shuffle(G.deck.concat(G.discard.splice(0)));
+    else if (k.kind === 'peek3') s.peek3 = true;
+    else { const c = G.deck.pop(); if (c) { G.discard.push(c); flashHint('Сожжена: ' + c.rank + c.suit); } }
+    s.used = true; G.consUsed = (G.consUsed || 0) + 1; G.cons.splice(i, 1); s.sel = null; render(); return;
   }
   s.sel = s.sel === i ? null : i;
   if (s.sel !== null) flashHint('Выбери стол для «' + k.name + '»');
@@ -1170,6 +1452,7 @@ function hit() {
   G.lastDrawn = c.id;
   refreshTables(s);
   render();
+  flyIn(c.id);
   G.lastDrawn = null;
   tgHaptic('light');
   autoFinish(s);
@@ -1216,6 +1499,13 @@ function finishSeat(res) {
   G.score += res.total;
   if (res.total > G.stats.bestSeat) G.stats.bestSeat = res.total;
   G.pushThisBlind += res.exact; G.stats.pushes += res.exact; G.stats.busts += res.bust;
+  if (res.exact >= 3) unlockAch('exact3');
+  { const used = res.tables.filter((r) => !r.empty); if (used.length && used.every((r) => r.bust)) unlockAch('wipe'); }
+  if (res.total >= 10000) unlockAch('big');
+  if (G.money >= 50) unlockAch('rich');
+  if (hasJoker('adrenaline') && res.bust) G.adrenaline = Math.min(6, (G.adrenaline || 0) + res.bust);
+  if (hasRelic('crown') && res.exact) { G.money += 2 * res.exact; log('Корона: +$' + 2 * res.exact, 'gold'); }
+  if (bossIs('tax')) { G.money = Math.max(0, G.money - 1); log('Налог: −$1', 'bad'); }
   const goodCards = [];
   s.tables.forEach((t, i) => { if (!res.tables[i].empty && !res.tables[i].bust) goodCards.push(...t.cards); });
   G.lowCardsRun += goodCards.filter((c) => c.val >= 2 && c.val <= 5).length;
@@ -1238,7 +1528,8 @@ function finishSeat(res) {
   showScoreBurst({ score: res.total, bust: res.bust > 0 && res.total === 0 });
   if (res.total === 0) tgHaptic('error');
   else if (res.exact > 0) tgHaptic('success');
-  G.seatsLeft = Math.max(0, G.seatsLeft - 1);
+  if (hasJoker('phoenix') && !G.phoenixUsed && res.total === 0 && res.bust) { G.phoenixUsed = true; log('Феникс: место не потрачено', 'gold'); }
+  else G.seatsLeft = Math.max(0, G.seatsLeft - 1);
   G.seat = null;
   checkEnd();
   render();
@@ -1253,13 +1544,19 @@ function checkEnd() {
 function winBlind() {
   G.phase = 'shop';
   const unused = Math.max(0, G.seatsLeft);
-  const interest = Math.min(CONFIG.interestCap, Math.floor(G.money / 5));
+  const interest = Math.min(CONFIG.interestCap + (hasRelic('piggy') ? 5 : 0), Math.floor(G.money / 5));
   const tips = hasJoker('tips') ? unused + G.pushThisBlind : 0;
-  const reward = CONFIG.baseReward + unused + interest + G.pushThisBlind + tips;
+  const reward = baseReward() + unused + interest + G.pushThisBlind + tips + (hasRelic('echo') ? unused : 0) + (hasRelic('vault') ? 3 : 0);
   G.money += reward;
+  if (G.contract) { G.money += G.contract.reward; log('Контракт выполнен: +$' + G.contract.reward, 'gold'); }
+  if (G.elite) { G.money += 5; log('Элитный блайнд: +$5', 'gold'); }
+  if (!G.consUsed) unlockAch('clean');
+  if (G.blind === 2 && (G.boss === 'lock' || G.boss2 === 'lock')) unlockAch('lock');
+  if (G.elite) unlockAch('elite');
+  if (G.money >= 50) unlockAch('rich');
   G.stats.blinds++;
   G.lastReward = {
-    base: CONFIG.baseReward,
+    base: baseReward(),
     unused,
     interest,
     pushes: G.pushThisBlind,
@@ -1269,11 +1566,12 @@ function winBlind() {
   log('<b>Блайнд пройден!</b> +$' + reward, 'good');
   tgHaptic('success');
   render();
-  setTimeout(() => openShop(), 420);
+  setTimeout(() => (((G.blind === 2 && (G.ante < CONFIG.maxAnte || G.endless)) || G.elite) ? openRelicChoice() : openShop()), 420);
 }
 
 function loseRun() {
   G.phase = 'over';
+  metaRunEnd(false);
   tgClosingConfirmation(false);
   tgHaptic('error');
   render();
@@ -1282,8 +1580,394 @@ function loseRun() {
   }, 350);
 }
 
+
+/* ============================================================
+   СИД, МЕТА-ПРОГРЕСС, КОЛОДЫ, ПУТЬ, СОБЫТИЯ, КУЗНИЦА
+   ============================================================ */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashStr(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function dateKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function seedStage(tag) {
+  if (G && G.daily) Math.random = mulberry32(hashStr(G.daily + '|' + G.ante + '|' + G.blind + '|' + tag));
+  else Math.random = RNG0;
+}
+function MOD_KEYS() { return Object.keys(MODS).filter((k) => k !== 'curse'); }
+
+const META_KEY = 'vochko.meta';
+let META = { unlocked: {}, ach: {}, stats: { runs: 0, wins: 0, bestAnte: 0, bestScore: 0, endlessBest: 0 }, daily: {}, unlockAll: false };
+function metaLoad() {
+  try {
+    const r = JSON.parse(localStorage.getItem(META_KEY) || 'null');
+    if (r) META = { ...META, ...r, unlockAll: false, stats: { ...META.stats, ...(r.stats || {}) } };
+  } catch (e) {}
+}
+function metaSave() {
+  try { const c = { ...META }; delete c.unlockAll; localStorage.setItem(META_KEY, JSON.stringify(c)); } catch (e) {}
+}
+const ACHS = {
+  exact3: { name: 'Снайпер', desc: '3 точных стола за одно место', reward: { joker: 'ladder' } },
+  clean: { name: 'Чистая работа', desc: 'Выиграть блайнд, не использовав расходников', reward: { joker: 'alchemist' } },
+  wipe: { name: 'Полный провал', desc: 'Все занятые столы перебрали на одном месте', reward: { joker: 'adrenaline' } },
+  big: { name: 'Крупный счёт', desc: '10 000 очков за одно место', reward: { joker: 'allin' } },
+  lock: { name: 'Взломщик', desc: 'Победить босса «Замок»', reward: { joker: 'diplomat' } },
+  ante4: { name: 'Дальний путь', desc: 'Дойти до анте 4', reward: { deck: 'short' } },
+  win: { name: 'Победитель', desc: 'Выиграть забег', reward: { deck: 'gold' } },
+  rich: { name: 'Богач', desc: 'Накопить $50', reward: { deck: 'glass' } },
+  elite: { name: 'Охотник', desc: 'Победить элитный блайнд', reward: { deck: 'alchemy' } },
+};
+function isUnlocked(kind, id) {
+  if (META.unlockAll) return true;
+  const gated = Object.values(ACHS).some((a) => a.reward[kind] === id);
+  return !gated || !!META.unlocked[kind + ':' + id];
+}
+function rewardName(r) {
+  if (r.joker) return 'джокер «' + JOKERS.find((j) => j.id === r.joker).name + '»';
+  return 'колода «' + DECKS[r.deck].name + '»';
+}
+function lockHint(kind, id) {
+  const a = Object.values(ACHS).find((x) => x.reward[kind] === id);
+  return a ? 'Откроется: ' + a.name : '';
+}
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add('out'), 3200);
+  setTimeout(() => t.remove(), 3700);
+}
+function unlockAch(id) {
+  const a = ACHS[id];
+  if (!a || META.ach[id]) return;
+  META.ach[id] = true;
+  for (const k of Object.keys(a.reward)) META.unlocked[k + ':' + a.reward[k]] = true;
+  metaSave();
+  toast('🏆 ' + a.name + ' — открыто: ' + rewardName(a.reward));
+  if (typeof tgHaptic === 'function') tgHaptic('success');
+}
+function metaRunEnd(win) {
+  if (!G || G.metaDone) return;
+  G.metaDone = true;
+  const st = META.stats;
+  if (!G.endless) { st.runs++; if (win) st.wins++; }
+  st.bestAnte = Math.max(st.bestAnte, Math.min(G.ante, CONFIG.maxAnte));
+  st.bestScore = Math.max(st.bestScore, G.stats.bestSeat);
+  if (G.endless) st.endlessBest = Math.max(st.endlessBest, G.ante);
+  if (G.daily) {
+    const prog = (G.ante - 1) * 3 + G.blind + (win ? 1 : 0), r = META.daily[G.daily];
+    if (!r || prog > r.prog) META.daily[G.daily] = { prog, ante: Math.min(G.ante, CONFIG.maxAnte), win: !!win && !G.endless, best: G.stats.bestSeat };
+  }
+  metaSave();
+}
+
+const DECKS = {
+  classic: { name: 'Классическая', emoji: '🂡', desc: 'Стандартные 52 карты.' },
+  short: { name: 'Короткая', emoji: '✂️', desc: 'Без 2, 3 и 4 (40 карт): больше чипов и больше перебора. +$2.' },
+  gold: { name: 'Золотая', emoji: '💰', desc: '4 случайные карты золотые, но стартовых денег на $2 меньше.' },
+  glass: { name: 'Хрупкая', emoji: '🔷', desc: '6 стеклянных карт (очки ×2, но могут разбиться) и лишний Срез −4.' },
+  alchemy: { name: 'Алхимическая', emoji: '⚗️', desc: 'Старт с тремя случайными расходниками, денег на $2 меньше.' },
+};
+function applyStartDeck(key) {
+  if (key === 'short') { G.runDeck = G.runDeck.filter((c) => !['2', '3', '4'].includes(c.rank)); G.money += 2; }
+  else if (key === 'gold') { shuffle(G.runDeck.slice()).slice(0, 4).forEach((c) => { c.mod = 'gold'; }); G.money = Math.max(0, G.money - 2); }
+  else if (key === 'glass') { shuffle(G.runDeck.slice()).slice(0, 6).forEach((c) => { c.mod = 'glass'; }); G.cons.push(CONS.minus4); }
+  else if (key === 'alchemy') { G.cons = shuffle(Object.keys(CONS)).slice(0, 3).map((k) => CONS[k]); G.money = Math.max(0, G.money - 2); }
+}
+function makeCurse() { return { id: ++cardSeq, rank: '☠', val: 8, suit: '✖', color: 'black', up: 0, mod: 'curse' }; }
+
+function nextCardsHTML(s) {
+  const n = s.peek3 ? 3 : (hasJoker('xray') || s.peek) ? 1 : 0;
+  if (!n || !G.deck.length) return '';
+  return '<span class="dlabel">Следующая' + (n > 1 ? ' ×' + n : '') + '</span>' + G.deck.slice(-n).reverse().map((c) => cardElement(c, { mini: 1 })).join('');
+}
+
+/* ---------- путь ---------- */
+const NODES = {
+  event: { emoji: '❓', name: 'Событие', desc: 'Случайная встреча: риск или выгода.' },
+  campfire: { emoji: '🔥', name: 'Кузница', desc: 'Удалить, улучшить или скопировать карту колоды.' },
+  elite: { emoji: '👹', name: 'Элитный блайнд', desc: 'Цель ×1,35 и правило босса. Награда: реликвия и +$5.' },
+  contract: { emoji: '📜', name: 'Контракт', desc: 'Добровольно усложни блайнд за деньги.' },
+  straight: { emoji: '➡️', name: 'Идти прямо', desc: 'Без остановок к блайнду. +$2.' },
+};
+const CONTRACTS = [
+  { id: 'hard', name: 'Тугая цель', desc: 'Цель блайнда +30%.', targetMul: 1.3, reward: 7 },
+  { id: 'seal', name: 'Печать', desc: 'Расходники на этом блайнде не работают.', boss: 'nocons', reward: 6 },
+  { id: 'fewer', name: 'Тесный зал', desc: 'На одно место меньше.', fewer: true, reward: 6 },
+  { id: 'tax', name: 'Налог', desc: 'Каждое место отнимает $1.', boss: 'tax', reward: 5 },
+];
+function openPath() {
+  G.phase = 'path'; G.pending = 'path';
+  seedStage('path');
+  const w = { event: 30, campfire: 22, elite: 14 + G.ante * 2, contract: 24 };
+  const picks = [];
+  while (picks.length < 2) {
+    const pool = Object.keys(w).filter((k) => !picks.includes(k));
+    let r = Math.random() * pool.reduce((a, k) => a + w[k], 0);
+    picks.push(pool.find((k) => (r -= w[k]) < 0) || pool[pool.length - 1]);
+  }
+  picks.push('straight');
+  G.path = picks;
+  render();
+  showOverlay(
+    '<div class="kicker">Путь · анте ' + G.ante + '</div><h2>Что дальше? <span class="thin">/ перед блайндом</span></h2>' +
+    '<p class="sub">Следующий: ' + BLIND_NAMES[G.blind] + '. Выбери остановку по дороге.</p>' +
+    '<div class="shop-grid">' + picks.map((k) => { const n = NODES[k];
+      return '<div class="shop-item node-' + k + '"><div class="si-emoji">' + n.emoji + '</div><div class="si-kind">Узел</div><div class="si-name">' + n.name + '</div><div class="si-desc">' + n.desc + '</div><button class="buy" data-node="' + k + '">Выбрать</button></div>'; }).join('') + '</div>'
+  );
+  document.querySelectorAll('#overlay [data-node]').forEach((b) => { b.onclick = () => takeNode(b.dataset.node); });
+}
+function takeNode(key) {
+  if (G.pending !== 'path' || !G.path || !G.path.includes(key)) return;
+  hideOverlay();
+  if (key === 'straight') { G.money += 2; log('Прямо к блайнду: +$2', 'gold'); leaveNode(); }
+  else if (key === 'elite') { G.nextElite = true; log('Элитный блайнд впереди', 'bad'); leaveNode(); }
+  else if (key === 'event') openEvent();
+  else if (key === 'campfire') openCampfire();
+  else if (key === 'contract') openContract();
+}
+function leaveNode() { G.pending = null; G.event = null; hideOverlay(); startBlind(); }
+function nodeResult(title, msg, pendingTag) {
+  G.pending = pendingTag || 'nodeDone';
+  render();
+  showOverlay('<div class="kicker">' + title + '</div><h2>Готово</h2><p class="sub">' + msg + '</p><div class="row-btns"><button class="primary" id="ov-onward">Дальше →</button></div>');
+  $('#ov-onward').onclick = leaveNode;
+}
+
+/* ---------- события ---------- */
+const EVENTS = [
+  { title: 'Игорный стол', text: 'За тёмным столом играют в кости. Тебя зовут за стол.', options: [
+    { label: 'Поставить $5 (50%: +$12, иначе −$5)', can: () => G.money >= 5, run: () => { if (Math.random() < 0.5) { G.money += 12; return 'Повезло: +$12.'; } G.money -= 5; return 'Не повезло: −$5.'; } },
+    { label: 'Пройти мимо', run: () => 'Ты прошёл мимо стола.' } ] },
+  { title: 'Сундук', text: 'Старый сундук без замка. Внутри что-то шуршит.', options: [
+    { label: 'Открыть', run: () => {
+      const r = Math.random();
+      if (r < 0.55) { if (G.cons.length < consSlots()) { const k = pick(Object.values(CONS)); G.cons.push(k); return 'Внутри «' + k.name + '».'; } G.money += 4; return 'Расходник не влез, вместо него +$4.'; }
+      if (r < 0.8) { const jk = shuffle(JOKERS.filter((j) => j.rarity === 'rare' && isUnlocked('joker', j.id) && !G.jokers.some((x) => x.id === j.id)))[0];
+        if (jk && G.jokers.length < maxJokers()) { G.jokers.push(jk); return 'Редкий джокер: «' + jk.name + '»!'; } G.money += 6; return 'Пусто, но монеты звякнули: +$6.'; }
+      G.money = Math.max(0, G.money - 4); return 'Ловушка! −$4.'; } },
+    { label: 'Пройти мимо', run: () => 'Ты оставил сундук в покое.' } ] },
+  { title: 'Торговец картами', text: 'Человек в плаще раскладывает карты с особой печатью.', options: [
+    { label: 'За $6: новая карта с печатью в колоду', can: () => G.money >= 6, run: () => { G.money -= 6; const nc = pick(makeDeck()); nc.mod = pick(MOD_KEYS()); G.runDeck.push(nc); return 'В колоде новая карта: ' + nc.rank + nc.suit + ' · ' + MODS[nc.mod].name + '.'; } },
+    { label: 'Отказаться', run: () => 'Торговец пожал плечами.' } ] },
+  { title: 'Проклятая колода', text: 'Тебе предлагают деньги, но вместе с ними идёт тёмная карта.', options: [
+    { label: '+$10, но в колоду добавится проклятая карта', run: () => { G.money += 10; G.runDeck.push(makeCurse()); return '+$10. В колоде появилась проклятая карта (убирается в кузнице).'; } },
+    { label: 'Отказаться', run: () => 'Ты отказался от тёмной сделки.' } ] },
+  { title: 'Ювелир', text: 'Мастер готов отполировать любую масть карт.', options: [
+    { label: 'За $7: все карты случайного ранга +1 навсегда', can: () => G.money >= 7, run: () => { G.money -= 7; const rk = pick(['2', '3', '4', '5', '6', '7', '8', '9', '10']); G.runDeck.forEach((c) => { if (c.rank === rk) c.up = (c.up || 0) + 1; }); return 'Все карты «' + rk + '» стали сильнее на 1.'; } },
+    { label: 'Уйти', run: () => 'Ты ушёл.' } ] },
+  { title: 'Благотворительность', text: 'Старушка просит монету «на удачу».', options: [
+    { label: 'Отдать $4: цель следующего блайнда −12%', can: () => G.money >= 4, run: () => { G.money -= 4; G.nextTargetMod = 0.88; return 'Удача с тобой: цель следующего блайнда на 12% ниже.'; } },
+    { label: 'Уйти', run: () => 'Ты прошёл мимо.' } ] },
+  { title: 'Старый алхимик', text: 'Стеклянные колбы переливаются на столе.', options: [
+    { label: 'Обменять случайный расходник на другой', can: () => G.cons.length > 0, run: () => { const i = Math.floor(Math.random() * G.cons.length); const old = G.cons[i]; const nk = pick(Object.values(CONS).filter((k) => k !== old)); G.cons[i] = nk; return '«' + old.name + '» превратился в «' + nk.name + '».'; } },
+    { label: 'Взять Срез −2 бесплатно', can: () => G.cons.length < consSlots(), run: () => { G.cons.push(CONS.minus2); return 'Ты получил «Срез −2».'; } },
+    { label: 'Уйти', run: () => 'Ты ушёл.' } ] },
+  { title: 'Спящий дракон', text: 'В пещере спит дракон. Рядом сияет легендарная вещь.', options: [
+    { label: 'Разбудить: 40% легендарный джокер, иначе −$6', run: () => {
+      if (Math.random() < 0.4) {
+        const lg = shuffle(JOKERS.filter((j) => j.rarity === 'legendary' && isUnlocked('joker', j.id) && !G.jokers.some((x) => x.id === j.id)))[0];
+        if (lg && G.jokers.length < maxJokers()) { G.jokers.push(lg); return 'Дракон отступил! Легендарный джокер «' + lg.name + '».'; }
+        G.money += 12; return 'Дракон отступил, вещь пуста, но сокровищница даёт +$12.';
+      }
+      const lost = Math.min(6, G.money); G.money -= lost; return 'Дракон проснулся: −$' + lost + '.'; } },
+    { label: 'Тихо уйти', run: () => 'Ты осторожно вышел из пещеры.' } ] },
+];
+function openEvent() {
+  G.phase = 'path'; G.pending = 'event';
+  seedStage('event');
+  G.event = pick(EVENTS);
+  const ev = G.event;
+  showOverlay(
+    '<div class="kicker">Событие · анте ' + G.ante + '</div><h2>' + ev.title + '</h2><p class="sub">' + ev.text + '</p>' +
+    '<div class="evt-list">' + ev.options.map((o, i) => '<button class="evt-btn" data-opt="' + i + '"' + (o.can && !o.can() ? ' disabled' : '') + '>' + o.label + '</button>').join('') + '</div>'
+  );
+  document.querySelectorAll('#overlay [data-opt]').forEach((b) => { b.onclick = () => chooseEvent(Number(b.dataset.opt)); });
+}
+function chooseEvent(i) {
+  const o = G.pending === 'event' && G.event && G.event.options[i];
+  if (!o || (o.can && !o.can())) return;
+  const msg = o.run();
+  log('Событие «' + G.event.title + '»: ' + msg, 'gold');
+  nodeResult('Событие · ' + G.event.title, msg, 'eventDone');
+}
+
+/* ---------- контракты ---------- */
+function openContract() {
+  G.phase = 'path'; G.pending = 'contract';
+  seedStage('contract');
+  G.contractOpts = shuffle(CONTRACTS.slice()).slice(0, 3);
+  showOverlay(
+    '<div class="kicker">Контракт · анте ' + G.ante + '</div><h2>Условия <span class="thin">/ за деньги</span></h2>' +
+    '<p class="sub">Усложни следующий блайнд и получи награду после победы. Можно отказаться.</p>' +
+    '<div class="evt-list">' + G.contractOpts.map((c, i) => '<button class="evt-btn" data-ct="' + i + '"><b>' + c.name + '</b> — ' + c.desc + ' <span class="evt-rew">+$' + c.reward + '</span></button>').join('') +
+    '<button class="evt-btn" data-ct="-1">Отказаться</button></div>'
+  );
+  document.querySelectorAll('#overlay [data-ct]').forEach((b) => { b.onclick = () => takeContract(Number(b.dataset.ct)); });
+}
+function takeContract(i) {
+  if (G.pending !== 'contract') return;
+  if (i >= 0 && G.contractOpts[i]) { G.nextContract = G.contractOpts[i]; log('Контракт «' + G.nextContract.name + '»', 'gold'); }
+  G.contractOpts = null;
+  leaveNode();
+}
+
+/* ---------- кузница ---------- */
+function openCampfire() {
+  G.phase = 'path'; G.pending = 'forge'; G.forgeMode = null;
+  showOverlay(
+    '<div class="kicker">Кузница · анте ' + G.ante + '</div><h2>Костёр <span class="thin">/ одно действие</span></h2>' +
+    '<p class="sub">Выбери действие, затем карту колоды (' + G.runDeck.length + ' карт). Проклятые карты убираются здесь.</p>' +
+    '<div class="evt-list"><button class="evt-btn" data-forge="remove">🗑 Удалить карту</button><button class="evt-btn" data-forge="upgrade">🔨 Улучшить карту: +2 к значению и +20 чипов</button><button class="evt-btn" data-forge="copy">📋 Скопировать карту</button><button class="evt-btn" data-forge="leave">Уйти</button></div>'
+  );
+  document.querySelectorAll('#overlay [data-forge]').forEach((b) => { b.onclick = () => forgeAction(b.dataset.forge); });
+}
+function forgeAction(mode) {
+  if (G.pending !== 'forge') return;
+  if (mode === 'leave') { leaveNode(); return; }
+  G.forgeMode = mode;
+  const titles = { remove: 'Удалить карту', upgrade: 'Улучшить карту', copy: 'Скопировать карту' };
+  const order = RANKS.map((r) => r[0]);
+  const cards = G.runDeck.slice().sort((a, b) => (b.mod === 'curse') - (a.mod === 'curse') || order.indexOf(a.rank) - order.indexOf(b.rank));
+  showOverlay(
+    '<div class="kicker">Кузница</div><h2>' + titles[mode] + '</h2><p class="sub">Нажми на карту.</p>' +
+    '<div class="forge-grid">' + cards.map((c) => cardElement(c, { mini: 1 })).join('') + '</div>' +
+    '<div class="row-btns"><button class="ghost" id="ov-back">Назад</button></div>'
+  );
+  $('#overlay .forge-grid').onclick = (e) => { const el = e.target.closest('.card'); if (el) forgeApply(Number(el.dataset.id)); };
+  $('#ov-back').onclick = openCampfire;
+}
+function forgeApply(id) {
+  if (G.pending !== 'forge' || !G.forgeMode) return;
+  const c = G.runDeck.find((x) => x.id === id);
+  if (!c) return;
+  let msg;
+  if (G.forgeMode === 'remove') {
+    if (G.runDeck.length <= 20) { flashHint('В колоде должно остаться хотя бы 20 карт'); return; }
+    G.runDeck = G.runDeck.filter((x) => x.id !== id);
+    msg = 'Карта ' + c.rank + c.suit + ' убрана из колоды.';
+  } else if (G.forgeMode === 'upgrade') {
+    if (c.mod === 'curse') { flashHint('Проклятую карту не улучшить, её лучше убрать'); return; }
+    c.up = (c.up || 0) + 2;
+    msg = 'Карта ' + c.rank + c.suit + ' стала сильнее: +2 к значению.';
+  } else {
+    if (G.runDeck.length >= 60) { flashHint('Колода уже слишком велика'); return; }
+    G.runDeck.push({ ...c, id: ++cardSeq });
+    msg = 'В колоде появилась копия ' + c.rank + c.suit + '.';
+  }
+  log('Кузница: ' + msg, 'gold');
+  nodeResult('Кузница', msg, 'forgeDone');
+}
+
+/* ---------- запуск забега, достижения ---------- */
+let SETUP = { stake: 0, deck: 'classic' };
+function showRunSetup() {
+  G.pending = 'setup';
+  const un = unlockedStake();
+  if (SETUP.stake > un) SETUP.stake = un;
+  if (!isUnlocked('deck', SETUP.deck)) SETUP.deck = 'classic';
+  const today = META.daily[dateKey()], st = META.stats;
+  showOverlay(
+    '<div class="intro-brand"><span class="ib-spade">♠</span><span class="ib-name">ВОЧКО</span><span class="ib-sub">двадцать одно · рогалик</span></div>' +
+    '<div class="kicker">Новый забег</div><h2>Подготовка <span class="thin">/ колода и стейк</span></h2>' +
+    '<h4 class="sec">Колода</h4><div class="opt-grid">' + Object.keys(DECKS).map((k) => { const d = DECKS[k], ok = isUnlocked('deck', k);
+      return '<button class="opt' + (SETUP.deck === k ? ' sel' : '') + (ok ? '' : ' locked') + '" ' + (ok ? 'data-deck="' + k + '"' : 'disabled') + '><span class="o-e">' + (ok ? d.emoji : '🔒') + '</span><b>' + d.name + '</b><small>' + (ok ? d.desc : lockHint('deck', k)) + '</small></button>'; }).join('') + '</div>' +
+    '<h4 class="sec">Стейк</h4><div class="opt-grid">' + STAKES.map((x, i) => { const ok = i <= un;
+      return '<button class="opt' + (SETUP.stake === i ? ' sel' : '') + (ok ? '' : ' locked') + '" ' + (ok ? 'data-stake="' + i + '"' : 'disabled') + '><span class="o-e">' + (ok ? '★' : '🔒') + '</span><b>' + x.name + '</b><small>' + (ok ? x.desc : 'Победи на стейке «' + STAKES[i - 1].name + '»') + '</small></button>'; }).join('') + '</div>' +
+    '<div class="setup-rec">Забегов: ' + st.runs + ' · побед: ' + st.wins + ' · лучшее анте: ' + st.bestAnte + (st.endlessBest ? ' · эндлесс: анте ' + st.endlessBest : '') + '</div>' +
+    '<div class="row-btns"><button class="ghost" id="ov-meta">Достижения</button><button class="ghost" id="ov-daily">Ежедневный' + (today ? ' · анте ' + today.ante : '') + '</button><button class="primary" id="ov-go">Начать</button></div>'
+  );
+  document.querySelectorAll('#overlay [data-deck]').forEach((b) => { b.onclick = () => { SETUP.deck = b.dataset.deck; showRunSetup(); }; });
+  document.querySelectorAll('#overlay [data-stake]').forEach((b) => { b.onclick = () => { SETUP.stake = Number(b.dataset.stake); showRunSetup(); }; });
+  $('#ov-go').onclick = () => newGame(SETUP.stake, SETUP.deck);
+  $('#ov-daily').onclick = () => newGame(0, 'classic', { daily: true });
+  $('#ov-meta').onclick = showMeta;
+}
+function showStakeSelect() { showRunSetup(); }
+function showMeta() {
+  const st = META.stats;
+  showOverlay(
+    '<div class="kicker">Прогресс</div><h2>Достижения</h2>' +
+    '<div class="rules" style="margin-top:10px">' + Object.keys(ACHS).map((k) => { const a = ACHS[k], done = !!META.ach[k];
+      return '<div class="rule"><span class="num">' + (done ? '✓' : '·') + '</span><div><b>' + a.name + '</b> — ' + a.desc + '<br><small style="color:#9fd8bc">Награда: ' + rewardName(a.reward) + '</small></div></div>'; }).join('') + '</div>' +
+    '<div class="setup-rec">Забегов: ' + st.runs + ' · побед: ' + st.wins + ' · лучшее анте: ' + st.bestAnte + ' · лучшее место: ' + fmt(st.bestScore) + (st.endlessBest ? ' · эндлесс: анте ' + st.endlessBest : '') + '</div>' +
+    '<div class="row-btns"><button class="primary" id="ov-back">Назад</button></div>'
+  );
+  $('#ov-back').onclick = showRunSetup;
+}
+
+const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function flyIn(id) {
+  if (REDUCED) return;
+  const el = document.querySelector('#hand .card[data-id="' + id + '"]');
+  const pile = document.querySelector('#dealer .pile');
+  if (!el || !pile || !el.animate) return;
+  const a = pile.getBoundingClientRect(), b = el.getBoundingClientRect();
+  const dx = a.left + a.width / 2 - (b.left + b.width / 2), dy = a.top + a.height / 2 - (b.top + b.height / 2);
+  el.animate([
+    { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(-18deg) scale(1.5)', opacity: 0.5, offset: 0 },
+    { transform: 'translate(' + dx * 0.3 + 'px,' + (dy * 0.3 - 34) + 'px) rotate(9deg) scale(1.12)', opacity: 1, offset: 0.6 },
+    { transform: 'none', opacity: 1, offset: 1 },
+  ], { duration: 480, easing: 'cubic-bezier(.2,.8,.25,1)' });
+}
+function burst(el, colors, n) {
+  const fx = document.getElementById('fx');
+  if (REDUCED || !fx || !el || !el.getBoundingClientRect) return;
+  const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('i'), sz = 4 + RNG0() * 6;
+    p.style.cssText = 'left:' + cx + 'px;top:' + cy + 'px;width:' + sz + 'px;height:' + sz * (RNG0() < 0.5 ? 1 : 2) + 'px;background:' + colors[i % colors.length];
+    fx.appendChild(p);
+    if (!p.animate) { p.remove(); continue; }
+    const ang = RNG0() * Math.PI * 2, d = 50 + RNG0() * 120;
+    const an = p.animate([
+      { transform: 'translate(0,0) rotate(0deg) scale(1)', opacity: 1 },
+      { transform: 'translate(' + Math.cos(ang) * d + 'px,' + (Math.sin(ang) * d + 46) + 'px) rotate(' + (RNG0() * 540 - 270) + 'deg) scale(.4)', opacity: 0 },
+    ], { duration: 650 + RNG0() * 500, easing: 'cubic-bezier(.15,.7,.3,1)' });
+    an.onfinish = () => p.remove();
+  }
+}
+function confetti() {
+  for (let k = 0; k < 7; k++) {
+    setTimeout(() => burst({ getBoundingClientRect: () => ({ left: RNG0() * innerWidth, top: 90 + RNG0() * 220, width: 0, height: 0 }) },
+      ['#ffd86b', '#8ff0bb', '#62b6ff', '#ff8c96', '#c77dff'], 28), k * 200);
+  }
+}
+function tableFx(s) {
+  if (!s) return;
+  s.tables.forEach((t, i) => {
+    const el = document.querySelector('#hand .tbl[data-t="' + i + '"]');
+    if (!el) return;
+    if (t.locked && !t.fxL) { t.fxL = true; burst(el, ['#ffd86b', '#fff3b0', '#f2c14e', '#ffffff'], 26); }
+    if (!t.locked) t.fxL = false;
+    if (t.dead && !t.fxD) {
+      t.fxD = true; burst(el, ['#ff6b76', '#ff9aa2', '#7a1f2a'], 16);
+      if (el.animate && !REDUCED) el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(0)' }], { duration: 380 });
+    }
+    if (!t.dead) t.fxD = false;
+  });
+}
 function victory() {
+  setTimeout(confetti, 350);
   G.phase = 'won';
+  unlockAch('win');
+  metaRunEnd(true);
+  const nu = Math.min(STAKES.length - 1, G.stake + 1);
+  G.unlocked = nu > unlockedStake() ? nu : 0;
+  unlockStake(nu);
   tgClosingConfirmation(false);
   render();
   setTimeout(() => {
@@ -1298,10 +1982,19 @@ function nextBlind() {
     G.blind = 0;
     G.ante++;
   }
-  if (G.ante > CONFIG.maxAnte) {
+  if (G.ante > CONFIG.maxAnte && !G.endless) {
     victory();
     return;
   }
+  if (G.blind !== 2) { openPath(); return; }
+  startBlind();
+}
+
+function startEndless() {
+  if (!G || G.phase !== 'won') return;
+  G.endless = true; G.metaDone = false;
+  tgClosingConfirmation(true);
+  hideOverlay();
   startBlind();
 }
 
@@ -1316,12 +2009,12 @@ function pickUpRank() {
 
 function pickModCard() {
   const free = G.runDeck.filter((c) => !c.mod);
-  return free.length ? { card: pick(free), mod: pick(Object.keys(MODS)) } : null;
+  return free.length ? { card: pick(free), mod: pick(MOD_KEYS()) } : null;
 }
 
 function buildShopItems() {
   const owned = new Set(G.jokers.map((j) => j.id));
-  const offers = shuffle(JOKERS.filter((j) => !owned.has(j.id))).slice(0, 3);
+  const offers = rollJokerOffers(3);
   const items = offers.map((j) => ({ kind: 'joker', joker: j, price: j.price, sold: false }));
   const key = pick(Object.keys(CONS));
   items.push({ kind: 'cons', key, price: CONS[key].price, sold: false });
@@ -1329,11 +2022,50 @@ function buildShopItems() {
   if (rank) items.push({ kind: 'up', price: 5, rank, sold: false });
   const mc = pickModCard();
   if (mc) items.push({ kind: 'mod', price: 6, mod: mc.mod, card: mc.card, sold: false });
+  items.forEach((it) => { it.price += G.stake >= 5 ? 1 : 0; });
   return items;
 }
 
+function openRelicChoice() {
+  if (G.phase !== 'shop') return;
+  seedStage('relic');
+  const pool = shuffle(Object.keys(RELICS).filter((k) => !G.relics.includes(k))).slice(0, 3);
+  if (!pool.length) { openShop(); return; }
+  G.relicChoice = pool;
+  const leg = shuffle(JOKERS.filter((j) => j.rarity === 'legendary' && isUnlocked('joker', j.id) && !G.jokers.some((x) => x.id === j.id)))[0] || null;
+  G.legendChoice = leg;
+  const legSlot = G.jokers.length < maxJokers();
+  showOverlay(
+    '<div class="kicker">' + (G.elite ? 'Элитный блайнд повержен' : 'Босс повержен') + ' · анте ' + G.ante + '</div><h2>Реликвия <span class="thin">/ навсегда</span></h2>' +
+    '<p class="sub">Выбери одну. Реликвии работают до конца забега и не занимают слоты джокеров.</p>' +
+    '<div class="shop-grid">' + pool.map((k, i) =>
+      '<div class="shop-item"><div class="si-emoji">' + RELICS[k].emoji + '</div><div class="si-kind">Реликвия</div><div class="si-name">' + RELICS[k].name + '</div><div class="si-desc">' + RELICS[k].desc + '</div><button class="buy" data-relic="' + i + '">Взять</button></div>').join('') +
+      (leg ? '<div class="shop-item joker-item r-legendary"><div class="si-emoji">' + leg.emoji + '</div><div class="si-kind">Легендарный джокер</div><div class="si-name">' + leg.name + '</div><div class="si-desc">' + leg.desc + '</div><button class="buy" data-legend="1" ' + (legSlot ? '' : 'disabled') + '>' + (legSlot ? 'Взять вместо реликвии' : 'Нет слота') + '</button></div>' : '') + '</div>'
+  );
+  document.querySelectorAll('#overlay [data-relic]').forEach((b) => { b.onclick = () => pickRelic(Number(b.dataset.relic)); });
+  const lb = document.querySelector('#overlay [data-legend]');
+  if (lb) lb.onclick = pickLegend;
+}
+function pickRelic(i) {
+  const k = G.relicChoice && G.relicChoice[i];
+  if (!k) return;
+  G.relics.push(k); G.relicChoice = null;
+  log('Реликвия «' + RELICS[k].name + '»', 'gold');
+  tgHaptic('success');
+  hideOverlay(); render(); openShop();
+}
+function pickLegend() {
+  const j = G.legendChoice;
+  if (!j || G.jokers.length >= maxJokers()) return;
+  G.jokers.push(j); G.relicChoice = null; G.legendChoice = null;
+  log('Легендарный джокер «' + j.name + '»', 'gold');
+  tgHaptic('success');
+  hideOverlay(); render(); openShop();
+}
 function openShop() {
   if (G.phase !== 'shop') return;
+  G.rerolls = 0;
+  seedStage('shop0');
   G.shop = { items: buildShopItems() };
   renderShop();
 }
@@ -1348,14 +2080,14 @@ function shopItemHTML(it, i) {
   let desc = '';
   let extraClass = '';
   if (it.kind === 'joker') {
-    kind = 'Джокер';
+    kind = 'Джокер · ' + RARITY[it.joker.rarity].name;
     emoji = it.joker.emoji;
     name = it.joker.name;
     desc = it.joker.desc;
-    extraClass = 'joker-item';
+    extraClass = 'joker-item r-' + it.joker.rarity;
   } else if (it.kind === 'cons') {
     const k = CONS[it.key];
-    kind = 'Расходник'; emoji = k.kind === 'plus' ? '➕' : '✂️'; name = k.name; desc = k.desc + ' Слоты: ' + G.cons.length + '/' + CONFIG.consSlots + '.';
+    kind = 'Расходник'; emoji = k.kind === 'plus' ? '➕' : '✂️'; name = k.name; desc = k.desc + ' Слоты: ' + G.cons.length + '/' + consSlots() + '.';
   } else if (it.kind === 'up') {
     kind = 'Закалка'; emoji = '🔨'; name = 'Все «' + it.rank + '» +1 навсегда';
     desc = 'Значение и чипы всех карт «' + it.rank + '» в колоде растут на 1 (максимум +3).';
@@ -1363,7 +2095,7 @@ function shopItemHTML(it, i) {
     kind = 'Печать'; emoji = MODS[it.mod].emoji; name = MODS[it.mod].name + ': ' + it.card.rank + it.card.suit;
     desc = MODS[it.mod].desc;
   }
-  const full = (it.kind === 'joker' && G.jokers.length >= CONFIG.maxJokers) || (it.kind === 'cons' && G.cons.length >= CONFIG.consSlots);
+  const full = (it.kind === 'joker' && G.jokers.length >= maxJokers()) || (it.kind === 'cons' && G.cons.length >= consSlots());
   const disabled = G.money < it.price || full ? 'disabled' : '';
   const label = full ? 'Нет слота' : 'Купить · $' + it.price;
   return (
@@ -1394,8 +2126,10 @@ function renderShop() {
 
   const ownedHTML = G.jokers.length
     ? G.jokers.map((j) =>
-        '<div class="owned">' + j.emoji + ' ' + j.name +
-          '<button data-sell="' + j.id + '">+$' + Math.floor(j.price / 2) + '</button></div>'
+        '<div class="owned joker-owned r-' + j.rarity + '" tabindex="0"><span class="o-main">' + j.emoji + ' ' + j.name + (j.charges ? ' · ' + j.charges : '') + '</span>' +
+          '<button data-sell="' + j.id + '">+$' + Math.floor(j.price / 2) + '</button>' +
+          '<div class="tip o-tip"><div class="tip-rar r-' + j.rarity + '">' + RARITY[j.rarity].name + '</div><b>' + j.name + '</b><br>' + j.desc +
+          (j.charges ? '<br><i>Осталось мест: ' + j.charges + '</i>' : '') + '<div class="tip-sell">Продажа: +$' + Math.floor(j.price / 2) + '</div></div></div>'
       ).join('')
     : '<div class="owned" style="border-style:dashed;opacity:.6">Пока пусто</div>';
 
@@ -1405,7 +2139,7 @@ function renderShop() {
     rewardHTML +
     '<div class="shop-grid">' + G.shop.items.map(shopItemHTML).join('') + '</div>' +
     '<h4 style="margin:18px 0 8px;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#8ea0b8">Твои джокеры' +
-      ' <span style="opacity:.6">(' + G.jokers.length + '/' + CONFIG.maxJokers + ')</span></h4>' +
+      ' <span style="opacity:.6">(' + G.jokers.length + '/' + maxJokers() + ')</span> <span style="opacity:.55;letter-spacing:.6px;text-transform:none">· наведи или нажми — увидишь описание</span></h4>' +
     '<div class="owned-list">' + ownedHTML + '</div>' +
     '<div class="shop-foot">' +
       '<div class="money-now">В кармане <b>$' + G.money + '</b></div>' +
@@ -1439,14 +2173,14 @@ function buyItem(index) {
     return;
   }
   if (it.kind === 'joker') {
-    if (G.jokers.length >= CONFIG.maxJokers) {
+    if (G.jokers.length >= maxJokers()) {
       flashHint('Нет свободного слота под джокера');
       return;
     }
     G.jokers.push(it.joker.id === 'xray' ? { ...it.joker, charges: 5 } : it.joker);
     log('Куплен джокер «' + it.joker.name + '»', 'gold');
   } else if (it.kind === 'cons') {
-    if (G.cons.length >= CONFIG.consSlots) { flashHint('Нет слота под расходник'); return; }
+    if (G.cons.length >= consSlots()) { flashHint('Нет слота под расходник'); return; }
     G.cons.push(CONS[it.key]);
     log('Куплен расходник «' + CONS[it.key].name + '»', 'gold');
   } else if (it.kind === 'up') {
@@ -1483,11 +2217,10 @@ function rerollShop() {
     return;
   }
   G.money -= CONFIG.rerollPrice;
+  G.rerolls = (G.rerolls || 0) + 1;
+  seedStage('shop' + G.rerolls);
   const keep = G.shop.items.filter((it) => it.kind !== 'joker' && !it.sold);
-  const owned = new Set(G.jokers.map((j) => j.id));
-  const offers = shuffle(JOKERS.filter((j) => !owned.has(j.id)))
-    .slice(0, 3)
-    .map((j) => ({ kind: 'joker', joker: j, price: j.price, sold: false }));
+  const offers = rollJokerOffers(3).map((j) => ({ kind: 'joker', joker: j, price: j.price + (G.stake >= 5 ? 1 : 0), sold: false }));
   G.shop.items = offers.concat(keep);
   renderShop();
   render();
@@ -1513,7 +2246,8 @@ function hideOverlay() {
 // Закрывает оверлей и возвращает тот экран, который соответствует текущей фазе.
 function closeOverlay() {
   hideOverlay();
-  if (G.phase === 'intro') showBlindIntro();
+  if (G.pending === 'setup') showRunSetup();
+  else if (G.phase === 'intro') showBlindIntro();
   else if (G.phase === 'shop') renderShop();
   else if (G.phase === 'over') showGameOver();
   else if (G.phase === 'won') showVictory();
@@ -1524,13 +2258,15 @@ function showBlindIntro() {
   const names = BLIND_NAMES;
   showOverlay(
     '<div class="intro-brand"><span class="ib-spade">♠</span><span class="ib-name">ВОЧКО</span><span class="ib-sub">двадцать одно · рогалик</span></div>' +
-    '<div class="kicker">Анте ' + G.ante + ' · ' + names[G.blind] + '</div>' +
+    '<div class="kicker">Анте ' + G.ante + ' · ' + names[G.blind] + (G.elite ? ' · элитный' : '') + (G.contract ? ' · контракт' : '') + (G.stake ? ' · стейк ' + STAKES[G.stake].name : '') + '</div>' +
     '<h2>' + names[G.blind] + ' <span class="thin">/ цель места ' + limitNow() + '</span></h2>' +
     '<div class="target-big">' + fmt(G.target) + '</div>' +
-    '<p class="sub">Собери эту сумму за ' + CONFIG.seats + ' места. Каждое место — отдельная раздача: три стола и общая колода. Взятая карта всегда идёт на текущий открытый стол, так что твоя задача — вовремя сказать «Стоп на столе» и «Сыграть». Неиспользованные места принесут деньги.</p>' +
+    '<p class="sub">Собери эту сумму за ' + seatsCount() + ' места. Каждое место — отдельная раздача: три стола и общая колода. Взятая карта всегда идёт на текущий открытый стол, так что твоя задача — вовремя сказать «Стоп на столе» и «Сыграть». Неиспользованные места принесут деньги.</p>' +
     (boss
-      ? '<div class="boss-note"><div class="bn-title">Правило дома: ' + boss.name + '</div><div class="bn-desc">' + boss.desc + '</div></div>'
+      ? '<div class="boss-note"><div class="bn-title">Правило дома: ' + boss.name + '</div><div class="bn-desc">' + boss.desc + '</div></div>' + (G.boss2 ? '<div class="boss-note"><div class="bn-title">Второе правило: ' + BOSSES[G.boss2].name + '</div><div class="bn-desc">' + BOSSES[G.boss2].desc + '</div></div>' : '')
       : '') +
+    (G.contract ? '<div class="boss-note"><div class="bn-title">Контракт: ' + G.contract.name + '</div><div class="bn-desc">' + G.contract.desc + ' Награда: +$' + G.contract.reward + '.</div></div>' : '') +
+    (G.elite ? '<div class="boss-note"><div class="bn-title">Элитный блайнд</div><div class="bn-desc">Цель ×1,35 и правило босса. После победы: реликвия и +$5.</div></div>' : '') +
     '<div class="row-btns"><button class="ghost" id="ov-rules">Правила</button><button class="primary" id="ov-start">Начать</button></div>'
   );
   $('#ov-start').onclick = () => {
@@ -1542,7 +2278,7 @@ function showBlindIntro() {
 
 function showGameOver() {
   showOverlay(
-    '<div class="kicker">Забег окончен · анте ' + G.ante + '</div>' +
+    '<div class="kicker">Забег окончен · анте ' + G.ante + (G.endless ? ' · эндлесс' : '') + (G.daily ? ' · ежедневный' : '') + '</div>' +
     '<h2>Дом <span class="thin">забрал своё</span></h2>' +
     '<p class="sub">Цель блайнда не взята. В 21 нельзя выигрывать каждый раз — но всегда можно было остановиться раньше.</p>' +
     '<div style="margin:16px 0 4px">' +
@@ -1567,8 +2303,9 @@ function showVictory() {
       '<div class="stat-line"><span>Точных столов</span><b>' + G.stats.pushes + '</b></div>' +
       '<div class="stat-line"><span>Лучшее место</span><b>' + fmt(G.stats.bestSeat) + '</b></div>' +
       '<div class="stat-line"><span>Финальный лимит</span><b>' + limitNow() + '</b></div>' +
+      (G.unlocked ? '<div class="stat-line"><span>Открыт стейк</span><b>' + STAKES[G.unlocked].name + '</b></div>' : '') +
     '</div>' +
-    '<div class="row-btns"><button class="primary" id="ov-restart">Ещё забег</button></div>'
+    '<div class="row-btns"><button class="ghost" id="ov-endless">Эндлесс →</button><button class="primary" id="ov-restart">Ещё забег</button></div>'
   );
   $('#ov-restart').onclick = newGame;
 }
@@ -1582,7 +2319,7 @@ function showRules() {
       '<div class="rule"><span class="num">2</span><div>На место у тебя <b>3 стола</b> и общая колода. Взятая карта <b>автоматически ложится на текущий открытый стол</b>. Когда решишь, что хватит, — «Стоп на столе», и карты пойдут на следующий. Убрать карту нельзя. На стол помещается 4 карты (джокер или босс могут изменить лимит) — счётчик на столе покажет, сколько уже лежит. Точная сумма фиксирует стол, перебор его убивает.</div></div>' +
       '<div class="rule"><span class="num">3</span><div>Сумма руки сравнивается с <b>целью места</b> (21, растёт с анте). Чем ближе, тем выше множитель. <b>Перебор</b> (сумма выше цели) — это <b>0 очков</b> и сгоревшее место: срезай сумму расходниками.</div></div>' +
       '<div class="rule"><span class="num">4</span><div><b>Срез −N</b> уменьшает сумму руки (чипы остаются). <b>Усилитель +N</b> добавляет к сумме и чипам. Выбери расходник, затем <b>стол</b>. Тратятся.</div></div>' +
-      '<div class="rule"><span class="num">5</span><div>Чипы x множитель = очки. Набрал цель блайнда — деньги за оставшиеся места. В магазине: джокеры, расходники, закалка и печати на картах (💰 золотая, 🔷 стеклянная, 🌈 дикая, ⚖️ тяжёлая).</div></div>' +
+      '<div class="rule"><span class="num">5</span><div>Чипы x множитель = очки. Набрал цель блайнда — деньги за оставшиеся места. В магазине: джокеры, расходники, закалка и печати на картах (💰 золотая, 🔷 стеклянная, 🌈 дикая, ⚖️ тяжёлая).</div></div><div class="rule"><span class="num">6</span><div><b>Путь:</b> перед малым и большим блайндом выбираешь остановку: событие, кузницу (удалить, улучшить или скопировать карту), контракт или элитный блайнд. Прогресс, достижения и ежедневный забег — в меню «Новый забег».</div></div>' +
     '</div>' +
     '<table class="mult-table" style="margin-top:14px"><tr><td>Ровно в цель</td><td>x8</td></tr><tr><td>на 1</td><td>x4</td></tr><tr><td>на 2</td><td>x2,5</td></tr><tr><td>на 3</td><td>x1,5</td></tr><tr><td>на 4–5</td><td>x1</td></tr><tr><td>на 6+</td><td>x0,5</td></tr></table>' +
     '<p class="sub" style="margin-top:14px">Расстояние считается только вниз от цели. Две карты ровно в цель — натуральное, x2. Туз считается 11 или 1.</p>' +
@@ -1598,7 +2335,7 @@ function showRules() {
 
 function cardElement(c, o) {
   o = o || {};
-  return '<div class="card ' + c.color + (o.mini ? ' mini' : '') + (G.lastDrawn === c.id ? ' fromdeck' : '') + (o.scoring ? ' scoring' : '') + (c.mod ? ' m-' + c.mod : '') + '" data-id="' + c.id + '" style="--rot:0deg;--lift:0px">' +
+  return '<div class="card ' + c.color + (['J', 'Q', 'K', 'A'].includes(c.rank) ? ' face' : '') + (o.mini ? ' mini' : '') + (G.lastDrawn === c.id ? ' fromdeck' : '') + (o.scoring ? ' scoring' : '') + (c.mod ? ' m-' + c.mod : '') + '" data-id="' + c.id + '" data-r="' + c.rank + '" data-s="' + c.suit + '" data-g="' + ({ K: '♚', Q: '♛', J: '♞', A: '✦' }[c.rank] || '') + '" style="--rot:0deg;--lift:0px">' +
     '<span class="c-rank">' + c.rank + '</span><span class="c-suit">' + c.suit + '</span>' +
     (o.mini ? '' : '<span class="c-chips">' + (c.mod === 'wild' ? '1–11' : cv(c)) + ' · ' + cardChips(c) + '</span>') + (c.mod && !o.mini ? '<span class="c-mod">' + MODS[c.mod].emoji + '</span>' : '') + '</div>';
 }
@@ -1622,10 +2359,10 @@ function tableHTML(s, t, ti) {
   const active = activeTableIndex(s);
   const can = (s.sel !== null && !t.dead && !t.locked && t.cards.length) || (G.phase === 'play' && s.sel === null && ti === active && tableOpen(t));
   const activeClass = G.phase === 'play' && s.sel === null && ti === active && tableOpen(t) ? ' active' : '';
-  const cls = 'tbl' + activeClass + (t.locked ? ' ok' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
+  const cls = 'tbl' + (t.blocked ? ' blocked' : '') + activeClass + (t.locked ? ' ok' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
   const full = t.cards.length >= cap;
-  const closed = t.dead || t.stood || t.locked || full;
-  const state = t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? lim + '!' : r && r.bust ? 'перебор?' : full ? 'полон' : '';
+  const closed = t.blocked || t.dead || t.stood || t.locked || full;
+  const state = t.blocked ? 'ЗАМОК' : t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? lim + '!' : r && r.bust ? 'перебор?' : full ? 'полон' : '';
   const capCls = closed ? ' closed' : ' open';
   const capTitle = closed ? 'Стол закрыт — карты больше не добавляются' : 'Можно добавить ещё ' + (cap - t.cards.length);
   return '<div class="' + cls + '" data-t="' + ti + '"><div class="t-head"><span>Стол ' + (ti + 1) + '</span><b class="t-sum">' + (r ? r.sum : '—') + '</b></div>' +
@@ -1637,7 +2374,7 @@ function tableHTML(s, t, ti) {
 function renderTable() {
   $('#tbl-limit').textContent = limitNow();
   let dots = '';
-  for (let i = 0; i < CONFIG.seats; i++) dots += '<span class="seat-dot' + (i < G.seatsLeft ? ' on' : '') + '"></span>';
+  for (let i = 0; i < seatsCount(); i++) dots += '<span class="seat-dot' + (i < G.seatsLeft ? ' on' : '') + '"></span>';
   $('#seats-dots').innerHTML = dots;
   const s = G.seat;
   const nx = G.deck.length ? G.deck[G.deck.length - 1] : null;
@@ -1646,9 +2383,10 @@ function renderTable() {
   for (let k = layers; k >= 1; k--) pile += '<div class="card back mini p' + k + '"><span></span></div>';
   pile += '<span class="pcount">' + n + ' в колоде' + (G.discard.length ? ' · сброс ' + G.discard.length : '') + '</span></div>';
   $('#dealer').innerHTML = G.phase === 'play' || s
-    ? pile + (s && (hasJoker('xray') || s.peek) && nx ? '<span class="dlabel">Следующая</span>' + cardElement(nx, { mini: 1 }) : '')
+    ? pile + (s ? nextCardsHTML(s) : '')
     : '';
   $('#hand').innerHTML = s ? '<div class="tables">' + s.tables.map((t, i) => tableHTML(s, t, i)).join('') + '</div>' : '<div class="hand-empty">Место не начато</div>';
+  tableFx(s);
 }
 
 function renderStats() {
@@ -1691,15 +2429,15 @@ function renderActions() {
 
 function renderJokers() {
   let html = '';
-  for (let i = 0; i < CONFIG.maxJokers; i++) {
+  for (let i = 0; i < maxJokers(); i++) {
     const j = G.jokers[i];
     if (j) {
       html +=
-        '<div class="joker">' +
+        '<div class="joker r-' + j.rarity + '">' +
           '<span class="j-price">$' + j.price + '</span>' +
           '<span class="j-emoji">' + j.emoji + '</span>' +
           '<span class="j-name">' + j.name + (j.charges ? ' · ' + j.charges : '') + '</span>' +
-          '<div class="tip"><b>' + j.name + '</b><br>' + j.desc + (j.charges ? '<br><i>Осталось мест: ' + j.charges + '</i>' : '') + '</div>' +
+          '<div class="tip"><div class="tip-rar r-' + j.rarity + '">' + RARITY[j.rarity].name + '</div><b>' + j.name + '</b><br>' + j.desc + (j.charges ? '<br><i>Осталось мест: ' + j.charges + '</i>' : '') + '</div>' +
         '</div>';
     } else {
       html += '<div class="joker empty">+</div>';
@@ -1710,14 +2448,20 @@ function renderJokers() {
 
 function renderSide() {
   const boss = G.boss ? BOSSES[G.boss] : null;
-  $('#side-limit').textContent = limitNow() + (G.boss === 'lowLimit' ? ' (−3)' : '');
+  $('#side-limit').textContent = limitNow() + (bossIs('lowLimit') ? ' (−3)' : '');
   $('#side-deck').textContent = G.deck.length + ' / ' + G.runDeck.length;
   $('#side-best').textContent = fmt(G.stats.bestSeat);
+  const rp = $('#relic-panel');
+  if (rp) rp.innerHTML = '<h4>Реликвии · ' + STAKES[G.stake || 0].name + '</h4>' +
+    (G.relics.length ? G.relics.map((k) => '<div class="kv" title="' + RELICS[k].desc + '"><span>' + RELICS[k].emoji + ' ' + RELICS[k].name + '</span><b></b></div>').join('')
+      : '<div style="font-size:11px;color:#6d7f97;line-height:1.4">Дадут за победу над боссом.</div>') +
+    (G.stake ? '<div style="font-size:11px;color:#9fd8bc;margin-top:6px">' + STAKES[G.stake].desc + '</div>' : '');
 
   $('#boss-panel').innerHTML = '<h4>Правило дома</h4>' + (boss
     ? '<div class="boss-box"><div class="boss-name">' + boss.name + '</div><div class="boss-desc">' + boss.desc + '</div></div>'
     : '<div class="kv"><span>Босс</span><b>—</b></div><div style="font-size:11px;color:#6d7f97;line-height:1.4">Правило появится на босс-блайнде.</div>');
 
+  if (G.boss2) $('#boss-panel').innerHTML += '<div class="boss-box"><div class="boss-name">+ ' + BOSSES[G.boss2].name + '</div><div class="boss-desc">' + BOSSES[G.boss2].desc + '</div></div>';
   const nextPanel = $('#next-panel');
   if (hasJoker('xray') && G.deck.length) {
     const c = G.deck[G.deck.length - 1];
@@ -1850,13 +2594,18 @@ document.addEventListener('DOMContentLoaded', initTelegram);
 
 bindEvents();
 document.addEventListener('click', (e) => {
-  const j = e.target.closest('.joker');
-  const tip = e.target.closest('.joker .tip');
-  document.querySelectorAll('.joker.show').forEach((x) => { if (x !== j) x.classList.remove('show'); });
+  if (e.target.id === 'ov-endless') { startEndless(); return; }
+  if (e.target.closest('[data-sell]')) return;
+  const j = e.target.closest('.joker, .joker-owned');
+  const tip = e.target.closest('.tip');
+  document.querySelectorAll('.joker.show, .joker-owned.show').forEach((x) => { if (x !== j) x.classList.remove('show'); });
   if (tip) return;
   if (j) j.classList.toggle('show');
-  else document.querySelectorAll('.joker.show').forEach((x) => x.classList.remove('show'));
 });
+metaLoad();
+const fxLayer = document.createElement('div');
+fxLayer.id = 'fx';
+document.body.appendChild(fxLayer);
 newGame();
 
 </script>
