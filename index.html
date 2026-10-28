@@ -861,7 +861,7 @@ html{background:#070a10}body{height:auto}
     box-shadow:0 -12px 26px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:5px}
   #actions{margin:0;gap:6px}
   #hint{min-height:13px;margin:0}
-  #cons{min-height:30px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  #cons{min-height:44px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:2px}
   .cons-btn{flex:0 0 auto;white-space:nowrap}
 }
 /* ===== Portrait arena: one felt, one visual language ===== */
@@ -968,8 +968,10 @@ main{max-width:1120px;gap:16px;padding:16px}
 .btn.stand{background:linear-gradient(#427653,#2c563b);border-color:#9fc69a99;color:#f5f4de}
 .btn:disabled{opacity:.35;box-shadow:none}.btn kbd{display:none}
 #hint{font-size:11px;line-height:1.3;margin:0;min-height:0;color:var(--gold)}#hint:empty{display:none}
-#cons{justify-content:flex-start;gap:8px;min-height:44px;flex-wrap:wrap;overflow:visible;padding:0}
-.cons-btn{min-height:44px;padding:8px 11px;background:#142b20;border:1px solid #91ad8f66;border-radius:9px;color:#e2e5d2;font-size:12px;box-shadow:none;flex:0 0 auto;white-space:nowrap}
+#cons{display:flex;justify-content:flex-start;align-items:stretch;gap:6px;min-width:0;max-width:100%;min-height:44px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:0 1px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+#cons::-webkit-scrollbar{display:none}
+#cons:has(.hand-empty){min-height:0;overflow:visible}
+.cons-btn{min-height:44px;padding:8px 11px;background:#142b20;border:1px solid #91ad8f66;border-radius:9px;color:#e2e5d2;font-size:12px;box-shadow:none;flex:0 0 auto;white-space:nowrap;scroll-snap-align:start}
 .cons-btn.on{background:#354e3c;border-color:var(--gold);color:#ffe3a1}
 #cons .hand-empty{font-size:11px;text-transform:none;letter-spacing:0;color:var(--muted)}
 .run-details{min-width:0}.run-details>summary{display:none}.run-details:not([open])>#side{display:flex}
@@ -1010,7 +1012,8 @@ main{max-width:1120px;gap:16px;padding:16px}
   .joker .tip{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));top:auto;width:auto;transform:none;padding:14px;font-size:13px}.joker.show .tip{transform:none}
   #dock{gap:8px;padding-bottom:2px;position:relative;bottom:auto;background:none;box-shadow:none;margin:0}
   #actions{gap:8px}.btn{font-size:11px;padding:10px 4px;min-height:48px;line-height:1.25}
-  #cons{flex-wrap:wrap;overflow:visible;min-height:44px;gap:8px}.cons-btn{min-height:44px;font-size:11px;padding:8px 10px}
+  #cons{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;min-height:44px;gap:6px;padding:0 1px 2px}.cons-btn{min-height:44px;font-size:11px;padding:7px 9px;gap:5px}
+  #cons .cons-btn .item-art{width:22px;height:22px}
   .run-details{border:1px solid #bca56a2b;border-radius:12px;background:#101e17}
   .run-details>summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:10px 13px;cursor:pointer;font-size:12px;color:#bac8b9;list-style:none}
   .run-details>summary::-webkit-details-marker{display:none}.run-details>summary::after{content:'+';font-size:18px;color:var(--gold)}.run-details[open]>summary::after{content:'−'}
@@ -1242,7 +1245,7 @@ const CONFIG = {
   healsPerShop: 2,
   potionHeal: 15, potionPrice: 3, potionStock: 2,
   slotPriceC: 8, slotStepC: 5,
-  tablePrice: 100,
+  tablePrice: 65,
   redHeal3: 10, redHeal4: 15,
   blackBonus3: 10, blackBonus4: 15,
 };
@@ -1268,7 +1271,7 @@ const JOKERS = [
   { id: 'lucky7', name: 'Счастливая семёрка', emoji: '7️⃣', price: 4, desc: 'Каждая семёрка даёт +80 чипов.' },
   { id: 'redblack', name: 'Красное / чёрное', emoji: '♦️', price: 5, desc: 'Красные карты: +0,25 множителя. Чёрные: +15 чипов.' },
   { id: 'tips', name: 'Чаевые', emoji: '🪙', price: 4, desc: '+$1 за точное попадание в цель и +$1 за каждый неиспользованный ход.' },
-  { id: 'counter', name: 'Счётчик', emoji: '🧮', price: 6, desc: '+0,25 множителя за каждую сыгранную за забег карту 2–5. Максимум +3.' },
+  { id: 'counter', name: 'Счётчик', emoji: '🧮', price: 6, desc: '+0,2 множителя за каждую сыгранную за забег карту 2–5. Максимум +2.' },
   { id: 'cushion', name: 'Подушка', emoji: '🛏️', price: 6, desc: 'Перелёт на 1 над целью не считается перебором (множитель как за расстояние 1).' },
   { id: 'gambler', name: 'Азартный', emoji: '🎲', price: 5, desc: '+0,5 множителя за каждую карту на столе сверх второй.' },
   { id: 'miser', name: 'Скряга', emoji: '👛', price: 5, desc: '+0,5 множителя за каждый неиспользованный расходник.' },
@@ -1294,14 +1297,14 @@ const JOKERS = [
   { id: 'surgeon', name: 'Хирург', emoji: '🔪', price: 5, desc: 'Срезы режут на 1 больше, усилители добавляют на 1 больше.' },
   { id: 'ice', name: 'Лёд', emoji: '🧊', price: 4, desc: 'Замороженный стол приносит очки ×1,5.' },
   { id: 'diplomat', name: 'Дипломат', emoji: '🕊️', price: 10, rarity: 'legendary', desc: 'Правило дома босса действует только на первые два хода боя.' },
-  { id: 'allin', name: 'Всё или ничего', emoji: '🎰', price: 10, rarity: 'legendary', desc: 'Очки хода ×2, но если хоть один стол перебрал, ход приносит 0.' },
+  { id: 'allin', name: 'Всё или ничего', emoji: '🎰', price: 10, rarity: 'legendary', desc: 'Очки хода ×2. Первый перебор за бой не обнуляет ход, каждый следующий обнуляет.' },
   { id: 'phoenix', name: 'Феникс', emoji: '🔥', price: 10, rarity: 'legendary', desc: 'Раз за бой ход, обнулённый переборами, не тратится.' },
   { id: 'pair', name: 'Пара', emoji: '👯', price: 7, desc: 'Если среди сыгранных карт есть две одного номинала — очки x2.' },
   { id: 'wide', name: 'Широкий стол', emoji: '🃏', price: 7, desc: 'На столе можно держать 5 карт вместо 4. Срезы спасут сумму.' },
   { id: 'xray', name: 'Сканер', emoji: '👁️', price: 5, desc: 'Видишь следующую карту колоды. Хватает на 5 ходов, потом сгорает.' },
 ];
 const MODS = {
-  gold: { name: 'Золотая', emoji: '💰', desc: '+$2 при розыгрыше стола (без перебора).' },
+  gold: { name: 'Золотая', emoji: '💰', desc: '+$1 при розыгрыше стола (без перебора).' },
   glass: { name: 'Стеклянная', emoji: '🔷', desc: 'Очки стола x2, но после розыгрыша карта разбивается с шансом 25%.' },
   wild: { name: 'Дикая', emoji: '🌈', desc: 'Значение подбирается автоматически от 1 до 11.' },
   heavy: { name: 'Тяжёлая', emoji: '⚖️', desc: 'Чипы карты удваиваются.' },
@@ -1321,10 +1324,10 @@ const RELICS = {
 const STAKES = [
   { name: 'Белый', desc: 'Обычные правила.' },
   { name: 'Бронза', desc: 'Цели боёв +10%.' },
-  { name: 'Серебро', desc: 'Боссы получают второе правило дома.' },
-  { name: 'Золото', desc: 'Награда за бой на $1 меньше.' },
-  { name: 'Платина', desc: 'Три хода на бой вместо четырёх.' },
-  { name: 'Алмаз', desc: 'Всё в магазине дороже на $1.' },
+  { name: 'Серебро', desc: 'Цели +10%, боссы получают второе правило дома.' },
+  { name: 'Золото', desc: 'Цели +10%, второе правило босса и награда за бой на $1 меньше.' },
+  { name: 'Платина', desc: 'Цели боёв +25%, второе правило босса и награда на $1 меньше.' },
+  { name: 'Алмаз', desc: 'Цели +25%, второе правило босса, награда на $1 меньше и всё в магазине дороже на $1.' },
 ];
 const BOSS_CLASH = { hot: ['lowLimit','pendulum'], lowLimit: ['hot','pendulum'], pendulum: ['hot','lowLimit'], nocons: ['thin'], thin: ['nocons'] };
 const PENDULUM_TARGETS = [21,18,25];
@@ -1340,7 +1343,7 @@ function tablesPerSeat() { return 3 + ((G && G.extraTables) ? 1 : 0); }
 // Лечение и банки продаются только в магазине после босса (или элитного боя).
 function shopHealOpen() { return !!(G && (G.blind === 2 || G.elite)); }
 function baseReward() { return CONFIG.baseReward - (G && G.stake >= 3 ? 1 : 0); }
-function seatsCount() { return CONFIG.seats + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.stake >= 4 ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
+function seatsCount() { return CONFIG.seats + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
 function unlockedStake() {
   try { return Math.min(STAKES.length - 1, Number(localStorage.getItem('vochko.stake') || 0)); } catch (e) { return 0; }
 }
@@ -1406,8 +1409,8 @@ const COMBAT = {
   bustPenalty: 2, phaseAt: 0.5, phasePower: 1.35,
   armor: 0.06, shieldRatio: 0.06, healRatio: 0.04,
   weak: 0.2, rage: 1.5, healPrice: 4, healAmount: 30,
-  items: { execute: 0.25, exact: 0.12, revenge: 0.3, shield: 0.5,
-    desperate: 0.25, boss: 0.2, vitality: 25, mend: 5,
+  items: { execute: 0.4, exact: 0.2, revenge: 0.5, shield: 1.0,
+    desperate: 0.4, boss: 0.35, vitality: 25, mend: 5,
     ward: 8, plating: 0.15, opener: 0.2, revive: 20 }
 };
 const ENEMIES = [
@@ -1417,12 +1420,12 @@ const ENEMIES = [
   {id:'usurer', name:'Кровавый ростовщик', glyph:'♝', moves:['attack','heal','heavy']}
 ];
 const COMBAT_JOKERS = [
-  ['execution','Добивание','🗡️','+25% урона, если у врага не больше 30% HP.'],
-  ['bullseye','Пробой навылет','🎯','+12% урона за каждый точный стол.'],
-  ['revenge','Ответный азарт','🔥','После перебора следующая атака сильнее на 30%.'],
-  ['breaker','Щитолом','🔨','+50% урона щиту; остаток атаки идёт в HP.'],
-  ['desperate','На грани','❤️','+25% урона при HP игрока не выше 30%.'],
-  ['slayer','Боссоборец','⚔️','+20% урона боссам.']
+  ['execution','Добивание','🗡️','+40% урона, если у врага не больше 30% HP.'],
+  ['bullseye','Пробой навылет','🎯','+20% урона за каждый точный стол.'],
+  ['revenge','Ответный азарт','🔥','После перебора следующая атака сильнее на 50%.'],
+  ['breaker','Щитолом','🔨','+100% урона щиту; остаток атаки идёт в HP.'],
+  ['desperate','На грани','❤️','+40% урона при HP игрока не выше 30%.'],
+  ['slayer','Боссоборец','⚔️','+35% урона боссам.']
 ];
 COMBAT_JOKERS.forEach(([id,name,emoji,desc]) => JOKERS.push({id,name,emoji,desc,price:6,rarity:'rare'}));
 JOKERS.push({id:'encore',name:'На бис',emoji:'📣',price:7,rarity:'rare',desc:'+1 ход в каждом бою: обычно 5 вместо 4. Даёт ещё один розыгрыш всех столов на победу над врагом.'});
@@ -1526,7 +1529,7 @@ const Combat = {
     if(p.hp<=0)Effects.run('lethal',{});
   },
   start(){
-    G.battle={turn:0,revenge:false,lastHit:null,lastReceived:0,resolving:false};
+    G.battle={turn:0,revenge:false,lastHit:null,lastReceived:0,resolving:false,allinBusts:0};
     G.player.shield=0;G.player.effects=[];G.enemy=Enemy.create();Effects.run('start',{});
   },
   buyHeal(){
@@ -1682,10 +1685,11 @@ function multBaseFor(d) {
   return 0.6;
 }
 function cv(c) { return c.val + (c.up || 0) + (c.dv || 0); }
-function cardChips(c) {
+function cardChips(c, wildVal) {
   if (c.mod === 'curse') return 0;
   if (bossIs('odd') && ['3', '5', '7', '9'].includes(c.rank)) return 0;
-  let v = (c.val + (c.up || 0) + (c.dc || 0)) * 10;
+  const shown = wildVal != null ? wildVal : c.val + (c.up || 0) + (c.dc || 0);
+  let v = shown * 10;
   if (hasRelic('anvil')) v += 10;
   if (hasJoker('six') && c.val >= 2 && c.val <= 6) v += 40;
   if (hasJoker('ace') && c.rank === 'A') v += 40;
@@ -1697,18 +1701,23 @@ function cardChips(c) {
   if (bossIs('dark') && c.color === 'red') v = Math.floor(v / 2);
   return v;
 }
-function scorePlay(cards, sum, lim, xc) {
+function wildValues(n, total) {
+  if (!n) return [];
+  const base = Math.floor(total / n), rem = total % n;
+  return Array.from({ length: n }, (_, i) => base + (i < rem ? 1 : 0));
+}
+function scorePlay(cards, sum, lim, xc, wildMap) {
   const d = sum - lim;
   const royal = cards.filter(c => c.rank === 'K').length >= 3;
   const critical = cards.filter(c => c.rank === 'A').length >= 3;
   if (d > 0 && !royal && !(hasJoker('cushion') && d === 1)) {
     let bc = xc || 0;
-    for (const c of cards) bc += cardChips(c);
+    for (const c of cards) bc += cardChips(c, wildMap && wildMap.get(c.id));
     return { chips: bc, mult: 0, score: 0, tags: ['ПЕРЕБОР: 0 очков'], sum, bust: true };
   }
   const base = multBaseFor(Math.abs(d));
   let chips = xc || 0;
-  for (const c of cards) chips += cardChips(c);
+  for (const c of cards) chips += cardChips(c, wildMap && wildMap.get(c.id));
   let add = 0, mul = 1;
   const tags = [];
   if (hasJoker('ace')) {
@@ -1716,7 +1725,7 @@ function scorePlay(cards, sum, lim, xc) {
     if (a) { add += 0.5 * a; tags.push('тузы +' + fmtMult(0.5 * a)); }
   }
   if (hasJoker('counter')) {
-    const b = Math.min(3, G.lowCardsRun * 0.25);
+    const b = Math.min(2, G.lowCardsRun * 0.2);
     if (b > 0) { add += b; tags.push('счётчик +' + fmtMult(b)); }
   }
   if (hasJoker('redblack')) {
@@ -1747,7 +1756,8 @@ function evalPlay(cards, adj) {
   adj = adj || { dv: 0, dc: 0 };
   const lim = limitNow();
   const sc = adj.fz ? cards.slice(0, adj.fz) : cards;
-  const wilds = sc.filter((c) => c.mod === 'wild').length;
+  const wildCards = sc.filter((c) => c.mod === 'wild');
+  const wilds = wildCards.length;
   const norm = sc.filter((c) => c.mod !== 'wild');
   const aces = norm.filter((c) => c.rank === 'A').length;
   const kmax = bossIs('ace11') ? 0 : aces;
@@ -1755,7 +1765,9 @@ function evalPlay(cards, adj) {
   let best = null;
   for (let k = 0; k <= kmax; k++) {
     for (let t = wilds; t <= 11 * wilds; t++) {
-      const r = scorePlay(cards, raw - 10 * k + t, lim, adj.dc * 10);
+      const vals = wildValues(wilds, t);
+      const wildMap = wilds ? new Map(wildCards.map((c, i) => [c.id, vals[i]])) : null;
+      const r = scorePlay(cards, raw - 10 * k + t, lim, adj.dc * 10, wildMap);
       if (!best || r.score > best.score || (r.score === best.score && (r.bust === best.bust ? (r.bust ? r.sum < best.sum : r.sum > best.sum) : !r.bust))) best = r;
     }
   }
@@ -1769,7 +1781,8 @@ function maxPlay() { return bossIs('max3') ? 3 : 4 + (hasJoker('wide') ? 1 : 0);
    ============================================================ */
 
 function targetFor(ante, blind) {
-  return Math.round(CONFIG.baseTarget * Math.pow(CONFIG.growth, ante - 1) * CONFIG.blindMult[blind]) * (G.stake >= 1 ? 1.1 : 1) | 0;
+  const stakeMult = G.stake >= 4 ? 1.25 : G.stake >= 1 ? 1.1 : 1;
+  return Math.round(CONFIG.baseTarget * Math.pow(CONFIG.growth, ante - 1) * CONFIG.blindMult[blind]) * stakeMult | 0;
 }
 
 function pickBoss() {
@@ -2035,8 +2048,10 @@ function evalSeat(s) {
     if (sm[1] === sm[0] + 1 && sm[2] === sm[1] + 1) { total = Math.round(total * 2); tags.push('лесенка x2'); }
   }
   if (hasJoker('allin')) {
-    if (bust) { total = 0; tags.push('всё или ничего: 0'); }
-    else if (total) { total = Math.round(total * 2); tags.push('всё или ничего x2'); }
+    if (bust) {
+      if (!(G.battle && G.battle.allinBusts)) tags.push('всё или ничего: первый перебор прощён');
+      else { total = 0; tags.push('всё или ничего: 0'); }
+    } else if (total) { total = Math.round(total * 2); tags.push('всё или ничего x2'); }
   }
   if (bust) tags.push('перебор столов: ' + bust);
   return { tables: T, total, exact, bust, chips, tags, closed, heal };
@@ -2246,6 +2261,7 @@ function finishSeat(res, animated = false) {
   G.score += res.total;
   if (res.total > G.stats.bestSeat) G.stats.bestSeat = res.total;
   G.pushThisBlind += res.exact; G.stats.pushes += res.exact; G.stats.busts += res.bust;
+  if (hasJoker('allin') && res.bust) G.battle.allinBusts = (G.battle.allinBusts || 0) + 1;
   if (res.exact >= 3) unlockAch('exact3');
   { const used = res.tables.filter((r) => !r.empty); if (used.length && used.every((r) => r.bust)) unlockAch('wipe'); }
   if (res.total >= 10000) unlockAch('big');
@@ -2258,7 +2274,7 @@ function finishSeat(res, animated = false) {
   G.lowCardsRun += goodCards.filter((c) => c.val >= 2 && c.val <= 5).length;
   if (res.bust && hasJoker('insurer')) { G.money += 2 * res.bust; log('Страховщик: +$' + 2 * res.bust, 'gold'); }
   const gold = goodCards.filter((c) => c.mod === 'gold').length;
-  if (gold) { G.money += 2 * gold; log('Золотые карты: +$' + 2 * gold, 'gold'); }
+  if (gold) { G.money += gold; log('Золотые карты: +$' + gold, 'gold'); }
   const broken = goodCards.filter((c) => c.mod === 'glass' && Math.random() < 0.25);
   if (broken.length) {
     G.runDeck = G.runDeck.filter((c) => !broken.some((b) => b.id === c.id));
@@ -2463,13 +2479,13 @@ function metaRunEnd(win) {
 
 const DECKS = {
   classic: { name: 'Классическая', emoji: '🂡', desc: 'Стандартные 52 карты.' },
-  short: { name: 'Короткая', emoji: '✂️', desc: 'Без 2, 3 и 4 (40 карт): больше чипов и больше перебора. +$2.' },
+  short: { name: 'Короткая', emoji: '✂️', desc: 'Без 2 и 3 (44 карты): выше средняя карта, но меньше точной настройки. +$3.' },
   gold: { name: 'Золотая', emoji: '💰', desc: '4 случайные карты золотые, но стартовых денег на $2 меньше.' },
   glass: { name: 'Хрупкая', emoji: '🔷', desc: '6 стеклянных карт (очки ×2, но могут разбиться) и лишний Срез −4.' },
   alchemy: { name: 'Алхимическая', emoji: '⚗️', desc: 'Старт с тремя случайными расходниками, денег на $2 меньше.' },
 };
 function applyStartDeck(key) {
-  if (key === 'short') { G.runDeck = G.runDeck.filter((c) => !['2', '3', '4'].includes(c.rank)); G.money += 2; }
+  if (key === 'short') { G.runDeck = G.runDeck.filter((c) => !['2', '3'].includes(c.rank)); G.money += 3; }
   else if (key === 'gold') { pickFree(4).forEach((c) => { c.mod = 'gold'; }); G.money = Math.max(0, G.money - 2); }
   else if (key === 'glass') { pickFree(6).forEach((c) => { c.mod = 'glass'; }); G.cons.push(CONS.minus4); }
   else if (key === 'alchemy') { G.cons = shuffle(Object.keys(CONS)).slice(0, 3).map((k) => CONS[k]); G.money = Math.max(0, G.money - 2); }
@@ -2550,7 +2566,7 @@ const EVENTS = [
     { label: '+$10, но в колоду добавится проклятая карта', run: () => { G.money += 10; G.runDeck.push(makeCurse()); return '+$10. В колоде появилась проклятая карта (убирается в кузнице).'; } },
     { label: 'Отказаться', run: () => 'Ты отказался от тёмной сделки.' } ] },
   { title: 'Ювелир', text: 'Мастер готов отполировать любую масть карт.', options: [
-    { label: 'За $7: все карты случайного ранга +1 навсегда', can: () => G.money >= 7, run: () => { G.money -= 7; const rk = pick(['2', '3', '4', '5', '6', '7', '8', '9', '10']); G.runDeck.forEach((c) => { if (c.rank === rk) c.up = (c.up || 0) + 1; }); return 'Все карты «' + rk + '» стали сильнее на 1.'; } },
+    { label: 'За $7: все карты случайного ранга +30 чипов навсегда', can: () => G.money >= 7, run: () => { G.money -= 7; const rk = pick(['2', '3', '4', '5', '6', '7', '8', '9', '10']); G.runDeck.forEach((c) => { if (c.rank === rk) c.dc = Math.min(6, (c.dc || 0) + 3); }); return 'Все карты «' + rk + '» стали сильнее: +30 чипов.'; } },
     { label: 'Уйти', run: () => 'Ты ушёл.' } ] },
   { title: 'Благотворительность', text: 'Старушка просит монету «на удачу».', options: [
     { label: 'Отдать $4: цель следующего боя −12%', can: () => G.money >= 4, run: () => { G.money -= 4; G.nextTargetMod = 0.88; return 'Удача с тобой: цель следующего боя на 12% ниже.'; } },
@@ -2957,7 +2973,7 @@ function startEndless() {
    ============================================================ */
 
 function pickUpRank() {
-  const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10'].filter((r) => G.runDeck.some((c) => c.rank === r && (c.up || 0) < 3));
+  const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10'].filter((r) => G.runDeck.some((c) => c.rank === r && (c.dc || 0) < 6));
   return ranks.length ? pick(ranks) : null;
 }
 
@@ -3065,8 +3081,8 @@ function shopItemHTML(it, i) {
     const k = CONS[it.key];
     kind = 'Расходник'; emoji = k.kind === 'plus' ? '➕' : '✂️'; name = k.name; desc = k.desc + ' Слоты: ' + G.cons.length + '/' + consSlots() + '.';
   } else if (it.kind === 'up') {
-    kind = 'Закалка'; emoji = '🔨'; name = 'Все «' + it.rank + '» +1 навсегда';
-    desc = 'Значение и чипы всех карт «' + it.rank + '» в колоде растут на 1 (максимум +3).';
+    kind = 'Закалка'; emoji = '🔨'; name = 'Все «' + it.rank + '» +20 чипов';
+    desc = 'Чипы всех карт «' + it.rank + '» в колоде растут на 20, сумма не меняется (максимум +60).';
   } else if (it.kind === 'mod') {
     kind = 'Печать'; emoji = MODS[it.mod].emoji; name = MODS[it.mod].name + ': ' + it.card.rank + it.card.suit;
     desc = MODS[it.mod].desc;
@@ -3192,8 +3208,8 @@ function buyItem(index) {
     G.cons.push(CONS[it.key]);
     log('Куплен расходник «' + CONS[it.key].name + '»', 'gold');
   } else if (it.kind === 'up') {
-    G.runDeck.forEach((c) => { if (c.rank === it.rank) c.up = (c.up || 0) + 1; });
-    log('Закалка: все «' + it.rank + '» +1', 'gold');
+    G.runDeck.forEach((c) => { if (c.rank === it.rank) c.dc = Math.min(6, (c.dc || 0) + 2); });
+    log('Закалка: все «' + it.rank + '» +20 чипов', 'gold');
   } else if (it.kind === 'mod') {
     it.card.mod = it.mod;
     log('Печать «' + MODS[it.mod].name + '» на ' + it.card.rank + it.card.suit, 'gold');
@@ -3381,7 +3397,7 @@ function cardElement(c, o) {
   const pips = pipCount ? '<span class="c-pips" data-count="' + pipCount + '" aria-hidden="true">' + Array.from({length:pipCount}, () => '<i>' + c.suit + '</i>').join('') + '</span>' : '';
   return '<div class="card ' + c.color + (['J', 'Q', 'K', 'A'].includes(c.rank) ? ' face' : '') + (o.mini ? ' mini' : '') + (G.lastDrawn === c.id ? ' fromdeck' : '') + (o.scoring ? ' scoring' : '') + (c.mod ? ' m-' + c.mod : '') + '" data-id="' + c.id + '" data-r="' + c.rank + '" data-s="' + c.suit + '" data-g="' + ({ K: '♚', Q: '♛', J: '♞', A: '✦' }[c.rank] || '') + '" style="--rot:0deg;--lift:0px">' +
     '<span class="c-rank" data-suit="' + c.suit + '">' + c.rank + '</span><span class="c-suit">' + c.suit + '</span>' + pips +
-    (o.mini ? '' : '<span class="c-chips">' + (c.mod === 'wild' ? '1–11' : cv(c)) + ' · ' + cardChips(c) + '</span>') + (c.mod && !o.mini ? '<span class="c-mod">' + MODS[c.mod].emoji + '</span>' : '') + '</div>';
+    (o.mini ? '' : '<span class="c-chips">' + (c.mod === 'wild' ? '1–11' : cv(c) + ' · ' + cardChips(c)) + '</span>') + (c.mod && !o.mini ? '<span class="c-mod">' + MODS[c.mod].emoji + '</span>' : '') + '</div>';
 }
 
 function renderHUD() {
@@ -3485,6 +3501,10 @@ function renderActions() {
   $('#cons').innerHTML = G.cons.length
     ? G.cons.map((k, i) => '<button class="cons-btn' + (s && s.sel === i ? ' on' : '') + '" data-cons="' + i + '" title="' + k.desc + '">' + itemArt('cons', Object.keys(CONS).find(id => CONS[id] === k)) + k.name + '</button>').join('')
     : '<span class="hand-empty">нет расходников</span>';
+  const consEl = $('#cons');
+  const consOverflow = () => consEl.classList.toggle('more', consEl.scrollLeft + consEl.clientWidth < consEl.scrollWidth - 2);
+  consOverflow();
+  consEl.onscroll = consOverflow;
 }
 
 function renderJokers() {

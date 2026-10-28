@@ -27,9 +27,10 @@ main{gap:12px;padding:10px;max-width:1100px}
 .limit-badge{font:650 13px/1.2 'Segoe UI',sans-serif;padding:5px 9px;border:1px solid #c3a15b;border-image:none;border-radius:6px;background:#d9bc82;text-transform:none}.limit-badge b{font:700 25px/1 var(--serif);margin-left:5px}
 .table-upgrade{font:500 12px/1.25 'Segoe UI',sans-serif;padding:6px;border:1px solid #a88e4c55;border-radius:6px;color:#d0c5a2;background:#10251a;max-width:106px;white-space:normal;text-align:center}
 #dealer{min-height:38px}.pile{height:34px;padding-left:28px}.pile .card.mini{width:20px;height:29px}.pcount{font:650 14px/1.2 'Segoe UI',sans-serif;color:#e1d5b6}.pile::after{inset:-6px 0}
-#cons{order:2;display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:8px;margin:0;padding:0;min-height:48px}
+#cons{order:2;display:flex;flex-wrap:nowrap;justify-content:flex-start;align-items:stretch;gap:6px;margin:0;padding:0;min-height:44px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+#cons::-webkit-scrollbar{display:none}
 #cons::before{display:none}
-.cons-btn{min-height:48px;padding:6px 10px;gap:7px;border:1px solid #809b88;border-image:none;border-radius:8px;background:#183b2d;color:#f0e6cd;font:650 14px/1.2 'Segoe UI',sans-serif;box-shadow:none}
+.cons-btn{min-height:44px;padding:6px 9px;gap:6px;border:1px solid #809b88;border-image:none;border-radius:8px;background:#183b2d;color:#f0e6cd;font:650 12px/1.2 'Segoe UI',sans-serif;box-shadow:none;white-space:nowrap;flex:0 0 auto;scroll-snap-align:start}
 .cons-btn .item-art{width:29px;height:29px;border-radius:4px}.cons-btn.on{background:#3b5940;border-color:#e8cd8e;color:#fff3ca;filter:none;box-shadow:inset 0 0 0 1px #e8cd8e}
 #cons .hand-empty{font:400 13px/1.3 'Segoe UI',sans-serif;color:#acbaab;text-transform:none;letter-spacing:0}
 .tables,.tables.four{gap:8px;grid-template-columns:repeat(3,minmax(0,1fr))}.tables.four{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -83,7 +84,7 @@ main{gap:12px;padding:10px;max-width:1100px}
  .formula{padding:6px;gap:4px}.fbox,.fbox.chips,.fbox.mult,.fbox.result{padding:0 3px}.fbox .f-label{font-size:12px}.fbox .f-val{font-size:22px}.fbox.result{flex-direction:row;gap:8px;align-items:center}.fbox.chips .f-label,.fbox.mult .f-label{display:none}.fbox.result .f-label{max-width:50px;line-height:1.1}.fbox.result .f-val{font-size:30px}#preview-note{font-size:13px}.op{font-size:14px}
  #jokers-bar{padding:0}#jokers-bar .jlabel{display:none}.joker{height:76px}.joker.empty{height:42px}.joker .j-emoji .item-art{width:32px;height:32px}.joker .j-name{font-size:11px}.joker .tip{top:auto;bottom:calc(var(--ui-bottom) + 12px);left:10px;right:10px;max-height:45dvh;overflow-y:auto;width:auto;transform:none;padding:15px}
  #dock{position:relative;bottom:auto;z-index:26;margin:0;padding:0;background:none;border:0;box-shadow:none;border-radius:0}#actions{gap:8px}.btn{font-size:14px;min-height:54px;padding:9px 4px}
- #cons{gap:8px;min-height:48px;padding:0}.cons-btn{font-size:14px;min-height:48px;padding:6px 9px}.table-upgrade{font-size:12px}.pcount{font-size:14px}
+ #cons{gap:6px;min-height:44px;padding:0}.cons-btn{font-size:12px;min-height:44px;padding:6px 8px}.table-upgrade{font-size:12px}.pcount{font-size:14px}
  .modal,.modal.wide,.modal:has(.shop-grid){padding:14px;max-height:calc(100dvh - var(--ui-top) - var(--ui-bottom) - 20px)}.modal h2{font-size:26px}.shop-grid{gap:8px}.shop-item{padding:10px;gap:8px}.shop-item .si-name{font-size:17px}.shop-item .si-desc{font-size:14px}.shop-item .si-kind{font-size:12px}.shop-item .buy{font-size:15px}.shop-section-heading span{font-size:12px}.shop-section-heading h3{font-size:18px}.opt small{font-size:14px}
  #side .panel{padding:12px}.run-details>summary{font-size:14px}#log{font-size:13px;max-height:180px}
 }

@@ -24,6 +24,7 @@ const {launch,load,writeReport}=require('./runtime.cjs');
   reset('plus2');G.seat.tables.forEach((t,i)=>{t.cards=i===2?[card('2'),card('3'),card('5'),card('9')]:[card('10'),card('9')];t.stood=i<2});refreshTables(G.seat);
   const before=G.seatsLeft;autoFinish(G.seat);check('Full boards allow useful consumable before autoplay',G.seatsLeft===before&&G.seat&&!G.seat.locked,{before,after:G.seatsLeft});
   reset('minus2');const aces=evalPlay([card('A'),card('A','♥'),card('2')]);check('Tied ace values prefer the closest legal total',aces.sum===14,{shown:aces.sum,score:aces.score});
+  reset('minus2');const wildHand=evalPlay([card('K','♠','wild'),card('Q'),card('5')]);check('Wild chips follow the chosen value',wildHand.sum===21&&wildHand.chips===210,{sum:wildHand.sum,chips:wildHand.chips,score:wildHand.score});
   reset('minus2');G.jokers=[JOKERS.find(j=>j.id==='relay')];G.seat.tables[0].cards=[card('A'),card('K')];G.seat.tables[1].cards=[card('9','♥','glass')];
   const relay=evalSeat(G.seat).tables[1];const expectedRelay=evalPlay(G.seat.tables[1].cards,{dv:0,dc:4});check('Relay bonus inherits glass multiplier',relay.score===expectedRelay.score,{actual:relay.score,expected:expectedRelay.score});
   reset('minus2');G.extraTables=1;G.seat.tables.push(newTable());G.jokers=[JOKERS.find(j=>j.id==='ladder')];G.seat.tables[0].cards=[card('10'),card('9')];G.seat.tables[1].cards=[card('10'),card('Q')];G.seat.tables[2].cards=[card('A'),card('K')];
