@@ -1,0 +1,115 @@
+{
+  "checks": [
+    {
+      "name": "minus2 changes the sum and consumes one item"
+    },
+    {
+      "name": "minus4 changes the sum and consumes one item"
+    },
+    {
+      "name": "plus2 changes the sum and consumes one item"
+    },
+    {
+      "name": "plus4 changes the sum and consumes one item"
+    },
+    {
+      "name": "pct30 changes the sum and consumes one item"
+    },
+    {
+      "name": "Freeze retains sum while scoring new chips"
+    },
+    {
+      "name": "Swap replaces only last card"
+    },
+    {
+      "name": "Shuffle combines draw and discard without held cards"
+    },
+    {
+      "name": "peek works when draw pile needs recycling",
+      "detail": {
+        "consLeft": 0,
+        "draw": 1,
+        "discard": 0
+      }
+    },
+    {
+      "name": "peek does not spend item on an empty deck",
+      "detail": {
+        "consLeft": 1
+      }
+    },
+    {
+      "name": "peek3 works when draw pile needs recycling",
+      "detail": {
+        "consLeft": 0,
+        "draw": 1,
+        "discard": 0
+      }
+    },
+    {
+      "name": "peek3 does not spend item on an empty deck",
+      "detail": {
+        "consLeft": 1
+      }
+    },
+    {
+      "name": "burn works when draw pile needs recycling",
+      "detail": {
+        "consLeft": 0,
+        "draw": 0,
+        "discard": 1
+      }
+    },
+    {
+      "name": "burn does not spend item on an empty deck",
+      "detail": {
+        "consLeft": 1
+      }
+    },
+    {
+      "name": "Full boards allow useful consumable before autoplay",
+      "detail": {
+        "before": 4,
+        "after": 4
+      }
+    },
+    {
+      "name": "Tied ace values prefer the closest legal total",
+      "detail": {
+        "shown": 14,
+        "score": 144
+      }
+    },
+    {
+      "name": "Relay bonus inherits glass multiplier",
+      "detail": {
+        "actual": 156,
+        "expected": 156
+      }
+    },
+    {
+      "name": "Ladder recognizes three live consecutive tables with fourth empty",
+      "detail": {
+        "sums": [
+          19,
+          20,
+          21,
+          0
+        ],
+        "tags": [
+          "лесенка x2"
+        ]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "name": "Sync is not a free multiplier for manually stopped small hands",
+      "detail": {
+        "tags": [
+          "синхронизация x1.5"
+        ]
+      }
+    }
+  ]
+}
