@@ -1740,7 +1740,7 @@ function evalPlay(cards, adj) {
   for (let k = 0; k <= kmax; k++) {
     for (let t = wilds; t <= 11 * wilds; t++) {
       const r = scorePlay(cards, raw - 10 * k + t, lim, adj.dc * 10);
-      if (!best || r.score > best.score || (r.score === best.score && r.sum < best.sum)) best = r;
+      if (!best || r.score > best.score || (r.score === best.score && (r.bust === best.bust ? (r.bust ? r.sum < best.sum : r.sum > best.sum) : !r.bust))) best = r;
     }
   }
   if (adj.fz) best.tags = best.tags.concat('❄ сумма заморожена');
@@ -1881,11 +1881,15 @@ function startSeat() {
   render();
 }
 
-function drawFromDeck() {
+function ensureDrawPile() {
   if (!G.deck.length) {
-    if (!G.discard.length) return null;
+    if (!G.discard.length) return false;
     G.deck = shuffle(G.discard.splice(0, G.discard.length));
   }
+  return true;
+}
+function drawFromDeck() {
+  if (!ensureDrawPile()) return null;
   return G.deck.pop() || null;
 }
 
@@ -1962,6 +1966,15 @@ function evalSeat(s) {
     return r;
   });
   const pre = [];
+  if (hasJoker('relay')) {
+    T.forEach((r, i) => {
+      if (i > 0 && !r.empty && !r.bust && T[i - 1].exact) {
+        const boosted = evalPlay(s.tables[i].cards, { ...s.tables[i].adj, dc: (s.tables[i].adj.dc || 0) + 4 });
+        T[i] = { ...boosted, exact: r.exact };
+      }
+    });
+    if (T.some((r, i) => i > 0 && !r.empty && !r.bust && T[i - 1].exact)) pre.push('эстафета +40');
+  }
   T.forEach((r, i) => { r.frozen = !!(s.tables[i].adj && s.tables[i].adj.fz); });
   // Красный стол лечит, чёрный — бьёт сильнее. Работает на 3+ картах и только без перебора.
   let heal = 0;
@@ -1975,9 +1988,6 @@ function evalSeat(s) {
   });
   if (hasJoker('ice') && T.some((r) => !r.empty && !r.bust && r.frozen)) {
     T.forEach((r) => { if (!r.empty && !r.bust && r.frozen) r.score = Math.round(r.score * 1.5); }); pre.push('лёд x1.5');
-  }
-  if (hasJoker('relay') && T.some((r, i) => i > 0 && !r.empty && !r.bust && T[i - 1].exact)) {
-    T.forEach((r, i) => { if (i > 0 && !r.empty && !r.bust && T[i - 1].exact) { r.chips += 40; r.score += Math.round(40 * r.mult); } }); pre.push('эстафета +40');
   }
   if (hasJoker('tandem')) {
     const eq = (r, i) => !r.empty && !r.bust && T.some((o, j) => j !== i && !o.empty && !o.bust && o.sum === r.sum);
@@ -2003,7 +2013,7 @@ function evalSeat(s) {
   if (hasJoker('sync') && closed) { total = Math.round(total * 1.5); tags.push('синхронизация x1.5'); }
   if (hasJoker('balance') && T.every((r) => !r.empty && !r.bust && r.sum >= lim - 2)) { total = Math.round(total * 1.4); tags.push('равновесие x1.4'); }
   if (hasJoker('ladder') && live.length === 3) {
-    const sm = T.map((r) => r.sum).sort((a, b) => a - b);
+    const sm = live.map((r) => r.sum).sort((a, b) => a - b);
     if (sm[1] === sm[0] + 1 && sm[2] === sm[1] + 1) { total = Math.round(total * 2); tags.push('лесенка x2'); }
   }
   if (hasJoker('allin')) {
@@ -2023,6 +2033,10 @@ function autoFinish(s) {
     return evalPlay(t.cards, t.adj).bust && canSaveTable(s, t);
   });
   if (savable) { flashHint('Перебор можно спасти срезом — или нажми «Сыграть»'); return; }
+  const canAdjust = !bossIs('nocons') && !(bossIs('thin') && s.used) && G.cons.some(k =>
+    ['minus','pct','plus','swap','remove','move'].includes(k.kind) && !(bossIs('noplus') && k.kind === 'plus') &&
+    s.tables.some(t => !t.blocked && t.cards.length && (['remove','move'].includes(k.kind) || !t.dead && !t.locked)));
+  if (canAdjust) { flashHint('Можно применить расходник — или нажми «Сыграть»'); return; }
   stand();
 }
 
@@ -2095,11 +2109,15 @@ function pickCons(i) {
   if (k.kind === 'peek') {
     if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
     if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+    if (!ensureDrawPile()) { flashHint('Колода пуста'); return; }
+    if (s.peek || s.peek3) { flashHint('Следующая карта уже открыта'); return; }
     s.peek = true; s.used = true; G.consUsed = (G.consUsed || 0) + 1; G.cons.splice(i, 1); s.sel = null; render(); return;
   }
   if (k.kind === 'shuffle' || k.kind === 'peek3' || k.kind === 'burn') {
     if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
     if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+    if (!ensureDrawPile()) { flashHint('Колода пуста'); return; }
+    if (k.kind === 'peek3' && s.peek3) { flashHint('Следующие карты уже открыты'); return; }
     if (k.kind === 'shuffle') G.deck = shuffle(G.deck.concat(G.discard.splice(0)));
     else if (k.kind === 'peek3') s.peek3 = true;
     else { const c = G.deck.pop(); if (c) { G.discard.push(c); flashHint('Сожжена: ' + c.rank + c.suit); } }
