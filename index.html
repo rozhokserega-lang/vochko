@@ -2810,40 +2810,40 @@ function baseCards() {
 }
 function sealsTabHTML() {
   return '<p class="sub">Печать навсегда остаётся на карте и работает в каждом забеге (кроме ежедневного). Купленных печатей: ' + sealCount() + ', каждая следующая дороже на 10%. Заменить печать нельзя.</p>' +
-    '<div class="seal-row">' + Object.keys(SEAL_BASE).map((t) => '<button class="seal-opt' + (SEAL_SEL === t ? ' sel' : '') + '" data-seal="' + t + '"><span>' + MODS[t].emoji + '</span><b>' + MODS[t].name + '</b><small>' + MODS[t].desc + '</small><i>🪙 ' + sealPrice(t) + '</i></button>').join('') + '</div>' +
+    '<div class="seal-row">' + Object.keys(SEAL_BASE).map((t) => '<button class="seal-opt' + (SEAL_SEL === t ? ' sel' : '') + '" data-seal="' + t + '">' + itemArt('relic', {heavy:'up',gold:'coins',glass:'revive',wild:'prism'}[t]) + '<b>' + MODS[t].name + '</b><small>' + MODS[t].desc + '</small><i>' + itemArt('relic','coins') + ' ' + sealPrice(t) + '</i></button>').join('') + '</div>' +
     '<h4 class="sec">Выбери карту</h4><div class="forge-grid seal-grid">' + baseCards().map((c) => cardElement(c, { mini: 1 })).join('') + '</div>';
 }
 function startTabHTML() {
   const sh = META.shop;
-  const cashCard = '<div class="up-card"><div class="up-head"><b>💵 Стартовый капитал</b><span>уровень ' + sh.cash + '/' + CASH_PRICES.length + '</span></div><p>+$1 стартовых денег за уровень. Сейчас: +$' + sh.cash + '.</p>' +
-    (sh.cash >= CASH_PRICES.length ? '<div class="up-max">Максимум</div>' : '<button class="buy" data-buy="cash">Улучшить · 🪙 ' + CASH_PRICES[sh.cash] + '</button>') + '</div>';
-  const consCard = '<div class="up-card"><div class="up-head"><b>🧪 Запасной расходник</b><span>' + (sh.extraCons ? 'куплено' : '🪙 ' + EXTRA_CONS_PRICE) + '</span></div><p>Каждый забег начинается с лишним расходником на твой выбор (занимает слот).</p>' +
-    (sh.extraCons ? '<div class="pick-row">' + Object.keys(CONS).map((k) => '<button class="chip' + (sh.extraCons === k ? ' sel' : '') + '" data-setcons="' + k + '" title="' + CONS[k].desc + '">' + CONS[k].name + '</button>').join('') + '</div>' : '<button class="buy" data-buy="cons">Купить · 🪙 ' + EXTRA_CONS_PRICE + '</button>') + '</div>';
-  const jokerCard = '<div class="up-card"><div class="up-head"><b>🃏 Стартовый джокер</b><span>' + (sh.startJoker ? 'куплено' : '🪙 ' + START_JOKER_PRICE) + '</span></div><p>Каждый забег начинается с обычным джокером на твой выбор.</p>' +
-    (sh.startJoker ? '<div class="pick-row">' + JOKERS.filter((j) => j.rarity === 'common' && isUnlocked('joker', j.id)).map((j) => '<button class="chip' + (sh.startJoker === j.id ? ' sel' : '') + '" data-setjoker="' + j.id + '" title="' + j.desc + '">' + j.emoji + ' ' + j.name + '</button>').join('') + '</div>' : '<button class="buy" data-buy="joker">Купить · 🪙 ' + START_JOKER_PRICE + '</button>') + '</div>';
+  const cashCard = '<div class="up-card"><div class="up-head"><b>' + itemArt('relic','vault') + ' Стартовый капитал</b><span>уровень ' + sh.cash + '/' + CASH_PRICES.length + '</span></div><p>+$1 стартовых денег за уровень. Сейчас: +$' + sh.cash + '.</p>' +
+    (sh.cash >= CASH_PRICES.length ? '<div class="up-max">Максимум</div>' : '<button class="buy" data-buy="cash">Улучшить · ' + itemArt('relic','coins') + ' ' + CASH_PRICES[sh.cash] + '</button>') + '</div>';
+  const consCard = '<div class="up-card"><div class="up-head"><b>' + itemArt('relic','slotc') + ' Запасной расходник</b><span>' + (sh.extraCons ? 'куплено' : '' + itemArt('relic','coins') + ' ' + EXTRA_CONS_PRICE) + '</span></div><p>Каждый забег начинается с лишним расходником на твой выбор (занимает слот).</p>' +
+    (sh.extraCons ? '<div class="pick-row">' + Object.keys(CONS).map((k) => '<button class="chip' + (sh.extraCons === k ? ' sel' : '') + '" data-setcons="' + k + '" title="' + CONS[k].desc + '">' + itemArt('cons', k) + CONS[k].name + '</button>').join('') + '</div>' : '<button class="buy" data-buy="cons">Купить · ' + itemArt('relic','coins') + ' ' + EXTRA_CONS_PRICE + '</button>') + '</div>';
+  const jokerCard = '<div class="up-card"><div class="up-head"><b>' + itemArt('joker','insurer') + ' Стартовый джокер</b><span>' + (sh.startJoker ? 'куплено' : '' + itemArt('relic','coins') + ' ' + START_JOKER_PRICE) + '</span></div><p>Каждый забег начинается с обычным джокером на твой выбор.</p>' +
+    (sh.startJoker ? '<div class="pick-row">' + JOKERS.filter((j) => j.rarity === 'common' && isUnlocked('joker', j.id)).map((j) => '<button class="chip' + (sh.startJoker === j.id ? ' sel' : '') + '" data-setjoker="' + j.id + '" title="' + j.desc + '">' + itemArt('joker', j.id) + ' ' + j.name + '</button>').join('') + '</div>' : '<button class="buy" data-buy="joker">Купить · ' + itemArt('relic','coins') + ' ' + START_JOKER_PRICE + '</button>') + '</div>';
   const slotLvl = sh.jokerSlot || 0;
-  const slotCard = '<div class="up-card"><div class="up-head"><b>🃏 Слот джокера</b><span>уровень ' + slotLvl + '/' + JOKER_SLOT_PRICES.length + '</span></div><p>Постоянный +1 слот под джокера в каждом забеге. Сейчас слотов: ' + (CONFIG.maxJokers + slotLvl) + '.</p>' +
-    (slotLvl >= JOKER_SLOT_PRICES.length ? '<div class="up-max">Максимум</div>' : '<button class="buy" data-buy="jokerslot">Купить · 🪙 ' + JOKER_SLOT_PRICES[slotLvl] + '</button>') + '</div>';
+  const slotCard = '<div class="up-card"><div class="up-head"><b>' + itemArt('relic','slot') + ' Слот джокера</b><span>уровень ' + slotLvl + '/' + JOKER_SLOT_PRICES.length + '</span></div><p>Постоянный +1 слот под джокера в каждом забеге. Сейчас слотов: ' + (CONFIG.maxJokers + slotLvl) + '.</p>' +
+    (slotLvl >= JOKER_SLOT_PRICES.length ? '<div class="up-max">Максимум</div>' : '<button class="buy" data-buy="jokerslot">Купить · ' + itemArt('relic','coins') + ' ' + JOKER_SLOT_PRICES[slotLvl] + '</button>') + '</div>';
   return '<p class="sub">Постоянные бонусы к началу каждого забега (кроме ежедневного).</p><div class="up-list">' + cashCard + consCard + jokerCard + slotCard + '</div>';
 }
 function lookTabHTML() {
   const sh = META.shop;
   const row = (kind, title) => '<h4 class="sec">' + title + '</h4><div class="opt-grid">' + Object.keys(COSMETICS[kind]).map((id) => {
     const c = COSMETICS[kind][id], own = sh.owned[kind].includes(id), act = sh.active[kind] === id;
-    return '<button class="opt look' + (act ? ' sel' : '') + '" data-look="' + kind + ':' + id + '"><span class="swatch" style="background:' + c.sw + '"></span><b>' + c.name + '</b><small>' + (act ? 'Выбрано' : own ? 'Выбрать' : '🪙 ' + c.price) + '</small></button>';
+    return '<button class="opt look' + (act ? ' sel' : '') + '" data-look="' + kind + ':' + id + '"><span aria-hidden="true" class="swatch preview-' + kind + '" style="background:' + c.sw + '"></span><b>' + c.name + '</b><small>' + (act ? 'Выбрано' : own ? 'Выбрать' : '' + itemArt('relic','coins') + ' ' + c.price) + '</small></button>';
   }).join('') + '</div>';
   return '<p class="sub">Чисто косметика: игру она не меняет.</p>' + row('back', 'Рубашка карт') + row('felt', 'Сукно стола');
 }
 function showMetaShop(tab) {
   if (tab) SHOP_TAB = tab;
   const sh = META.shop;
-  const tabs = [['seals', '🂠 Печати'], ['start', '⭐ Старт'], ['look', '🎨 Облик']];
+  const tabs = [['seals', 'Печати', 'mod'], ['start', 'Старт', 'opener'], ['look', 'Облик', 'table']];
   const body = SHOP_TAB === 'seals' ? sealsTabHTML() : SHOP_TAB === 'start' ? startTabHTML() : lookTabHTML();
   showOverlay(
-    '<div class="kicker">Лавка</div><h2>Лавка колоды <span class="thin">/ навсегда</span></h2>' +
-    '<div class="coin-bar">🪙 <b>' + sh.coins + '</b> монет</div>' +
-    '<div class="shop-tabs">' + tabs.map((t) => '<button class="tab' + (t[0] === SHOP_TAB ? ' on' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>' + body +
-    '<div class="row-btns"><button class="primary" id="ov-back">Назад</button></div>'
+    '<div class="meta-shop"><div class="kicker">Лавка</div><h2>Лавка колоды <span class="thin">/ навсегда</span></h2>' +
+    '<div class="coin-bar">' + itemArt('relic','coins') + ' <b>' + sh.coins + '</b> монет</div>' +
+    '<div class="shop-tabs">' + tabs.map((t) => '<button class="tab' + (t[0] === SHOP_TAB ? ' on' : '') + '" data-tab="' + t[0] + '">' + itemArt('relic', t[2]) + t[1] + '</button>').join('') + '</div>' + body +
+    '<div class="row-btns"><button class="primary" id="ov-back">Назад</button></div></div>'
   );
   const ov = document.getElementById('overlay');
   ov.querySelectorAll('[data-tab]').forEach((b) => { b.onclick = () => showMetaShop(b.dataset.tab); });
@@ -2873,7 +2873,7 @@ function pickSealCard(key) {
     '<div class="kicker">Покупка навсегда</div><h2>Подтвердить?</h2>' +
     '<div class="confirm-card">' + cardElement(shown) + '</div>' +
     '<p class="sub" style="text-align:center">Карта <b>' + key + '</b> получит печать «' + MODS[SEAL_SEL].name + '». ' + MODS[SEAL_SEL].desc + ' Отменить покупку будет нельзя.</p>' +
-    '<div class="row-btns"><button class="ghost" id="ov-no">Отмена</button><button class="primary" id="ov-yes">Купить · 🪙 ' + p + '</button></div>'
+    '<div class="row-btns"><button class="ghost" id="ov-no">Отмена</button><button class="primary" id="ov-yes">Купить · ' + itemArt('relic','coins') + ' ' + p + '</button></div>'
   );
   $('#ov-no').onclick = () => showMetaShop('seals');
   $('#ov-yes').onclick = () => { if (buySeal(key, SEAL_SEL)) toast('Печать «' + MODS[SEAL_SEL].name + '» на ' + key); showMetaShop('seals'); };

@@ -49,3 +49,26 @@
 }
 @media(max-height:740px) and (max-width:600px){.home-screen{gap:9px}.home-identity h1{font-size:52px}.home-card-fan{height:80px}.home-playing-card{width:54px;height:76px;left:calc(50% - 27px)}.home-playing-card.card-left{translate:-35px 3px}.home-playing-card.card-right{translate:35px 3px}.home-actions{gap:8px}.home-start{padding:11px;min-height:47px}.home-secondary{min-height:46px;padding:10px}.home-links button{min-height:60px}.home-links .item-art{width:23px;height:23px}.home-records{font-size:11px}.modal.game-home{padding:14px 18px}.scene-header{height:110px}}
 @media(prefers-reduced-motion:reduce){.modal.game-home{animation:none}.route-card{transition:none}.route-card:hover{translate:none}}
+
+/* Permanent shop uses the same illustrated item atlases as the run shop. */
+.meta-shop .shop-tabs{display:flex;gap:8px}
+.meta-shop .tab{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;min-width:0;padding:9px 6px}
+.meta-shop .tab .item-art{width:27px;height:27px}
+.meta-shop .coin-bar{display:inline-flex;align-items:center;gap:7px;background:#17291d;border:1px solid #a28448;color:#e8d4a6;box-shadow:none;border-radius:4px}
+.meta-shop .coin-bar .item-art{width:28px;height:28px}
+.meta-shop .seal-opt{gap:6px;padding:12px}
+.meta-shop .seal-opt>.item-art{width:58px;height:58px;border:1px solid #a28448;border-radius:3px;margin-bottom:3px}
+.meta-shop .seal-opt i{display:flex;align-items:center;gap:5px;margin-top:auto;padding-top:5px}
+.meta-shop .seal-opt i .item-art,.meta-shop .buy .item-art,.meta-shop .up-head>span .item-art,.meta-shop .look small .item-art{width:20px;height:20px}
+.meta-shop .up-head{align-items:center;flex-wrap:wrap}
+.meta-shop .up-head b{display:flex;align-items:center;gap:10px}
+.meta-shop .up-head b .item-art{width:42px;height:42px}
+.meta-shop .chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;text-align:left}
+.meta-shop .chip .item-art{width:27px;height:27px}
+.meta-shop .look{display:flex;flex-direction:column;align-items:center;gap:7px}
+.meta-shop .swatch{position:relative;flex-shrink:0;margin:2px 0 5px;border:2px solid #b99a60;box-shadow:inset 0 0 0 3px #17271f,0 3px 8px #0006}
+.meta-shop .preview-back{width:48px;height:66px;border-radius:4px}
+.meta-shop .preview-back:after{content:'♠';position:absolute;inset:6px;display:grid;place-items:center;border:1px solid #c6aa6c99;color:#e6c27a;font-size:25px;background:repeating-linear-gradient(45deg,transparent 0 5px,#ddc18a18 5px 6px)}
+.meta-shop .preview-felt{width:88px;max-width:100%;height:54px;border-radius:50%;border-width:4px}
+.meta-shop .preview-felt:after{content:'';position:absolute;inset:7px;border:1px solid #c6aa6c88;border-radius:50%}
+@media(max-width:380px){.meta-shop .tab{gap:4px;font-size:12px}.meta-shop .tab .item-art{width:23px;height:23px}.meta-shop .seal-opt{padding:9px}}
