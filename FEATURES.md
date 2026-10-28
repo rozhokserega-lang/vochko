@@ -1,6 +1,6 @@
 # Tactical update
 
-The game entry point remains `index_vochko_v8.html`. It loads `assets/game-features.js` before the inline game code and `assets/reference-theme.css` for the portrait interface.
+The game entry point remains `index.html`. It loads `assets/game-features.js` before the inline game code and `assets/reference-theme.css` for the portrait interface.
 
 - Run checkpoints: browser localStorage key `vochko.run.v1`, separate from permanent progression. The setup screen shows Continue when a valid checkpoint exists. Stable actions save automatically; score animations retain the preceding checkpoint. Completion/death clears it. Consumable definitions, event callbacks, and shop card references are rebound on resume. Daily PRNG state is preserved; effects use the independent cosmetic RNG.
 - Forecast: `attackPreview`, `enemyResponse`, and `combatForecast` share the real attack and enemy response calculations. The displayed HP loss accounts for shields, armor, weakness, damage jokers, table healing, revival, enemy abilities, and lethal attacks. A final-round warning accounts for Phoenix.
@@ -14,7 +14,7 @@ The game entry point remains `index_vochko_v8.html`. It loads `assets/game-featu
 - Healing feedback: `assets/heal-fx.js` and `.css` listen to actual HP restoration events rather than the final net HP delta. Green motes travel from red tables or the purchased item toward player HP, a separate +HP label shows the capped recovered amount, and health bars light up. Shop healing has its own visible bar; repeated purchases do not restart modal entry animations. Damage interrupts the restoring bar style without hiding the healing event. Full HP produces no false healing. Revival and relic healing use the same feedback; reduced motion retains static text and removes particles. No gameplay RNG is consumed.
 - Game menus: `assets/game-menu.js` and `.css` provide a dedicated illustrated title screen, Continue/New Game/Daily and collection navigation. Run setup is a separate deck carousel plus difficulty selector, retaining unlocks and selections. The in-game menu button flushes pending combat and saves before returning home. Route choices, events, forge, contracts and result screens share the original five-panel `assets/path-scenes.png` illustration atlas. Battle introductions show a portrait, HP/turn/target summary and collapsible instructions. UI-only navigation consumes no gameplay RNG.
 
-Verification (Node + bundled Playwright, installed Edge):
+Historical verification commands (these `.preview` scripts are not included; current runnable tests: `tests/playtest/README.md`):
 
 ```
 rtk proxy node .preview/check-layout.cjs
@@ -28,3 +28,7 @@ rtk proxy node .preview/check-menu-ui.cjs
 ```
 
 Layout checks cover 320–1440px, three/four tables and touch controls. Tactical checks compare forecast to complete real turns, reload different progression phases, exercise selection UIs, verify daily RNG and item references, and cover transfer/reservation rules.
+
+## Tactical clarity
+
+`assets/tactical-clarity.js` adds copied-state consumable previews, damage explanations and saved last-turn/battle summaries. Hidden draw cards remain hidden; Alchemist includes both outcomes. Sync requires every available table (at least three) to be exact, bust or full. Verification: `npm test`. Balance matrix: `npm run test:balance`. See `BALANCE.md`.

@@ -12,11 +12,11 @@ const GameMenu={
   showOverlay('<div class="home-screen"><header class="home-identity"><span class="home-eyebrow">КАРТОЧНЫЙ РОГАЛИК</span><h1>ВОЧКО</h1><div class="home-ornament" aria-hidden="true">♠</div><p>Собери колоду. Обыграй казино.</p></header>'+
    '<div class="home-card-fan" aria-hidden="true"><span class="home-playing-card card-left"><b>Q ♦</b><i style="--court:33.3333%"></i></span><span class="home-playing-card card-middle"><b>A ♠</b><i style="--court:100%"></i></span><span class="home-playing-card card-right"><b>K ♥</b><i style="--court:0%"></i></span></div>'+
    '<nav class="home-actions" aria-label="Главное меню">'+
-   (saved?'<button class="home-start" id="ov-continue"><b>Продолжить</b><small>Анте '+saved.game.ante+' · '+BLIND_SHORT[saved.game.blind]+' · '+saved.game.player.hp+' HP</small></button>':'')+
+   (saved?'<button class="home-start" id="ov-continue"><b>Продолжить</b><small>Этап '+saved.game.ante+' · '+BLIND_SHORT[saved.game.blind]+' · '+saved.game.player.hp+' HP</small></button>':'')+
    '<button class="'+(saved?'home-secondary':'home-start')+'" id="menu-new-game">Новая игра</button>'+
    '<button class="home-secondary daily-action" id="menu-daily"><span>Ежедневный забег</span><small>Одна колода для всех</small></button>'+
    '<div class="home-links"><button id="menu-shop">'+itemArt('relic','coins')+'<span>Лавка</span></button><button id="menu-achievements">'+itemArt('relic','crown')+'<span>Достижения</span></button><button id="menu-rules">'+itemArt('joker','insurer')+'<span>Правила</span></button></div></nav>'+
-   '<footer class="home-records"><span>Победы <b>'+stats.wins+'</b></span><span>Лучшее анте <b>'+stats.bestAnte+'</b></span><span>Монеты <b>'+META.shop.coins+'</b></span></footer></div>',true);
+   '<footer class="home-records"><span>Победы <b>'+stats.wins+'</b></span><span>Лучший этап <b>'+stats.bestAnte+'</b></span><span>Монеты <b>'+META.shop.coins+'</b></span></footer></div>',true);
   $('#overlay .modal').classList.add('game-home');
   if($('#ov-continue'))$('#ov-continue').onclick=()=>{this.backTarget=null;resumeRun()};
   $('#menu-new-game').onclick=showRunSetup;
@@ -56,7 +56,7 @@ const GameMenu={
   tgShowBack(true);
  },
  pathHTML(picks){
-  return '<div class="path-screen"><div class="kicker">Анте '+G.ante+' · между боями</div><h2>Выбери свой путь</h2><p class="sub">Впереди '+BLIND_NAMES[G.blind].toLowerCase()+'. Куда заглянем по дороге?</p><div class="route-options">'+picks.map((key,index)=>{
+  return '<div class="path-screen"><div class="kicker">Этап '+G.ante+' · между боями</div><h2>Выбери свой путь</h2><p class="sub">Впереди '+BLIND_NAMES[G.blind].toLowerCase()+'. Куда заглянем по дороге?</p><div class="route-options">'+picks.map((key,index)=>{
    const node=NODES[key];return '<button class="route-card route-'+key+'" data-node="'+key+'">'+this.routeArt(key)+'<span class="route-copy"><small>Путь '+(index+1)+'</small><b>'+node.name+'</b><span>'+node.desc+'</span><em>Выбрать →</em></span></button>';
   }).join('')+'</div><p class="path-hint">Любой путь ведёт к следующему бою.</p></div>';
  },
@@ -71,7 +71,7 @@ const GameMenu={
   const enemy=G.enemy,boss=G.boss?BOSSES[G.boss]:null;
   const portrait=((({collector:0,brawler:1,sentinel:2,usurer:3})[enemy.id]??4)*25)+'%';
   const rule=key=>'<div class="brief-house-rule"><b>'+BOSSES[key].name+'</b><p>'+BOSSES[key].desc+'</p></div>';
-  return '<div class="battle-brief"><header class="brief-header"><div class="brief-portrait" aria-hidden="true" style="--portrait-x:'+portrait+'"></div><div><div class="kicker">Анте '+G.ante+' · '+BLIND_NAMES[G.blind]+'</div><h2>'+enemy.name+'</h2><p>'+(G.elite?'Элитный противник':enemy.type==='boss'?'Босс казино':enemy.type==='mini'?'Мини-босс':'Следующий противник')+'</p></div></header>'+
+  return '<div class="battle-brief"><header class="brief-header"><div class="brief-portrait" aria-hidden="true" style="--portrait-x:'+portrait+'"></div><div><div class="kicker">Этап '+G.ante+' · '+BLIND_NAMES[G.blind]+'</div><h2>'+enemy.name+'</h2><p>'+(G.elite?'Элитный противник':enemy.type==='boss'?'Босс казино':enemy.type==='mini'?'Мини-босс':'Следующий противник')+'</p></div></header>'+
    '<div class="brief-stats"><div><span>HP врага</span><strong>'+fmt(enemy.hp)+'</strong></div><div><span>Ходов на бой</span><strong>'+seatsCount()+'</strong></div><div><span>Цель карт</span><strong>'+limitNow()+'</strong></div></div>'+
    (enemyTrait()?'<p class="brief-trait">'+enemyTrait()+'</p>':'')+
    (boss?'<div class="brief-rules-title">Правило дома</div>'+rule(G.boss)+(G.boss2?rule(G.boss2):''):'')+

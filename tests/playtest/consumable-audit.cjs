@@ -1,10 +1,9 @@
-const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const fs=require('node:fs');
+const {launch,load,writeReport}=require('./runtime.cjs');
 (async()=>{
- const browser=await chromium.launch({channel:'msedge',headless:true});
+ const browser=await launch();
  try{
  const page=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});
- await page.route('https://telegram.org/**',r=>r.abort());await page.goto((process.env.GAME_URL || require('node:url').pathToFileURL(require('node:path').resolve(__dirname, '../../index.html')).href));
+ await load(page);
  const report=await page.evaluate(()=>{
   const findings=[],checks=[];
   function reset(key){newGame(0,'classic');hideOverlay();startSeat();G.cons=[CONS[key]];G.enemy.hp=G.enemy.maxHp=100000;}
@@ -32,6 +31,6 @@ const fs=require('node:fs');
   reset('minus2');G.cons=[CONS.peek,CONS.freeze];G.jokers=[JOKERS.find(j=>j.id==='sync')];G.seat.tables.forEach(t=>{t.cards=[card('2')];t.stood=true});check('Sync is not a free multiplier for manually stopped small hands',!evalSeat(G.seat).tags.some(t=>t.includes('синхронизация')),{tags:evalSeat(G.seat).tags});
   return {checks,findings};
  });
- fs.writeFileSync(__dirname+'/consumable-audit.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
+ writeReport('consumable-audit.json',report);console.log(JSON.stringify(report,null,2));if(report.findings.length)process.exitCode=1;
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});

@@ -1090,6 +1090,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/mobile-polish.css?v=20261028-3">
 <link rel="stylesheet" href="assets/heal-fx.css?v=20261028-4">
 <link rel="stylesheet" href="assets/game-menu.css?v=20261028-5">
+<link rel="stylesheet" href="assets/ui-refinements.css?v=20261028-2">
+<script src="assets/ui-refinements.js?v=20261028-1" defer></script>
 </head>
 <body>
 
@@ -1098,8 +1100,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <header id="hud">
   <div class="hud-left">
     <div class="brand" aria-label="ВОЧКО"><span class="brand-spade">♠</span><span class="brand-name">ВОЧКО</span></div>
-    <div class="pill"><span class="label">Анте</span><span class="val" id="hud-ante">1</span></div>
-    <div class="pill"><span class="label">Блайнд</span><span class="val small" id="hud-blind">Малый</span></div>
+    <div class="pill"><span class="label">Этап</span><span class="val" id="hud-ante">1</span></div>
+    <div class="pill"><span class="label">Бой</span><span class="val small" id="hud-blind">Малый</span></div>
   </div>
   <div class="hud-mid">
     <div class="hud-target">
@@ -1145,6 +1147,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
       </div>
       <div id="battle-result" role="status" aria-live="polite"></div>
     </section>
+    <div id="target-cycle" class="target-cycle" role="status" aria-live="polite" hidden></div>
     <div id="cons" aria-label="Расходники"></div>
     <div id="hand"></div>
 
@@ -1162,6 +1165,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
       </div>
       <div class="preview-note" id="preview-note"></div>
       <div id="tags"></div>
+      <button class="ghost damage-details-btn" id="damage-details">Как считается урон?</button>
     </div>
 
     <div id="jokers-bar" aria-label="Ваши джокеры">
@@ -1184,9 +1188,9 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
   <aside id="side">
     <div class="panel">
       <h4>Забег</h4>
-      <div class="kv"><span>Цель места</span><b id="side-limit">21</b></div>
+      <div class="kv"><span>Цель карт</span><b id="side-limit">21</b></div>
       <div class="kv"><span>Колода</span><b id="side-deck">52 / 52</b></div>
-      <div class="kv"><span>Лучшее место</span><b id="side-best">0</b></div>
+      <div class="kv"><span>Лучший ход</span><b id="side-best">0</b></div>
     </div>
     <div class="panel" id="boss-panel"></div>
       <div class="panel" id="relic-panel"></div>
@@ -1208,10 +1212,11 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261028-3"></script>
+<script src="assets/game-features.js?v=20261028-6"></script>
+<script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js"></script>
 <script src="assets/heal-fx.js?v=20261028-4"></script>
-<script src="assets/game-menu.js?v=20261028-5"></script>
+<script src="assets/game-menu.js?v=20261028-6"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -1242,8 +1247,8 @@ const CONFIG = {
   blackBonus3: 10, blackBonus4: 15,
 };
 
-const BLIND_NAMES = ['Малый блайнд', 'Большой блайнд', 'Босс-блайнд'];
-const BLIND_SHORT = ['Малый', 'Большой', 'Босс'];
+const BLIND_NAMES = ['Первый бой', 'Второй бой', 'Босс'];
+const BLIND_SHORT = ['Первый', 'Второй', 'Босс'];
 
 const SUITS = [
   { sym: '♠', color: 'black' },
@@ -1262,75 +1267,77 @@ const JOKERS = [
   { id: 'six', name: 'Шестёрка', emoji: '6️⃣', price: 4, desc: 'Карты 2–6 дают +40 чипов.' },
   { id: 'lucky7', name: 'Счастливая семёрка', emoji: '7️⃣', price: 4, desc: 'Каждая семёрка даёт +80 чипов.' },
   { id: 'redblack', name: 'Красное / чёрное', emoji: '♦️', price: 5, desc: 'Красные карты: +0,25 множителя. Чёрные: +15 чипов.' },
-  { id: 'tips', name: 'Чаевые', emoji: '🪙', price: 4, desc: '+$1 за точное попадание в цель и +$1 за каждое неиспользованное место.' },
+  { id: 'tips', name: 'Чаевые', emoji: '🪙', price: 4, desc: '+$1 за точное попадание в цель и +$1 за каждый неиспользованный ход.' },
   { id: 'counter', name: 'Счётчик', emoji: '🧮', price: 6, desc: '+0,25 множителя за каждую сыгранную за забег карту 2–5. Максимум +3.' },
   { id: 'cushion', name: 'Подушка', emoji: '🛏️', price: 6, desc: 'Перелёт на 1 над целью не считается перебором (множитель как за расстояние 1).' },
-  { id: 'gambler', name: 'Азартный', emoji: '🎲', price: 5, desc: '+0,5 множителя за каждую карту в руке сверх второй.' },
+  { id: 'gambler', name: 'Азартный', emoji: '🎲', price: 5, desc: '+0,5 множителя за каждую карту на столе сверх второй.' },
   { id: 'miser', name: 'Скряга', emoji: '👛', price: 5, desc: '+0,5 множителя за каждый неиспользованный расходник.' },
   { id: 'insurer', name: 'Страховщик', emoji: '🧾', price: 4, desc: '+$2 за каждый перебор.' },
   { id: 'face', name: 'Портретист', emoji: '👑', price: 4, desc: 'Каждые J, Q, K дают +30 чипов.' },
   { id: 'streak', name: 'Точный ритм', emoji: '🎯', price: 5, desc: 'Каждое точное попадание в цель за забег навсегда даёт +0,1 к множителю (максимум +3).' },
-  { id: 'hearts', name: 'Сердечный договор', emoji: '♥️', price: 4, desc: 'Каждая черва даёт +25 чипов. Три и больше червей в руке — ещё +1 к множителю.' },
-  { id: 'triple', name: 'Тройной удар', emoji: '🔱', price: 6, desc: 'Ровно 3 карты в руке дают +60 чипов и +0,5 к множителю.' },
-  { id: 'precision', name: 'Джокер точности', emoji: '🎯', price: 6, desc: 'Каждый стол ровно в цель даёт +25% к очкам всего места.' },
-  { id: 'suits', name: 'Джокер масти', emoji: '♥️', price: 5, desc: 'Червы на разных столах: +15% к очкам места за каждый стол с червой (от двух столов).' },
+  { id: 'hearts', name: 'Сердечный договор', emoji: '♥️', price: 4, desc: 'Каждая черва даёт +25 чипов. Три и больше червей на столе — ещё +1 к множителю.' },
+  { id: 'triple', name: 'Тройной удар', emoji: '🔱', price: 6, desc: 'Ровно 3 карты на столе дают +60 чипов и +0,5 к множителю.' },
+  { id: 'precision', name: 'Джокер точности', emoji: '🎯', price: 6, desc: 'Каждый стол ровно в цель даёт +25% к очкам всего хода.' },
+  { id: 'suits', name: 'Джокер масти', emoji: '♥️', price: 5, desc: 'Червы на разных столах: +15% к очкам хода за каждый стол с червой (от двух столов).' },
   { id: 'risk', name: 'Джокер риска', emoji: '⚠️', price: 6, desc: 'Если хотя бы один стол перебрал, остальные столы приносят x1.5.' },
   { id: 'refund', name: 'Джокер перебора', emoji: '♻️', price: 5, desc: 'За каждый перебитый стол возвращает 25% очков лучшего стола.' },
-  { id: 'sync', name: 'Синхронизация', emoji: '🔗', price: 7, desc: 'Если все три стола закрыты (точно в цель, перебор или полный), очки места x1.5.' },
+  { id: 'sync', name: 'Синхронизация', emoji: '🔗', price: 7, desc: 'Если все доступные столы (минимум три) точные, с перебором или заполнены, очки хода x1.5. Ручной стоп сам по себе не считается.' },
   { id: 'tandem', name: 'Тандем', emoji: '👯', price: 6, desc: 'Два стола с одинаковой суммой: очки каждого из них ×1,5.' },
-  { id: 'ladder', name: 'Лесенка', emoji: '🪜', price: 7, desc: 'Суммы трёх столов идут подряд (например 19, 20, 21): очки места ×2.' },
+  { id: 'ladder', name: 'Лесенка', emoji: '🪜', price: 7, desc: 'Суммы трёх столов идут подряд (например 19, 20, 21): очки хода ×2.' },
   { id: 'relay', name: 'Эстафета', emoji: '🏃', price: 5, desc: 'Стол, идущий сразу после точного стола, получает +40 чипов.' },
-  { id: 'balance', name: 'Равновесие', emoji: '⚖️', price: 4, desc: 'Все три стола в пределах 2 очков от цели без перебора: очки места ×1,4.' },
+  { id: 'balance', name: 'Равновесие', emoji: '⚖️', price: 4, desc: 'Все три стола в пределах 2 очков от цели без перебора: очки хода ×1,4.' },
   { id: 'crimson', name: 'Красная рука', emoji: '🌹', price: 5, rarity: 'rare', desc: 'Красные столы лечат на 50% больше: 15 HP за 3 карты и 23 за 4.' },
   { id: 'blot', name: 'Чёрная краска', emoji: '🖤', price: 5, rarity: 'rare', desc: 'Чёрные столы дают ещё +10% к очкам: 20% за 3 карты и 25% за 4.' },
   { id: 'banker', name: 'Ростовщик', emoji: '🏧', price: 5, desc: '+0,15 множителя на каждом столе за каждые $10 в кармане (максимум +1,5).' },
   { id: 'alchemist', name: 'Алхимик', emoji: '⚗️', price: 6, desc: 'Использованный расходник с шансом 35% не тратится.' },
-  { id: 'adrenaline', name: 'Адреналин', emoji: '💉', price: 6, desc: 'Каждый перебитый стол даёт +0,5 множителя столам следующих мест блайнда (максимум +3).' },
+  { id: 'adrenaline', name: 'Адреналин', emoji: '💉', price: 6, desc: 'Каждый перебитый стол даёт +0,5 множителя столам следующих ходов боя (максимум +3).' },
   { id: 'surgeon', name: 'Хирург', emoji: '🔪', price: 5, desc: 'Срезы режут на 1 больше, усилители добавляют на 1 больше.' },
   { id: 'ice', name: 'Лёд', emoji: '🧊', price: 4, desc: 'Замороженный стол приносит очки ×1,5.' },
-  { id: 'diplomat', name: 'Дипломат', emoji: '🕊️', price: 10, rarity: 'legendary', desc: 'Правило дома босса действует только на первые два места блайнда.' },
-  { id: 'allin', name: 'Всё или ничего', emoji: '🎰', price: 10, rarity: 'legendary', desc: 'Очки места ×2, но если хоть один стол перебрал, место приносит 0.' },
-  { id: 'phoenix', name: 'Феникс', emoji: '🔥', price: 10, rarity: 'legendary', desc: 'Раз за блайнд место, обнулённое переборами, не тратится.' },
+  { id: 'diplomat', name: 'Дипломат', emoji: '🕊️', price: 10, rarity: 'legendary', desc: 'Правило дома босса действует только на первые два хода боя.' },
+  { id: 'allin', name: 'Всё или ничего', emoji: '🎰', price: 10, rarity: 'legendary', desc: 'Очки хода ×2, но если хоть один стол перебрал, ход приносит 0.' },
+  { id: 'phoenix', name: 'Феникс', emoji: '🔥', price: 10, rarity: 'legendary', desc: 'Раз за бой ход, обнулённый переборами, не тратится.' },
   { id: 'pair', name: 'Пара', emoji: '👯', price: 7, desc: 'Если среди сыгранных карт есть две одного номинала — очки x2.' },
-  { id: 'wide', name: 'Широкий стол', emoji: '🃏', price: 7, desc: 'В руке можно держать 5 карт вместо 4. Срезы спасут сумму.' },
-  { id: 'xray', name: 'Сканер', emoji: '👁️', price: 5, desc: 'Видишь следующую карту колоды. Хватает на 5 мест, потом сгорает.' },
+  { id: 'wide', name: 'Широкий стол', emoji: '🃏', price: 7, desc: 'На столе можно держать 5 карт вместо 4. Срезы спасут сумму.' },
+  { id: 'xray', name: 'Сканер', emoji: '👁️', price: 5, desc: 'Видишь следующую карту колоды. Хватает на 5 ходов, потом сгорает.' },
 ];
 const MODS = {
-  gold: { name: 'Золотая', emoji: '💰', desc: '+$2 при розыгрыше руки (без перебора).' },
-  glass: { name: 'Стеклянная', emoji: '🔷', desc: 'Очки руки x2, но после розыгрыша карта разбивается с шансом 25%.' },
+  gold: { name: 'Золотая', emoji: '💰', desc: '+$2 при розыгрыше стола (без перебора).' },
+  glass: { name: 'Стеклянная', emoji: '🔷', desc: 'Очки стола x2, но после розыгрыша карта разбивается с шансом 25%.' },
   wild: { name: 'Дикая', emoji: '🌈', desc: 'Значение подбирается автоматически от 1 до 11.' },
   heavy: { name: 'Тяжёлая', emoji: '⚖️', desc: 'Чипы карты удваиваются.' },
   curse: { name: 'Проклятая', emoji: '💀', desc: 'Даёт значение, но 0 чипов. Убирается в кузнице.' },
 };
 const RELICS = {
-  vault: { name: 'Сейф', emoji: '🏦', desc: '+$3 к награде за каждый блайнд.' },
+  vault: { name: 'Сейф', emoji: '🏦', desc: '+$3 к награде за каждый бой.' },
   belt: { name: 'Пояс', emoji: '🎒', desc: '+1 слот расходников.' },
   slot: { name: 'Запасной слот', emoji: '🃏', desc: '+1 слот джокера.' },
   anvil: { name: 'Наковальня', emoji: '⚒️', desc: 'Каждая карта даёт +10 чипов.' },
   crown: { name: 'Корона', emoji: '👑', desc: '+$2 за каждый стол ровно в цель.' },
   prism: { name: 'Призма', emoji: '🔺', desc: '+0,5 множителя на каждом столе.' },
-  kit: { name: 'Аптечка', emoji: '🩹', desc: 'В начале каждого блайнда получаешь Срез −2.' },
+  kit: { name: 'Аптечка', emoji: '🩹', desc: 'В начале каждого боя получаешь Срез −2.' },
   piggy: { name: 'Копилка', emoji: '🐷', desc: 'Потолок процентов +5.' },
-  echo: { name: 'Эхо', emoji: '📣', desc: 'Неиспользованные места приносят вдвое больше.' },
+  echo: { name: 'Эхо', emoji: '📣', desc: 'Неиспользованные ходы приносят вдвое больше.' },
 };
 const STAKES = [
   { name: 'Белый', desc: 'Обычные правила.' },
-  { name: 'Бронза', desc: 'Цели блайндов +10%.' },
+  { name: 'Бронза', desc: 'Цели боёв +10%.' },
   { name: 'Серебро', desc: 'Боссы получают второе правило дома.' },
-  { name: 'Золото', desc: 'Награда за блайнд на $1 меньше.' },
-  { name: 'Платина', desc: 'Три места на блайнд вместо четырёх.' },
+  { name: 'Золото', desc: 'Награда за бой на $1 меньше.' },
+  { name: 'Платина', desc: 'Три хода на бой вместо четырёх.' },
   { name: 'Алмаз', desc: 'Всё в магазине дороже на $1.' },
 ];
-const BOSS_CLASH = { hot: 'lowLimit', lowLimit: 'hot', nocons: 'thin', thin: 'nocons' };
-function bossIs(k) {
+const BOSS_CLASH = { hot: ['lowLimit','pendulum'], lowLimit: ['hot','pendulum'], pendulum: ['hot','lowLimit'], nocons: ['thin'], thin: ['nocons'] };
+const PENDULUM_TARGETS = [21,18,25];
+function bossRuleActive(k, spent = seatsCount() - G.seatsLeft) {
   if (!G || (G.boss !== k && G.boss2 !== k)) return false;
-  return !(hasJoker('diplomat') && seatsCount() - G.seatsLeft >= 2);
+  return !(hasJoker('diplomat') && spent >= 2);
 }
+function bossIs(k) { return !!G && bossRuleActive(k); }
 function hasRelic(id) { return !!(G && G.relics && G.relics.includes(id)); }
 function consSlots() { return CONFIG.consSlots + (hasRelic('belt') ? 1 : 0) + ((G && G.slotC) || 0); }
 function maxJokers() { return CONFIG.maxJokers + (hasRelic('slot') ? 1 : 0) + ((G && G.slotJ) || 0); }
 function tablesPerSeat() { return 3 + ((G && G.extraTables) ? 1 : 0); }
-// Лечение и банки продаются только в магазине после босса (или элитного блайнда).
+// Лечение и банки продаются только в магазине после босса (или элитного боя).
 function shopHealOpen() { return !!(G && (G.blind === 2 || G.elite)); }
 function baseReward() { return CONFIG.baseReward - (G && G.stake >= 3 ? 1 : 0); }
 function seatsCount() { return CONFIG.seats + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.stake >= 4 ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
@@ -1342,16 +1349,16 @@ function unlockStake(n) {
 }
 const CONS = {
   shuffle: { kind: 'shuffle', n: 0, name: 'Перетасовка', price: 3, desc: 'Тасует колоду вместе со сбросом: следующие карты изменятся.' },
-  peek3: { kind: 'peek3', n: 0, name: 'Дальновидность', price: 4, desc: 'Показывает 3 следующие карты колоды на это место.' },
+  peek3: { kind: 'peek3', n: 0, name: 'Дальновидность', price: 4, desc: 'Показывает 3 следующие карты колоды на весь ход.' },
   burn: { kind: 'burn', n: 0, name: 'Сжечь', price: 2, desc: 'Сбрасывает верхнюю карту колоды (хорошо после «Подсмотреть»).' },
-  freeze: { kind: 'freeze', n: 0, name: 'Заморозка', price: 5, desc: 'Фиксирует сумму руки. Следующие карты дают чипы, но не меняют сумму.' },
-  minus2: { kind: 'minus', n: 2, name: 'Срез −2', price: 2, desc: '−2 к сумме руки. Чипы остаются.' },
-  minus4: { kind: 'minus', n: 4, name: 'Срез −4', price: 4, desc: '−4 к сумме руки. Чипы остаются.' },
-  plus2: { kind: 'plus', n: 2, name: 'Усилитель +2', price: 3, desc: '+2 к сумме руки и +20 чипов.' },
-  pct30: { kind: 'pct', n: 0.3, name: 'Срез 30%', price: 5, desc: 'Уменьшает сумму руки на 30% (с округлением вверх). Чипы остаются.' },
-  peek: { kind: 'peek', n: 0, name: 'Подсмотреть', price: 2, desc: 'Показывает следующую карту колоды на это место.' },
+  freeze: { kind: 'freeze', n: 0, name: 'Заморозка', price: 5, desc: 'Фиксирует сумму стола. Следующие карты дают чипы, но не меняют сумму.' },
+  minus2: { kind: 'minus', n: 2, name: 'Срез −2', price: 2, desc: '−2 к сумме стола. Чипы остаются.' },
+  minus4: { kind: 'minus', n: 4, name: 'Срез −4', price: 4, desc: '−4 к сумме стола. Чипы остаются.' },
+  plus2: { kind: 'plus', n: 2, name: 'Усилитель +2', price: 3, desc: '+2 к сумме стола и +20 чипов.' },
+  pct30: { kind: 'pct', n: 0.3, name: 'Срез 30%', price: 5, desc: 'Уменьшает сумму стола на 30% (с округлением вверх). Чипы остаются.' },
+  peek: { kind: 'peek', n: 0, name: 'Подсмотреть', price: 2, desc: 'Показывает следующую карту колоды на весь ход.' },
   swap: { kind: 'swap', n: 0, name: 'Подмена', price: 4, desc: 'Заменяет последнюю взятую карту новой.' },
-  plus4: { kind: 'plus', n: 4, name: 'Усилитель +4', price: 5, desc: '+4 к сумме руки и +40 чипов.' },
+  plus4: { kind: 'plus', n: 4, name: 'Усилитель +4', price: 5, desc: '+4 к сумме стола и +40 чипов.' },
   remove: { kind: 'remove', n: 0, name: 'Убрать карту', price: 4, desc: 'Выбери любую выложенную карту на любом столе и отправь её в сброс. Можно спасти перебор или открыть закрытый стол. Из колоды карта не удаляется.' },
   move: { kind: 'move', n: 0, name: 'Перенос', price: 5, desc: 'Перенеси одну карту между любыми незаблокированными столами. Можно спасти перебор. На столе назначения должно быть свободное место.' },
 };
@@ -1372,18 +1379,19 @@ function rollJokerOffers(n) {
 }
 function consPower(k) { return k.n + (hasJoker('surgeon') && (k.kind === 'minus' || k.kind === 'plus') ? 1 : 0); }
 const BOSSES = {
+  pendulum: { name: 'Маятник', desc: 'Цель карт меняется в начале каждого хода: 21 → 18 → 25, затем повторяется. Во время добора цель не меняется.' },
   odd: { name: 'Чётный дом', desc: 'Нечётные карты (3, 5, 7, 9) дают 0 чипов, но считаются в сумму.' },
   ace11: { name: 'Тузобой', desc: 'Тузы всегда 11 — единицей их не сыграть.' },
-  nocons: { name: 'Печать', desc: 'Расходники на этом блайнде не работают.' },
-  max3: { name: 'Теснота', desc: 'Не больше 3 карт в руке.' },
-  hot: { name: 'Горячая цель', desc: 'Цель места выше на 2.' },
-  thin: { name: 'Один расходник', desc: 'На каждое место можно применить только один расходник.' },
-  noplus: { name: 'Без усилителей', desc: 'Усилители (+N) на этом блайнде не работают.' },
-  thief: { name: 'Вор', desc: 'В начале каждого места у тебя пропадает случайный расходник.' },
-  tax: { name: 'Налог', desc: 'Каждое сыгранное место отнимает $1.' },
+  nocons: { name: 'Печать', desc: 'Расходники на этом бою не работают.' },
+  max3: { name: 'Теснота', desc: 'Не больше 3 карт на столе.' },
+  hot: { name: 'Горячая цель', desc: 'Цель карт выше на 2.' },
+  thin: { name: 'Один расходник', desc: 'На каждый ход можно применить только один расходник.' },
+  noplus: { name: 'Без усилителей', desc: 'Усилители (+N) на этом бою не работают.' },
+  thief: { name: 'Вор', desc: 'В начале каждого хода у тебя пропадает случайный расходник.' },
+  tax: { name: 'Налог', desc: 'Каждый сыгранный ход отнимает $1.' },
   dark: { name: 'Чёрная ночь', desc: 'Красные карты дают вдвое меньше чипов.' },
-  lock: { name: 'Замок', desc: 'На каждом месте один случайный стол заблокирован: карты на него не ложатся.' },
-  lowLimit: { name: 'Урезанная цель', desc: 'Цель места снижена на 3.' },
+  lock: { name: 'Замок', desc: 'На каждом ходу один случайный стол заблокирован: карты на него не ложатся.' },
+  lowLimit: { name: 'Урезанная цель', desc: 'Цель карт снижена на 3.' },
 };
 const BOSS_KEYS = Object.keys(BOSSES);
 
@@ -1442,7 +1450,7 @@ const Effects = {
       ['relic','vitality','acquire',c=>{if(c.id==='vitality'){G.player.maxHp+=COMBAT.items.vitality;Combat.heal(COMBAT.items.vitality);}}],
       ['relic','revive','lethal',()=>{if(!G.player.revived){const before=G.player.hp;G.player.revived=true;G.player.hp=Math.min(G.player.maxHp,COMBAT.items.revive);HealingFX.record(G,G.player.hp-before,before,'revive');log('Последний шанс спасает от смерти!','good');}}]
     ];
-    defs.forEach(([kind,id,event,fn])=>{if(event===hook && (kind==='joker'?hasJoker(id):hasRelic(id)))fn(ctx);});
+    defs.forEach(([kind,id,event,fn])=>{if(event===hook && (kind==='joker'?hasJoker(id):hasRelic(id))){const before={mult:ctx.mult,shieldBonus:ctx.shieldBonus};fn(ctx);if(hook==='attack'&&(ctx.mult!==before.mult||ctx.shieldBonus!==before.shieldBonus)){(ctx.steps||(ctx.steps=[])).push({name:kind==='joker'?JOKERS.find(j=>j.id===id).name:RELICS[id].name,mult:ctx.mult-before.mult,shieldBonus:ctx.shieldBonus-before.shieldBonus});}}});
     return ctx;
   },
   add(actor,id,power) { const e=actor.effects.find(x=>x.id===id); if(e)e.power=power;else actor.effects.push({id,power}); },
@@ -1451,7 +1459,7 @@ const Effects = {
 const Enemy = {
   create() {
     const type=G.blind===2?'boss':(G.blind===1||G.elite)?'mini':'normal';
-    const def=type==='boss'?{id:G.boss,name:BOSSES[G.boss].name,glyph:({odd:'♚',ace11:'A',nocons:'✦',max3:'Ⅲ',hot:'☀',thin:'Ⅰ',noplus:'−',thief:'♝',tax:'$',dark:'☾',lock:'⚿',lowLimit:'↓'}[G.boss]),moves:['attack','guard','heavy','rage']}:
+    const def=type==='boss'?{id:G.boss,name:BOSSES[G.boss].name,glyph:({pendulum:'◷',odd:'♚',ace11:'A',nocons:'✦',max3:'Ⅲ',hot:'☀',thin:'Ⅰ',noplus:'−',thief:'♝',tax:'$',dark:'☾',lock:'⚿',lowLimit:'↓'}[G.boss]),moves:['attack','guard','heavy','rage']}:
       pick(ENEMIES.slice(type==='normal'?0:2,type==='normal'?2:4));
     return {...def,type,hp:G.target,maxHp:G.target,shield:0,armor:def.armor?COMBAT.armor:0,
       phase:1,effects:[],intent:null};
@@ -1572,7 +1580,7 @@ const BattleUI = {
     intent.className = e.hp <= 0 ? 'dead' : '';
     intent.textContent = e.hp <= 0 ? 'Противник повержен'
       : i ? ('Далее: ' + this.labels[i.kind] + (i.amount ? ' · ' + fmt(i.amount) : ''))
-      : 'Намерение появится в начале места';
+      : 'Намерение появится в начале хода';
     intent.title='За каждый перебор дополнительно '+COMBAT.bustPenalty+' входящего урона, если враг выжил';
     if(G.phase==='play' && e.id==='collector' && ['attack','heavy','hex'].includes(i?.kind)) {
       if(G.battle.bribed)intent.textContent='Откуп принят · атака отменена';
@@ -1582,7 +1590,7 @@ const BattleUI = {
     $('#player-hp').textContent = '\u2665 ' + p.hp + ' / ' + p.maxHp;
     $('#player-status').textContent = '\ud83d\udee1 ' + p.shield + (status(p) ? ' · ' + status(p) : '');
     $('#player-seats').textContent = (G.phase === 'play' || G.phase === 'intro')
-      ? ('места ' + '\u25cf'.repeat(Math.max(0, G.seatsLeft)) + '\u25cb'.repeat(Math.max(0, seatsCount() - G.seatsLeft)))
+      ? ('ходы ' + '\u25cf'.repeat(Math.max(0, G.seatsLeft)) + '\u25cb'.repeat(Math.max(0, seatsCount() - G.seatsLeft)))
       : '';
     const pbar = $('#player-health');
     pbar.style.width = (100 * p.hp / p.maxHp) + '%';
@@ -1657,8 +1665,12 @@ function flashHint(text) {
 }
 
 /* ---------------- правила ---------------- */
+function limitForTurn(turn = G.battle?.turn || 0, spent = seatsCount() - G.seatsLeft) {
+  if (bossRuleActive('pendulum', spent)) return PENDULUM_TARGETS[turn % PENDULUM_TARGETS.length];
+  return bossRuleActive('lowLimit', spent) ? G.limit - 3 : bossRuleActive('hot', spent) ? G.limit + 2 : G.limit;
+}
 function limitNow() {
-  return bossIs('lowLimit') ? G.limit - 3 : bossIs('hot') ? G.limit + 2 : G.limit;
+  return G.seat?.goal ?? limitForTurn();
 }
 function hasJoker(id) { return G.jokers.some((j) => j.id === id); }
 function multBaseFor(d) {
@@ -1687,7 +1699,9 @@ function cardChips(c) {
 }
 function scorePlay(cards, sum, lim, xc) {
   const d = sum - lim;
-  if (d > 0 && !(hasJoker('cushion') && d === 1)) {
+  const royal = cards.filter(c => c.rank === 'K').length >= 3;
+  const critical = cards.filter(c => c.rank === 'A').length >= 3;
+  if (d > 0 && !royal && !(hasJoker('cushion') && d === 1)) {
     let bc = xc || 0;
     for (const c of cards) bc += cardChips(c);
     return { chips: bc, mult: 0, score: 0, tags: ['ПЕРЕБОР: 0 очков'], sum, bust: true };
@@ -1725,7 +1739,9 @@ function scorePlay(cards, sum, lim, xc) {
   }
   const gl = cards.filter((c) => c.mod === 'glass').length;
   if (gl) { score *= Math.pow(2, gl); tags.push('стекло x' + Math.pow(2, gl)); }
-  return { chips, mult, score, tags, sum };
+  if (critical) { score *= 2; tags.push('три туза · крит ×2'); }
+  if (royal) tags.push('три короля · без перебора');
+  return { chips, mult, score, tags, sum, critical, royal };
 }
 function evalPlay(cards, adj) {
   adj = adj || { dv: 0, dc: 0 };
@@ -1836,6 +1852,7 @@ function startBlind() {
   G.contract = G.nextContract || null; G.nextContract = null;
   G.consUsed = 0;
   G.score = 0;
+  G.battleSummary = {turns:0,busts:0,bustChips:0,damage:0}; G.lastTurn = null;
   G.seatsLeft = seatsCount();
   G.pushThisBlind = 0;
   G.seat = null;
@@ -1845,7 +1862,7 @@ function startBlind() {
   G.adrenaline = 0; G.phoenixUsed = false;
   G.boss2 = null;
   if (G.boss && G.blind === 2 && (G.stake >= 2 || G.ante >= 7)) {
-    G.boss2 = pick(BOSS_KEYS.filter((k) => k !== G.boss && BOSS_CLASH[G.boss] !== k));
+    G.boss2 = pick(BOSS_KEYS.filter((k) => k !== G.boss && !(BOSS_CLASH[G.boss] || []).includes(k)));
   }
   G.limit = 21 + (G.ante - 1);
   G.target = targetFor(G.ante, G.blind);
@@ -1876,7 +1893,8 @@ function startSeat() {
     const k = G.cons.splice(Math.floor(Math.random() * G.cons.length), 1)[0];
     log('Вор украл «' + k.name + '»', 'bad');
   }
-  G.seat = { tables: makeTables(), sel: null, used: false, peek: false, locked: false };
+  const goal = limitForTurn();
+  G.seat = { goal, tables: makeTables(), sel: null, used: false, peek: false, locked: false };
   G.phase = 'play';
   render();
 }
@@ -2010,7 +2028,7 @@ function evalSeat(s) {
     total += back; tags.push('возврат +' + fmt(back));
   }
   const closed = s.tables.every((t) => t.blocked || t.cards.length && (t.locked || t.dead || t.stood || t.cards.length >= maxPlay()));
-  if (hasJoker('sync') && closed) { total = Math.round(total * 1.5); tags.push('синхронизация x1.5'); }
+  if (hasJoker('sync') && s.tables.filter(t=>!t.blocked).length >= 3 && s.tables.every((t,i)=>t.blocked || t.cards.length && (T[i].exact || T[i].bust || t.cards.length >= maxPlay()))) { total = Math.round(total * 1.5); tags.push('синхронизация x1.5'); }
   if (hasJoker('balance') && T.every((r) => !r.empty && !r.bust && r.sum >= lim - 2)) { total = Math.round(total * 1.4); tags.push('равновесие x1.4'); }
   if (hasJoker('ladder') && live.length === 3) {
     const sm = live.map((r) => r.sum).sort((a, b) => a - b);
@@ -2063,8 +2081,8 @@ function applyCons(ti) {
   if (t.dead) { flashHint('Этот стол выбыл'); return; }
   if (t.locked) { flashHint('Стол уже зафиксирован точной суммой'); return; }
   if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
-  if (bossIs('noplus') && k.kind === 'plus') { flashHint('Усилители на этом блайнде не работают'); return; }
-  if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+  if (bossIs('noplus') && k.kind === 'plus') { flashHint('Усилители на этом бою не работают'); return; }
+  if (bossIs('thin') && s.used) { flashHint('Один расходник на ход'); return; }
   if (!t.cards.length) { flashHint('Сначала положи карту на этот стол'); return; }
   if (k.kind === 'swap' && t.adj.fz && t.cards.length <= t.adj.fz) { flashHint('Нельзя: карта уже заморожена в сумме'); return; }
   if (k.kind === 'freeze' && t.adj.fz) { flashHint('Сумма стола уже заморожена'); return; }
@@ -2096,26 +2114,26 @@ function pickCons(i) {
   if (G.phase !== 'play' || !s || !k || s.locked) return;
   if (k.kind === 'move') {
     if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
-    if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+    if (bossIs('thin') && s.used) { flashHint('Один расходник на ход'); return; }
     if (!s.tables.some((t,ti)=>!t.blocked&&t.cards.length&&transferTargets(s,ti).length)) { flashHint('Нет карты для переноса или свободного места на другом столе'); return; }
     s.sel=i;render();showTransferPicker(s);return;
   }
   if (k.kind === 'remove') {
     if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
-    if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+    if (bossIs('thin') && s.used) { flashHint('Один расходник на ход'); return; }
     if (!s.tables.some(t => !t.blocked && t.cards.length)) { flashHint('Сначала выложи хотя бы одну карту'); return; }
     s.sel = i; render(); showRemovePicker(s); return;
   }
   if (k.kind === 'peek') {
     if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
-    if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+    if (bossIs('thin') && s.used) { flashHint('Один расходник на ход'); return; }
     if (!ensureDrawPile()) { flashHint('Колода пуста'); return; }
     if (s.peek || s.peek3) { flashHint('Следующая карта уже открыта'); return; }
     s.peek = true; s.used = true; G.consUsed = (G.consUsed || 0) + 1; G.cons.splice(i, 1); s.sel = null; render(); return;
   }
   if (k.kind === 'shuffle' || k.kind === 'peek3' || k.kind === 'burn') {
     if (bossIs('nocons')) { flashHint('Печать: расходники не работают'); return; }
-    if (bossIs('thin') && s.used) { flashHint('Один расходник на место'); return; }
+    if (bossIs('thin') && s.used) { flashHint('Один расходник на ход'); return; }
     if (!ensureDrawPile()) { flashHint('Колода пуста'); return; }
     if (k.kind === 'peek3' && s.peek3) { flashHint('Следующие карты уже открыты'); return; }
     if (k.kind === 'shuffle') G.deck = shuffle(G.deck.concat(G.discard.splice(0)));
@@ -2140,7 +2158,7 @@ function removedCardAdj(adj, index, length) {
 
 function showRemovePicker(s) {
   showOverlay('<div class="kicker">Расходник · в сброс</div><h2>Какую карту убрать?</h2><p class="sub">Выбери одну карту с любого стола. Она вернётся при следующей перетасовке.</p>' +
-    s.tables.map((t, ti) => t.blocked || !t.cards.length ? '' : '<section class="remove-group"><h3>Стол ' + (ti + 1) + '</h3><div class="remove-grid">' + t.cards.map((c, ci) => '<button class="remove-card" data-remove-table="' + ti + '" data-remove-card="' + ci + '" aria-label="Убрать ' + c.rank + c.suit + ' со стола ' + (ti + 1) + '">' + cardElement(c, {mini:1}) + '</button>').join('') + '</div></section>').join('') +
+    s.tables.map((t, ti) => t.blocked || !t.cards.length ? '' : '<section class="remove-group"><h3>Стол ' + (ti + 1) + '</h3><div class="remove-grid">' + t.cards.map((c, ci) => '<button class="remove-card" data-remove-table="' + ti + '" data-remove-card="' + ci + '" aria-label="Убрать ' + c.rank + c.suit + ' со стола ' + (ti + 1) + '">' + cardElement(c, {mini:1}) + '<small>'+previewText(previewConsumable(s,s.sel,ti,ci),ti)+'</small></button>').join('') + '</div></section>').join('') +
     '<div class="row-btns"><button class="ghost" id="remove-cancel">Отмена</button></div>');
   $('#remove-cancel').onclick = () => { if (G.seat === s) s.sel = null; hideOverlay(); render(); };
   document.querySelectorAll('[data-remove-card]').forEach(b => { b.onclick = () => removePlayedCard(s, Number(b.dataset.removeTable), Number(b.dataset.removeCard)); });
@@ -2221,6 +2239,7 @@ function showScoreBurst(r) {
 function finishSeat(res, animated = false) {
   const s = G.seat;
   if (G.phase !== 'play' || !s || G.battle.resolving) return;
+  recordTurnStart(res);
   G.battle.resolving = true;
   G.battle.lastReceived = 0;
   G.battle.lastAction = G.enemy.intent && G.enemy.intent.kind;
@@ -2256,7 +2275,7 @@ function finishSeat(res, animated = false) {
   if(!animated)showScoreBurst({ score: res.total, bust: res.bust > 0 && res.total === 0 });
   if (res.total === 0) tgHaptic('error');
   else if (res.exact > 0) tgHaptic('success');
-  if (hasJoker('phoenix') && !G.phoenixUsed && res.total === 0 && res.bust) { G.phoenixUsed = true; log('Феникс: место не потрачено', 'gold'); }
+  if (hasJoker('phoenix') && !G.phoenixUsed && res.total === 0 && res.bust) { G.phoenixUsed = true; log('Феникс: ход не потрачен', 'gold'); }
   else G.seatsLeft = Math.max(0, G.seatsLeft - 1);
   let healed = 0;
   if (res.heal) {
@@ -2274,6 +2293,7 @@ function finishSeat(res, animated = false) {
   const respond=()=>{
     if(G!==game||G.seat!==s||!G.battle.resolving)return;
     if (G.enemy.hp > 0) Enemy.act(res);
+    recordTurnEnd();
     G.battle.resolving = false;
     G.seat = null;
     checkEnd();
@@ -2301,7 +2321,7 @@ function winBlind() {
   const reward = baseReward() + unused + interest + G.pushThisBlind + tips + (hasRelic('echo') ? unused : 0) + (hasRelic('vault') ? 3 : 0);
   G.money += reward;
   if (G.contract) { G.money += G.contract.reward; log('Контракт выполнен: +$' + G.contract.reward, 'gold'); }
-  if (G.elite) { G.money += 5; log('Элитный блайнд: +$5', 'gold'); }
+  if (G.elite) { G.money += 5; log('Элитный бой: +$5', 'gold'); }
   G.runPoints = (G.runPoints || 0) + G.score;
   if (!G.consUsed) unlockAch('clean');
   if (G.blind === 2 && (G.boss === 'lock' || G.boss2 === 'lock')) unlockAch('lock');
@@ -2316,7 +2336,7 @@ function winBlind() {
     tips,
     total: reward,
   };
-  log('<b>Блайнд пройден!</b> +$' + reward, 'good');
+  log('<b>Бой пройден!</b> +$' + reward, 'good');
   tgHaptic('success');
   render();
   const wonGame=G;
@@ -2383,15 +2403,15 @@ function metaSave() {
   try { const c = { ...META }; delete c.unlockAll; localStorage.setItem(META_KEY, JSON.stringify(c)); } catch (e) {}
 }
 const ACHS = {
-  exact3: { name: 'Снайпер', desc: '3 точных стола за одно место', reward: { joker: 'ladder' } },
-  clean: { name: 'Чистая работа', desc: 'Выиграть блайнд, не использовав расходников', reward: { joker: 'alchemist' } },
-  wipe: { name: 'Полный провал', desc: 'Все занятые столы перебрали на одном месте', reward: { joker: 'adrenaline' } },
-  big: { name: 'Крупный счёт', desc: '10 000 очков за одно место', reward: { joker: 'allin' } },
+  exact3: { name: 'Снайпер', desc: '3 точных стола за один ход', reward: { joker: 'ladder' } },
+  clean: { name: 'Чистая работа', desc: 'Выиграть бой, не использовав расходников', reward: { joker: 'alchemist' } },
+  wipe: { name: 'Полный провал', desc: 'Все занятые столы перебрали за один ход', reward: { joker: 'adrenaline' } },
+  big: { name: 'Крупный счёт', desc: '10 000 очков за один ход', reward: { joker: 'allin' } },
   lock: { name: 'Взломщик', desc: 'Победить босса «Замок»', reward: { joker: 'diplomat' } },
-  ante4: { name: 'Дальний путь', desc: 'Дойти до анте 4', reward: { deck: 'short' } },
+  ante4: { name: 'Дальний путь', desc: 'Дойти до этапа 4', reward: { deck: 'short' } },
   win: { name: 'Победитель', desc: 'Выиграть забег', reward: { deck: 'gold' } },
   rich: { name: 'Богач', desc: 'Накопить $50', reward: { deck: 'glass' } },
-  elite: { name: 'Охотник', desc: 'Победить элитный блайнд', reward: { deck: 'alchemy' } },
+  elite: { name: 'Охотник', desc: 'Победить элитный бой', reward: { deck: 'alchemy' } },
   redhand: { name: 'Красная рука', desc: 'Красные столы вылечили 30 HP за забег', reward: { joker: 'crimson' } },
   blackout: { name: 'Чёрная полоса', desc: 'Сыграть 10 чёрных столов за забег', reward: { joker: 'blot' } },
 };
@@ -2466,15 +2486,15 @@ function nextCardsHTML(s) {
 const NODES = {
   event: { emoji: '❓', name: 'Событие', desc: 'Случайная встреча: риск или выгода.' },
   campfire: { emoji: '🔥', name: 'Кузница', desc: 'Удалить, улучшить или скопировать карту колоды.' },
-  elite: { emoji: '👹', name: 'Элитный блайнд', desc: 'Цель ×1,35 и правило босса. Награда: реликвия и +$5.' },
-  contract: { emoji: '📜', name: 'Контракт', desc: 'Добровольно усложни блайнд за деньги.' },
-  straight: { emoji: '➡️', name: 'Идти прямо', desc: 'Без остановок к блайнду. +$2.' },
+  elite: { emoji: '👹', name: 'Элитный бой', desc: 'Цель ×1,35 и правило босса. Награда: реликвия и +$5.' },
+  contract: { emoji: '📜', name: 'Контракт', desc: 'Добровольно усложни бой за деньги.' },
+  straight: { emoji: '➡️', name: 'Идти прямо', desc: 'Без остановок к бою. +$2.' },
 };
 const CONTRACTS = [
-  { id: 'hard', name: 'Тугая цель', desc: 'Цель блайнда +30%.', targetMul: 1.3, reward: 7 },
-  { id: 'seal', name: 'Печать', desc: 'Расходники на этом блайнде не работают.', boss: 'nocons', reward: 6 },
-  { id: 'fewer', name: 'Тесный зал', desc: 'На одно место меньше.', fewer: true, reward: 6 },
-  { id: 'tax', name: 'Налог', desc: 'Каждое место отнимает $1.', boss: 'tax', reward: 5 },
+  { id: 'hard', name: 'Тугая цель', desc: 'Цель боя +30%.', targetMul: 1.3, reward: 7 },
+  { id: 'seal', name: 'Печать', desc: 'Расходники на этом бою не работают.', boss: 'nocons', reward: 6 },
+  { id: 'fewer', name: 'Тесный зал', desc: 'На один ход меньше.', fewer: true, reward: 6 },
+  { id: 'tax', name: 'Налог', desc: 'Каждый ход отнимает $1.', boss: 'tax', reward: 5 },
 ];
 function openPath(resume = false) {
   G.phase = 'path'; G.pending = 'path';
@@ -2495,8 +2515,8 @@ function openPath(resume = false) {
 function takeNode(key) {
   if (G.pending !== 'path' || !G.path || !G.path.includes(key)) return;
   hideOverlay();
-  if (key === 'straight') { G.money += 2; log('Прямо к блайнду: +$2', 'gold'); leaveNode(); }
-  else if (key === 'elite') { G.nextElite = true; log('Элитный блайнд впереди', 'bad'); leaveNode(); }
+  if (key === 'straight') { G.money += 2; log('Прямо к бою: +$2', 'gold'); leaveNode(); }
+  else if (key === 'elite') { G.nextElite = true; log('Элитный бой впереди', 'bad'); leaveNode(); }
   else if (key === 'event') openEvent();
   else if (key === 'campfire') openCampfire();
   else if (key === 'contract') openContract();
@@ -2533,7 +2553,7 @@ const EVENTS = [
     { label: 'За $7: все карты случайного ранга +1 навсегда', can: () => G.money >= 7, run: () => { G.money -= 7; const rk = pick(['2', '3', '4', '5', '6', '7', '8', '9', '10']); G.runDeck.forEach((c) => { if (c.rank === rk) c.up = (c.up || 0) + 1; }); return 'Все карты «' + rk + '» стали сильнее на 1.'; } },
     { label: 'Уйти', run: () => 'Ты ушёл.' } ] },
   { title: 'Благотворительность', text: 'Старушка просит монету «на удачу».', options: [
-    { label: 'Отдать $4: цель следующего блайнда −12%', can: () => G.money >= 4, run: () => { G.money -= 4; G.nextTargetMod = 0.88; return 'Удача с тобой: цель следующего блайнда на 12% ниже.'; } },
+    { label: 'Отдать $4: цель следующего боя −12%', can: () => G.money >= 4, run: () => { G.money -= 4; G.nextTargetMod = 0.88; return 'Удача с тобой: цель следующего боя на 12% ниже.'; } },
     { label: 'Уйти', run: () => 'Ты прошёл мимо.' } ] },
   { title: 'Старый алхимик', text: 'Стеклянные колбы переливаются на столе.', options: [
     { label: 'Обменять случайный расходник на другой', can: () => G.cons.length > 0, run: () => { const i = Math.floor(Math.random() * G.cons.length); const old = G.cons[i]; const nk = pick(Object.values(CONS).filter((k) => k !== old)); G.cons[i] = nk; return '«' + old.name + '» превратился в «' + nk.name + '».'; } },
@@ -2554,7 +2574,7 @@ function openEvent(resume = false) {
   if (!resume) { seedStage('event'); G.event = pick(EVENTS); }
   const ev = G.event;
   showOverlay(
-    GameMenu.sceneHeader('event','Событие · анте '+G.ante,ev.title,ev.text) +
+    GameMenu.sceneHeader('event','Событие · этап '+G.ante,ev.title,ev.text) +
     '<div class="evt-list">' + ev.options.map((o, i) => '<button class="evt-btn" data-opt="' + i + '"' + (o.can && !o.can() ? ' disabled' : '') + '>' + o.label + '</button>').join('') + '</div>'
   );
   document.querySelectorAll('#overlay [data-opt]').forEach((b) => { b.onclick = () => chooseEvent(Number(b.dataset.opt)); });
@@ -2572,7 +2592,7 @@ function openContract(resume = false) {
   G.phase = 'path'; G.pending = 'contract';
   if (!resume) { seedStage('contract'); G.contractOpts = shuffle(CONTRACTS.slice()).slice(0, 3); }
   showOverlay(
-    GameMenu.sceneHeader('contract','Контракт · анте '+G.ante,'Условия дома','Усложни следующий бой за дополнительную награду. Можно отказаться.') +
+    GameMenu.sceneHeader('contract','Контракт · этап '+G.ante,'Условия дома','Усложни следующий бой за дополнительную награду. Можно отказаться.') +
     '<div class="evt-list">' + G.contractOpts.map((c, i) => '<button class="evt-btn" data-ct="' + i + '"><b>' + c.name + '</b> — ' + c.desc + ' <span class="evt-rew">+$' + c.reward + '</span></button>').join('') +
     '<button class="evt-btn" data-ct="-1">Отказаться</button></div>'
   );
@@ -2589,7 +2609,7 @@ function takeContract(i) {
 function openCampfire() {
   G.phase = 'path'; G.pending = 'forge'; G.forgeMode = null;
   showOverlay(
-    GameMenu.sceneHeader('campfire','Кузница · анте '+G.ante,'Закали свою колоду','Одно действие: удалить, усилить или скопировать карту. Карт в колоде: '+G.runDeck.length+'.') +
+    GameMenu.sceneHeader('campfire','Кузница · этап '+G.ante,'Закали свою колоду','Одно действие: удалить, усилить или скопировать карту. Карт в колоде: '+G.runDeck.length+'.') +
     '<div class="evt-list forge-actions"><button class="evt-btn" data-forge="remove">'+itemArt('cons','remove')+'<span>Удалить карту<small>Навсегда убрать из колоды</small></span></button><button class="evt-btn" data-forge="upgrade">'+itemArt('relic','up')+'<span>Улучшить карту<small>+2 к значению и +20 чипов</small></span></button><button class="evt-btn" data-forge="copy">'+itemArt('joker','pair')+'<span>Скопировать карту<small>Добавить ещё один экземпляр</small></span></button><button class="ghost" data-forge="leave">Пройти мимо</button></div>'
   );
   document.querySelectorAll('#overlay [data-forge]').forEach((b) => { b.onclick = () => forgeAction(b.dataset.forge); });
@@ -2641,7 +2661,7 @@ function showMeta() {
     '<div class="kicker">Прогресс</div><h2>Достижения</h2>' +
     '<div class="rules" style="margin-top:10px">' + Object.keys(ACHS).map((k) => { const a = ACHS[k], done = !!META.ach[k];
       return '<div class="rule"><span class="num">' + (done ? '✓' : '·') + '</span><div><b>' + a.name + '</b> — ' + a.desc + '<br><small style="color:#9fd8bc">Награда: ' + rewardName(a.reward) + '</small></div></div>'; }).join('') + '</div>' +
-    '<div class="setup-rec">Забегов: ' + st.runs + ' · побед: ' + st.wins + ' · лучшее анте: ' + st.bestAnte + ' · лучшее место: ' + fmt(st.bestScore) + (st.endlessBest ? ' · эндлесс: анте ' + st.endlessBest : '') + '</div>' +
+    '<div class="setup-rec">Забегов: ' + st.runs + ' · побед: ' + st.wins + ' · лучший этап: ' + st.bestAnte + ' · лучший ход: ' + fmt(st.bestScore) + (st.endlessBest ? ' · эндлесс: этап ' + st.endlessBest : '') + '</div>' +
     '<div class="row-btns"><button class="primary" id="ov-back">Назад</button></div>'
   );
   $('#ov-back').onclick = () => GameMenu.back();
@@ -2706,7 +2726,7 @@ function coinSummaryHTML() {
   const c = G && G.coinInfo;
   if (!c) return '';
   return '<div class="coin-box"><div class="coin-head">🪙 +' + c.total + ' монет</div><div class="coin-lines">Очков за забег: ' + fmt(c.points) + ' → ' + c.pts +
-    '<br>Пройдено анте: +' + c.antes + (c.winB ? '<br>Победа: +' + c.winB : '') + (c.mult > 1 ? '<br>Множитель стейка: ×' + c.mult : '') +
+    '<br>Пройдено этапов: +' + c.antes + (c.winB ? '<br>Победа: +' + c.winB : '') + (c.mult > 1 ? '<br>Множитель уровня сложности: ×' + c.mult : '') +
     '</div><div class="coin-sub">Всего монет: ' + META.shop.coins + '. Трать их в «Лавке».</div></div>';
 }
 /* --- покупки --- */
@@ -2956,7 +2976,7 @@ function buildShopItems() {
   if (rank) items.push({ kind: 'up', price: 5, rank, sold: false });
   const mc = pickModCard();
   if (mc) items.push({ kind: 'mod', price: 6, mod: mc.mod, card: mc.card, sold: false });
-  // HP продаётся только после босса (или элиты): здоровье — награда за большой блайнд.
+  // HP продаётся только после босса (или элиты): здоровье — награда за большой бой.
   if (shopHealOpen()) items.push({ kind: 'potion', heal: CONFIG.potionHeal, price: CONFIG.potionPrice, left: CONFIG.potionStock, sold: false });
   // Постоянные стоки на забег: слот расходника и четвёртый стол. Слот джокера — в мета-лавке.
   items.push({ kind: 'slotc', price: CONFIG.slotPriceC + CONFIG.slotStepC * (G.slotC || 0), sold: false });
@@ -2981,7 +3001,7 @@ function showRelicChoice() {
   const pool=G.relicChoice,leg=G.legendChoice;
   const legSlot = G.jokers.length < maxJokers();
   showOverlay(
-    '<div class="kicker">' + (G.elite ? 'Элитный блайнд повержен' : 'Босс повержен') + ' · анте ' + G.ante + '</div><h2>Реликвия <span class="thin">/ навсегда</span></h2>' +
+    '<div class="kicker">' + (G.elite ? 'Элитный бой повержен' : 'Босс повержен') + ' · этап ' + G.ante + '</div><h2>Реликвия <span class="thin">/ навсегда</span></h2>' +
     '<p class="sub">Выбери одну. Реликвии работают до конца забега и не занимают слоты джокеров.</p>' +
     '<div class="shop-grid">' + pool.map((k, i) =>
       '<div class="shop-item"><div class="si-emoji">' + itemArt('relic', k) + '</div><div class="si-kind">Реликвия</div><div class="si-name">' + RELICS[k].name + '</div><div class="si-desc">' + RELICS[k].desc + '</div><button class="buy" data-relic="' + i + '">Взять</button></div>').join('') +
@@ -3030,9 +3050,6 @@ function itemArt(type, id) {
 }
 
 function shopItemHTML(it, i) {
-  if (it.sold) {
-    return '<div class="shop-item sold"><div class="si-kind">куплено</div></div>';
-  }
   let kind = '';
   let emoji = '';
   let name = '';
@@ -3061,14 +3078,14 @@ function shopItemHTML(it, i) {
     desc = 'Ещё один расходник до конца забега. Сейчас слотов: ' + consSlots() + '.';
   } else if (it.kind === 'table') {
     kind = 'Столы'; emoji = '🪑'; name = 'Четвёртый стол';
-    desc = 'На каждом месте будет четыре стола вместо трёх. Больше комбо и запаса, но и перебора тоже.';
+    desc = 'На каждом ходу будет четыре стола вместо трёх. Больше комбо и запаса, но и перебора тоже.';
   }
   const noStock = it.kind === 'potion' && it.left <= 0;
   const full = (it.kind === 'joker' && G.jokers.length >= maxJokers()) || (it.kind === 'cons' && G.cons.length >= consSlots());
-  const disabled = G.money < it.price || full || noStock ? 'disabled' : '';
-  const label = noStock ? 'Нет в наличии' : full ? 'Нет слота' : 'Купить · $' + it.price;
+  const disabled = it.sold || G.money < it.price || full || noStock ? 'disabled' : '';
+  const label = it.sold ? '✓ Куплено' : noStock ? 'Нет в наличии' : full ? 'Нет слота' : 'Купить · $' + it.price;
   return (
-    '<div class="shop-item compact-offer ' + extraClass + (it.reserved ? ' is-reserved' : '') + '">' +
+    '<div data-offer="' + i + '" class="shop-item compact-offer ' + extraClass + (it.sold ? ' purchased' : '') + (it.reserved ? ' is-reserved' : '') + '">' +
       '<div class="si-emoji">' + (it.kind === 'joker' ? itemArt('joker', it.joker.id) : it.kind === 'cons' ? itemArt('cons', it.key) : it.kind === 'potion' ? itemArt('cons', 'potion') : itemArt('relic', it.kind) || emoji) + '</div>' +
       '<div class="offer-copy">' +
       '<div class="si-kind">' + kind + '</div>' +
@@ -3076,7 +3093,7 @@ function shopItemHTML(it, i) {
       '<div class="si-desc">' + desc + '</div>' +
       '</div><div class="offer-actions">' +
       '<button class="buy" data-buy="' + i + '" ' + disabled + '>' + label + '</button>' +
-      (['joker','cons','up','mod'].includes(it.kind) ? '<button class="reserve-btn" data-reserve="'+i+'" aria-pressed="'+!!it.reserved+'" title="'+(it.reserved?'Убрать из резерва':'Сохранить товар до следующего магазина по той же цене')+'">'+(it.reserved?'В резерве':'Отложить')+'</button>' : '') +
+      (!it.sold && ['joker','cons','up','mod'].includes(it.kind) ? '<button class="reserve-btn" data-reserve="'+i+'" aria-pressed="'+!!it.reserved+'" title="'+(it.reserved?'Убрать из резерва':'Сохранить товар до следующего магазина по той же цене')+'">'+(it.reserved?'В резерве':'Отложить')+'</button>' : '') +
     '</div></div>'
   );
 }
@@ -3096,9 +3113,9 @@ function renderShop() {
   const r = G.lastReward;
   const rewardHTML = r
     ? '<div class="reward-banner"><div>' +
-        '<div class="r-main">Блайнд пройден. Награда <b>+$' + r.total + '</b></div>' +
+        '<div class="r-main">Бой пройден. Награда <b>+$' + r.total + '</b></div>' +
         '<div class="r-break">база $' + r.base +
-          ' · места $' + r.unused +
+          ' · оставшиеся ходы $' + r.unused +
           ' · процент $' + r.interest +
           (r.pushes ? ' · точных $' + r.pushes : '') +
           (r.tips ? ' · чаевые $' + r.tips : '') +
@@ -3111,12 +3128,12 @@ function renderShop() {
         '<div class="owned joker-owned r-' + j.rarity + '" tabindex="0"><span class="o-main">' + itemArt('joker', j.id) + ' ' + j.name + (j.charges ? ' · ' + j.charges : '') + '</span>' +
           '<button data-sell="' + j.id + '">+$' + Math.floor(j.price / 2) + '</button>' +
           '<div class="tip o-tip"><div class="tip-rar r-' + j.rarity + '">' + RARITY[j.rarity].name + '</div><b>' + j.name + '</b><br>' + j.desc +
-          (j.charges ? '<br><i>Осталось мест: ' + j.charges + '</i>' : '') + '<div class="tip-sell">Продажа: +$' + Math.floor(j.price / 2) + '</div></div></div>'
+          (j.charges ? '<br><i>Осталось ходов: ' + j.charges + '</i>' : '') + '<div class="tip-sell">Продажа: +$' + Math.floor(j.price / 2) + '</div></div></div>'
       ).join('')
     : '<div class="owned" style="border-style:dashed;opacity:.6">Пока пусто</div>';
 
   showOverlay(
-    '<div class="kicker">Анте ' + G.ante + ' · ' + BLIND_NAMES[G.blind] + ' пройден</div>' +
+    '<div class="kicker">Этап ' + G.ante + ' · ' + BLIND_NAMES[G.blind] + ' пройден</div>' +
     '<h2>Магазин</h2>' +
     '<p class="reserve-note">Можно бесплатно отложить один товар до следующего магазина. Цена сохранится.</p>' +
     rewardHTML +
@@ -3157,6 +3174,8 @@ function buyItem(index) {
   if (G.phase !== 'shop' || !G.shop) return;
   const it = G.shop.items[index];
   if (!it || it.sold) return;
+  const purchaseName = document.querySelector('[data-offer="'+index+'"] .si-name')?.textContent || 'Товар';
+  const purchasePrice = it.price;
   if (G.money < it.price) {
     flashHint('Не хватает денег');
     return;
@@ -3189,6 +3208,7 @@ function buyItem(index) {
     tgHaptic('success');
     renderShop();
     render();
+    purchaseFeedback(index, purchaseName, purchasePrice);
     return;
   } else if (it.kind === 'slotc') {
     G.money -= it.price;
@@ -3198,6 +3218,7 @@ function buyItem(index) {
     tgHaptic('light');
     renderShop();
     render();
+    purchaseFeedback(index, purchaseName, purchasePrice);
     return;
   } else if (it.kind === 'table') {
     G.money -= it.price;
@@ -3207,6 +3228,7 @@ function buyItem(index) {
     tgHaptic('success');
     renderShop();
     render();
+    purchaseFeedback(index, purchaseName, purchasePrice);
     return;
   }
   G.money -= it.price;
@@ -3214,6 +3236,7 @@ function buyItem(index) {
   tgHaptic('light');
   renderShop();
   render();
+  purchaseFeedback(index, purchaseName, purchasePrice);
 }
 
 function sellJoker(id) {
@@ -3253,9 +3276,13 @@ function rerollShop() {
 function showOverlay(html, wide) {
   const ov = $('#overlay');
   const updatingShop=!ov.classList.contains('hidden')&&((!!ov.querySelector('.shop-health')&&html.includes('class="shop-health"'))||(!!ov.querySelector('.setup-screen')&&html.includes('class="setup-screen"')));
+  const previousScroll = updatingShop ? ov.querySelector('.modal').scrollTop : 0;
+  const offerHeights = updatingShop ? [...ov.querySelectorAll('[data-offer]')].map(el => [el.dataset.offer, el.getBoundingClientRect().height]) : [];
   ov.classList.remove('hidden');
   ov.innerHTML = '<div class="modal' + (wide ? ' wide' : '') + (updatingShop ? ' no-enter' : '') + '">' + html + '</div>';
   GameMenu.decorate();
+  offerHeights.forEach(([index, height]) => { const el = ov.querySelector('[data-offer="'+index+'"]'); if (el) el.style.minHeight = height + 'px'; });
+  if (updatingShop) ov.querySelector('.modal').scrollTop = previousScroll;
   saveRun();
 }
 
@@ -3291,14 +3318,14 @@ function showBlindIntro() {
 
 function showGameOver() {
   showOverlay(
-    '<div class="kicker">Забег окончен · анте ' + G.ante + (G.endless ? ' · эндлесс' : '') + (G.daily ? ' · ежедневный' : '') + '</div>' +
+    '<div class="kicker">Забег окончен · этап ' + G.ante + (G.endless ? ' · эндлесс' : '') + (G.daily ? ' · ежедневный' : '') + '</div>' +
     '<h2>Дом <span class="thin">забрал своё</span></h2>' +
-    '<p class="sub">' + (G.lossReason || 'Противник оказался сильнее.') + '</p>' +
+    '<p class="sub">' + (G.lossReason || 'Противник оказался сильнее.') + '</p>' + lossReviewHTML() +
     '<div style="margin:16px 0 4px">' +
-      '<div class="stat-line"><span>Дошёл до</span><b>' + G.ante + ' анте · ' + BLIND_SHORT[G.blind] + '</b></div>' +
-      '<div class="stat-line"><span>Блайндов пройдено</span><b>' + G.stats.blinds + '</b></div>' +
+      '<div class="stat-line"><span>Дошёл до</span><b>' + G.ante + '-го этапа · ' + BLIND_SHORT[G.blind] + '</b></div>' +
+      '<div class="stat-line"><span>Боёв пройдено</span><b>' + G.stats.blinds + '</b></div>' +
       '<div class="stat-line"><span>Точных столов</span><b>' + G.stats.pushes + '</b></div>' +
-      '<div class="stat-line"><span>Лучшее место</span><b>' + fmt(G.stats.bestSeat) + '</b></div>' +
+      '<div class="stat-line"><span>Лучший ход</span><b>' + fmt(G.stats.bestSeat) + '</b></div>' +
       '<div class="stat-line"><span>Лимит в конце</span><b>' + limitNow() + '</b></div>' +
     '</div>' + coinSummaryHTML() +
     '<div class="row-btns"><button class="ghost" id="ov-shop">Лавка</button><button class="primary" id="ov-restart">Новый забег</button></div>'
@@ -3308,15 +3335,15 @@ function showGameOver() {
 
 function showVictory() {
   showOverlay(
-    '<div class="kicker">Анте ' + CONFIG.maxAnte + ' · босс повержен</div>' +
+    '<div class="kicker">Этап ' + CONFIG.maxAnte + ' · босс повержен</div>' +
     '<h2>Ты <span class="thin">сломал дом</span></h2>' +
-    '<p class="sub">Восемь анте позади. Казино больше не может тебя обыграть — самое время придумать следующее правило.</p>' +
+    '<p class="sub">Восемь этапов позади. Казино больше не может тебя обыграть — самое время придумать следующее правило.</p>' +
     '<div style="margin:16px 0 4px">' +
-      '<div class="stat-line"><span>Блайндов пройдено</span><b>' + G.stats.blinds + '</b></div>' +
+      '<div class="stat-line"><span>Боёв пройдено</span><b>' + G.stats.blinds + '</b></div>' +
       '<div class="stat-line"><span>Точных столов</span><b>' + G.stats.pushes + '</b></div>' +
-      '<div class="stat-line"><span>Лучшее место</span><b>' + fmt(G.stats.bestSeat) + '</b></div>' +
+      '<div class="stat-line"><span>Лучший ход</span><b>' + fmt(G.stats.bestSeat) + '</b></div>' +
       '<div class="stat-line"><span>Финальный лимит</span><b>' + limitNow() + '</b></div>' +
-      (G.unlocked ? '<div class="stat-line"><span>Открыт стейк</span><b>' + STAKES[G.unlocked].name + '</b></div>' : '') +
+      (G.unlocked ? '<div class="stat-line"><span>Открыт уровень сложности</span><b>' + STAKES[G.unlocked].name + '</b></div>' : '') +
     '</div>' + coinSummaryHTML() +
     '<div class="row-btns"><button class="ghost" id="ov-shop">Лавка</button><button class="ghost" id="ov-endless">Эндлесс →</button><button class="primary" id="ov-restart">Ещё забег</button></div>'
   );
@@ -3328,12 +3355,13 @@ function showRules() {
     '<div class="kicker">Как это работает</div>' +
     '<h2>Двадцать одно <span class="thin">/ срезы и усилители</span></h2>' +
     '<div class="rules" style="margin-top:14px">' +
-      '<div class="rule"><span class="num">1</span><div>Пройди <b>8 анте</b> по три блайнда. В каждом победи врага за ограниченное число мест (обычно <b>4</b>). Очки становятся уроном.</div></div>' +
-      '<div class="rule"><span class="num">2</span><div>На место у тебя <b>' + tablesPerSeat() + ' стола</b> и общая колода. Взятая карта <b>автоматически ложится на текущий открытый стол</b>. Когда решишь, что хватит, — «Стоп на столе», и карты пойдут на следующий. Расходник <b>«Убрать карту»</b> позволяет выбрать любую выложенную карту и отправить её в сброс, в том числе с точного или перебитого стола. На стол помещается 4 карты (джокер или босс могут изменить лимит). Джокер <b>«На бис»</b> даёт дополнительное место в каждом бою: обычно 5 вместо 4.</div></div>' +
-      '<div class="rule"><span class="num">3</span><div>Сумма руки сравнивается с <b>целью места</b> (21, растёт с анте). Чем ближе, тем выше множитель. <b>Перебор</b> (сумма выше цели) — это <b>0 очков на этом столе</b> и +2 к входящему урону, если враг выжил: срезай сумму расходниками.</div></div>' +
-      '<div class="rule"><span class="num">4</span><div><b>Срез −N</b> уменьшает сумму руки (чипы остаются). <b>Усилитель +N</b> добавляет к сумме и чипам. Выбери расходник, затем <b>стол</b>. Тратятся.</div></div>' +
-      '<div class="rule"><span class="num">5</span><div>Чипы x множитель = очки. Очки наносят урон врагу после каждого места. Живой враг выполняет показанное намерение; за каждый перебор ещё 2 входящего урона. При 0 HP или исчерпании мест — поражение. HP сохраняется между боями; лечение и банки HP продаются только в магазине после босса или элитного блайнда. Босс на 50% HP входит во вторую фазу: следующие действия сильнее, появляется проклятие на одну атаку. Победа — деньги за оставшиеся места. В магазине: джокеры, расходники, закалка и печати на картах (💰 золотая, 🔷 стеклянная, 🌈 дикая, ⚖️ тяжёлая), слот расходника и четвёртый стол. Слот джокера покупается в «Лавке» за монеты после забега.</div></div><div class="rule"><span class="num">6</span><div><b>Цвет стола:</b> если все карты на столе одного цвета, стол даёт бонус. Красные (♥ ♦) лечат: 3 карты — <b>+10 HP</b>, 4 карты — <b>+15 HP</b>. Чёрные (♠ ♣) бьют сильнее: <b>+10%</b> и <b>+15%</b> к очкам стола. При переборе бонуса нет. Подсказка появляется на столе уже со второй карты.</div></div><div class="rule"><span class="num">7</span><div><b>Путь:</b> перед малым и большим блайндом выбираешь остановку: событие, кузницу (удалить, улучшить или скопировать карту), контракт или элитный блайнд. Прогресс, достижения и ежедневный забег — в меню «Новый забег».</div></div>' +
+      '<div class="rule"><span class="num">1</span><div>Пройди <b>8 этапов</b> по три боя. В каждом победи врага за ограниченное число ходов (обычно <b>4</b>). Очки становятся уроном.</div></div>' +
+      '<div class="rule"><span class="num">2</span><div>На ход у тебя <b>' + tablesPerSeat() + ' стола</b> и общая колода. Взятая карта <b>автоматически ложится на текущий открытый стол</b>. Когда решишь, что хватит, — «Стоп на столе», и карты пойдут на следующий. Расходник <b>«Убрать карту»</b> позволяет выбрать любую выложенную карту и отправить её в сброс, в том числе с точного или перебитого стола. На стол помещается 4 карты (джокер или босс могут изменить лимит). Джокер <b>«На бис»</b> даёт дополнительный ход в каждом бою: обычно 5 вместо 4.</div></div>' +
+      '<div class="rule"><span class="num">3</span><div>Сумма стола сравнивается с <b>целью карт</b> (21, растёт с каждым этапом). Чем ближе, тем выше множитель. <b>Перебор</b> (сумма выше цели) — это <b>0 очков на этом столе</b> и +2 к входящему урону, если враг выжил: срезай сумму расходниками.</div></div>' +
+      '<div class="rule"><span class="num">4</span><div><b>Срез −N</b> уменьшает сумму стола (чипы остаются). <b>Усилитель +N</b> добавляет к сумме и чипам. Выбери расходник, затем <b>стол</b>. Тратятся.</div></div>' +
+      '<div class="rule"><span class="num">5</span><div>Чипы x множитель = очки. Очки наносят урон врагу после каждого хода. Живой враг выполняет показанное намерение; за каждый перебор ещё 2 входящего урона. При 0 HP или исчерпании ходов — поражение. HP сохраняется между боями; лечение и банки HP продаются только в магазине после босса или элитного боя. Босс на 50% HP входит во вторую фазу: следующие действия сильнее, появляется проклятие на одну атаку. Победа — деньги за оставшиеся ходы. В магазине: джокеры, расходники, закалка и печати на картах (💰 золотая, 🔷 стеклянная, 🌈 дикая, ⚖️ тяжёлая), слот расходника и четвёртый стол. Слот джокера покупается в «Лавке» за монеты после забега.</div></div><div class="rule"><span class="num">6</span><div><b>Цвет стола:</b> если все карты на столе одного цвета, стол даёт бонус. Красные (♥ ♦) лечат: 3 карты — <b>+10 HP</b>, 4 карты — <b>+15 HP</b>. Чёрные (♠ ♣) бьют сильнее: <b>+10%</b> и <b>+15%</b> к очкам стола. При переборе бонуса нет. Подсказка появляется на столе уже со второй карты.</div></div><div class="rule"><span class="num">7</span><div><b>Путь:</b> перед первым и вторым боем выбираешь остановку: событие, кузницу (удалить, улучшить или скопировать карту), контракт или элитный бой. Прогресс, достижения и ежедневный забег — в меню «Новый забег».</div></div>' +
     '</div>' +
+    '<p class="sub"><b>Комбинации:</b> три или больше тузов на одном столе дают крит ×2 к его очкам, если нет перебора. Три или больше королей защищают весь стол от перебора: сумма остаётся прежней, множитель зависит от расстояния до цели. Это не автоматическое точное попадание. Четвёртая карта сохраняет комбинацию; бонус срабатывает один раз. Щит и броня врага действуют как обычно.</p>' +
     '<p class="sub"><b>Тактика:</b> нажми на колоду, чтобы посмотреть оставшиеся карты без раскрытия порядка. Прогноз показывает реальную потерю HP врага и ответный урон с учётом щитов, брони и эффектов. «Перенос»: выбери расходник, карту и другой стол. Особенности противника указаны перед боем и в сведениях о забеге. Один товар магазина можно бесплатно отложить до следующего магазина, в том числе через перероллы. Забег сохраняется автоматически; после перезагрузки нажми «Продолжить забег».</p>' +
     '<table class="mult-table" style="margin-top:14px"><tr><td>Ровно в цель</td><td>x8</td></tr><tr><td>на 1</td><td>x5</td></tr><tr><td>на 2</td><td>x3</td></tr><tr><td>на 3</td><td>x2</td></tr><tr><td>на 4–5</td><td>x1,25</td></tr><tr><td>на 6+</td><td>x0,6</td></tr></table>' +
     '<p class="sub" style="margin-top:14px">Расстояние считается только вниз от цели. Две карты ровно в цель — натуральное, x2. Туз считается 11 или 1.</p>' +
@@ -3385,15 +3413,18 @@ function tableHTML(s, t, ti) {
   const pv = paintOf(t, true);
   const bonus = '<div class="t-bonus' + (pv ? ' ' + pv.kind : '') + '">' +
     (pv ? (pv.kind === 'heal' ? '♥ +' + pv.value + ' HP' : '♠ +' + pv.value + '% урон') + (pv.n < 3 ? ' · ещё ' + (3 - pv.n) : '') : '') + '</div>';
-  return '<div class="' + cls + '" data-t="' + ti + '" aria-label="Стол ' + (ti + 1) + '"><div class="t-head"><span class="t-title" data-number="' + (ti + 1) + '" data-short="0' + (ti + 1) + '">Стол ' + (ti + 1) + '</span></div>' +
+  return '<div class="' + cls + '" data-t="' + ti + '" aria-label="Стол ' + (ti + 1) + '"><div class="t-head"><b class="t-sum" aria-label="Сумма карт">' + (r ? r.sum : '—') + '</b></div>' +
     '<div class="t-state"><span>' + state + '</span><span class="t-cap' + capCls + '" title="' + capTitle + '">' + t.cards.length + '/' + cap + '</span></div>' +
-    bonus +
+    (r?.critical ? '<div class="combo-badge critical">Три туза · крит ×2</div>' : '') +
+    (r?.royal ? '<div class="combo-badge royal">Три короля · без перебора</div>' : '') +
+    bonus + consumableTablePreview(s,ti) +
     '<div class="t-cards">' + t.cards.map((c) => cardElement(c, { mini: 1, scoring: s.locked && !t.dead })).join('') + '</div>' +
-    '<div class="t-footer"><b class="t-sum">' + (r ? r.sum : '—') + '</b><div class="t-score">' + (r && !r.bust ? '+' + fmt(r.score) : '') + '</div></div></div>';
+    '<div class="t-footer"><span class="t-title">Стол ' + (ti + 1) + '</span><div class="t-score">' + (r && !r.bust ? '+' + fmt(r.score) : '') + '</div></div></div>';
 }
 
 function renderTable() {
   $('#tbl-limit').textContent = limitNow();
+  renderTargetCycle();
   $('#table-upgrade').textContent = G.extraTables ? '4 стола открыто' : '4-й стол · $' + CONFIG.tablePrice;
   $('#table-upgrade').title = G.extraTables ? 'Дополнительный стол доступен до конца забега' : 'Четвёртый стол можно купить в магазине после победы';
   let dots = '';
@@ -3466,7 +3497,7 @@ function renderJokers() {
           '<span class="j-price">$' + j.price + '</span>' +
           '<span class="j-emoji">' + itemArt('joker', j.id) + '</span>' +
           '<span class="j-name">' + j.name + (j.charges ? ' · ' + j.charges : '') + '</span>' +
-          '<div class="tip"><div class="tip-rar r-' + j.rarity + '">' + RARITY[j.rarity].name + '</div><b>' + j.name + '</b><br>' + j.desc + (j.charges ? '<br><i>Осталось мест: ' + j.charges + '</i>' : '') + '</div>' +
+          '<div class="tip"><div class="tip-rar r-' + j.rarity + '">' + RARITY[j.rarity].name + '</div><b>' + j.name + '</b><br>' + j.desc + (j.charges ? '<br><i>Осталось ходов: ' + j.charges + '</i>' : '') + '</div>' +
         '</div>';
     } else {
       html += '<div class="joker empty">+</div>';
@@ -3488,7 +3519,7 @@ function renderSide() {
 
   $('#boss-panel').innerHTML = '<h4>Правило дома</h4>' + (boss
     ? '<div class="boss-box"><div class="boss-name">' + boss.name + '</div><div class="boss-desc">' + boss.desc + '</div></div>'
-    : '<div class="kv"><span>Босс</span><b>—</b></div><div style="font-size:11px;color:#6d7f97;line-height:1.4">Правило появится на босс-блайнде.</div>');
+    : '<div class="kv"><span>Босс</span><b>—</b></div><div style="font-size:11px;color:#6d7f97;line-height:1.4">Правило появится на бою с боссом.</div>');
 
   if (G.boss2) $('#boss-panel').innerHTML += '<div class="boss-box"><div class="boss-name">+ ' + BOSSES[G.boss2].name + '</div><div class="boss-desc">' + BOSSES[G.boss2].desc + '</div></div>';
   if (enemyTrait()) $('#boss-panel').innerHTML += '<div class="trait-note"><b>Особенность врага</b><br>'+enemyTrait()+'</div>';
@@ -3516,6 +3547,7 @@ function render() {
   renderTable();
   renderStats();
   renderActions();
+  $('#damage-details').disabled = G.phase !== 'play' || !G.seat || G.seat.locked || !!G.battle?.resolving;
   renderJokers();
   renderSide();
   saveRun();
@@ -3526,6 +3558,7 @@ function render() {
    ============================================================ */
 
 function bindEvents() {
+  $('#damage-details').onclick = showDamageBreakdown;
   $('#btn-draw').onclick = hit;
   $('#btn-stand').onclick = stand;
   $('#btn-stop-table').onclick = stopCurrentTable;

@@ -31,7 +31,7 @@ function resumeRun() {
   restoringRun = true;
   G = saved.game;
   G.cons = saved.consKeys.map(key => CONS[key]);
-  G.jokers = G.jokers.map(j => ({...JOKERS.find(def => def.id === j.id), ...j}));
+  G.jokers = G.jokers.map(j => ({...j, ...JOKERS.find(def => def.id === j.id), ...(j.charges !== undefined ? {charges:j.charges} : {})}));
   const bindOffer = item => {
     if (item.joker) item.joker = JOKERS.find(j => j.id === item.joker.id);
     if (item.card) item.card = G.runDeck.find(c => c.id === item.card.id);
@@ -65,7 +65,7 @@ function resumeRun() {
 function enemyTrait(enemy = G.enemy) {
   return ({
     collector:'Откуп: $3 отменяют следующую атаку. Штраф за перебор остаётся.',
-    brawler:'Раз в 3 места — тяжёлый удар. Стол из 4+ карт без перебора ослабляет его на 40%.',
+    brawler:'Раз в 3 хода — тяжёлый удар. Стол из 4+ карт без перебора ослабляет его на 40%.',
     sentinel:'Точный стол снимает 2% брони до конца боя.',
     usurer:'Два точных стола отменяют объявленное лечение.'
   })[enemy?.id] || '';
@@ -76,7 +76,7 @@ function attackPreview(result, healApplied = false) {
   const weak = player.effects.find(effect => effect.id === 'weak')?.power || 0;
   const armor = enemy.id === 'sentinel' ? Math.max(0, enemy.armor - .02 * result.exact) : enemy.armor;
   const hit = Combat.damage(result.total * ctx.mult * (1 - weak), enemy.shield, armor, ctx.shieldBonus);
-  return {...hit, hp:Math.min(enemy.hp, hit.hp), armor};
+  return {...hit, hp:Math.min(enemy.hp, hit.hp), armor, steps:ctx.steps||[]};
 }
 function enemyResponse(result, intent = G.enemy.intent) {
   if (!intent) return {raw:0,kind:'none',amount:0};
@@ -188,9 +188,9 @@ function transferTargets(s, source) {
 function showTransferPicker(s, source = null) {
   const from = source && s.tables[source.table]?.cards[source.card];
   const content = from ? '<p class="sub">Куда перенести '+from.rank+from.suit+' со стола '+(source.table+1)+'?</p><div class="transfer-targets">'+transferTargets(s,source.table).map(({table,index})=>{
-    const result=evalPlay(table.cards.concat(from),table.adj);
-    return '<button class="evt-btn" data-move-to="'+index+'"><b>Стол '+(index+1)+'</b><span>Сумма '+result.sum+(result.bust?' · перебор':'')+(table.adj.fz?' · заморозка':'')+'</span></button>';
-  }).join('')+'</div>' : '<p class="sub">Выбери карту. Затем выбери стол назначения. Перенос не расходует место.</p>'+s.tables.map((table,ti)=>table.blocked||!table.cards.length||!transferTargets(s,ti).length?'':'<section class="remove-group"><h3>Стол '+(ti+1)+'</h3><div class="remove-grid">'+table.cards.map((card,ci)=>'<button class="remove-card" data-move-from="'+ti+'" data-move-card="'+ci+'" aria-label="Перенести '+card.rank+card.suit+' со стола '+(ti+1)+'">'+cardElement(card,{mini:1})+'</button>').join('')+'</div></section>').join('');
+    const preview=previewConsumable(s,s.sel,source.table,source.card,index);
+    return '<button class="evt-btn" data-move-to="'+index+'"><b>Стол '+(index+1)+'</b><span>'+previewText(preview,source.table,index)+'</span></button>';
+  }).join('')+'</div>' : '<p class="sub">Выбери карту. Затем выбери стол назначения. Перенос не расходует ход.</p>'+s.tables.map((table,ti)=>table.blocked||!table.cards.length||!transferTargets(s,ti).length?'':'<section class="remove-group"><h3>Стол '+(ti+1)+'</h3><div class="remove-grid">'+table.cards.map((card,ci)=>'<button class="remove-card" data-move-from="'+ti+'" data-move-card="'+ci+'" aria-label="Перенести '+card.rank+card.suit+' со стола '+(ti+1)+'">'+cardElement(card,{mini:1})+'</button>').join('')+'</div></section>').join('');
   showOverlay('<div class="kicker">Расходник · перенос</div><h2>'+(from?'Выбери стол':'Какую карту перенести?')+'</h2>'+content+'<div class="row-btns">'+(from?'<button class="ghost" id="move-back">Другая карта</button>':'')+'<button class="ghost" id="move-cancel">Отмена</button></div>');
   $('#move-cancel').onclick=()=>{if(G.seat===s)s.sel=null;hideOverlay();render()};
   if($('#move-back'))$('#move-back').onclick=()=>showTransferPicker(s);
@@ -217,4 +217,18 @@ function initRunFeatures() {
   window.addEventListener('pagehide',saveRun);
   $('#dealer').addEventListener('click',event=>{if(event.target.closest('.pile'))showDeckBook()});
   $('#dealer').addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.closest('.pile')){event.preventDefault();event.stopPropagation();showDeckBook()}});
+}
+
+function renderTargetCycle() {
+  const el = document.querySelector('#target-cycle');
+  const changing = G.boss === 'pendulum' || G.boss2 === 'pendulum';
+  el.hidden = !changing || !['intro','play'].includes(G.phase);
+  if (el.hidden) return;
+  const turn = G.battle?.turn || 0;
+  // The outgoing turn keeps its target until the next hand is created.
+  const nextTurn = G.battle?.resolving ? turn : turn + 1;
+  const spent = seatsCount() - G.seatsLeft + (G.battle?.resolving ? 0 : 1);
+  const next = limitForTurn(nextTurn, spent);
+  el.innerHTML = '<b>Маятник · цель сейчас '+limitNow()+'</b><span>21 → 18 → 25 → 21 · следующая цель: '+next+'</span>'+
+    (!bossIs('pendulum') ? '<small>Дипломат отключил правило: действует обычная цель.</small>' : '');
 }
