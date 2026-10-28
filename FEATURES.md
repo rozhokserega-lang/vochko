@@ -10,6 +10,7 @@ The game entry point remains `index_vochko_v8.html`. It loads `assets/game-featu
 - Reservation: one unsold joker, consumable, rank upgrade or modification can be reserved free. It survives rerolls and arrives at the next shop at the same price. Selecting another item changes the reservation; buying consumes it. An item rendered invalid by intervening deck/event changes is omitted.
 - Attack choreography: `assets/attack-fx.js` and `.css` collect card motes into the damage counter (~490ms), send an impulse to the enemy (220ms), commit damage on impact, then resolve the enemy response 270ms later. Controls are locked through the sequence. Cosmetic effects use only `RNG0`. Reduced motion skips the sequence; backgrounding fast-forwards safely; restarting cancels the old sequence. Stable save checkpoints remain intact until resolution. Direct calls to `finishSeat(result)` remain synchronous for deterministic combat checks.
 - Mobile readability: `assets/mobile-polish.css` gives sums 32px, HP 18px and touch controls 13–15px text with 44–54px targets. Consumables are immediately below the goal/deck row. Controls stay in normal flow so they never cover tables or the forecast; small screens scroll. Telegram system and content safe areas are combined and updated on SDK inset/viewport events, including overlays and bottom spacing. Fine gold borders replace small decorative frames; idle table confetti is removed.
+- Turn budget: a full-width banner in the battle panel shows remaining/total turns in large numbers with one segment per turn. One remaining turn uses an explicit last-turn warning. Draw and stop-table do not spend turns; "Сыграть ход" resolves one complete set of tables. The banner follows extra-turn jokers, difficulty and contracts, updates on impact, and hides outside battle. Shop offers use compact list rows with 30–36px art, 14px descriptions, and full-size purchase/reserve targets.
 
 Verification (Node + bundled Playwright, installed Edge):
 
@@ -19,6 +20,7 @@ rtk proxy node .preview/check-new-mechanics.cjs
 rtk proxy node .preview/check-tactical.cjs
 rtk proxy node .preview/check-attack-fx.cjs
 rtk proxy node .preview/check-telegram-layout.cjs
+rtk proxy node .preview/check-shop-rounds.cjs
 ```
 
 Layout checks cover 320–1440px, three/four tables and touch controls. Tactical checks compare forecast to complete real turns, reload different progression phases, exercise selection UIs, verify daily RNG and item references, and cover transfer/reservation rules.

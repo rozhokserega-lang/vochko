@@ -114,7 +114,25 @@ function forecastText(forecast) {
   const f = forecast;
   return 'HP врага −' + fmt(f.hit.hp) + (f.hit.absorbed ? ' · щит −' + fmt(f.hit.absorbed) : '') +
     (f.win ? ' · победа' : ' · тебе −' + f.incoming + ' HP' + (f.enemyHeal ? ' · враг лечится +' + fmt(f.enemyHeal) : '')) +
-    (f.healed ? ' · лечение +' + f.healed : '') + (f.revive ? ' · возрождение' : '') + (f.playerHp <= 0 ? ' · опасно: поражение' : f.outOfSeats ? ' · места закончатся' : '');
+    (f.healed ? ' · лечение +' + f.healed : '') + (f.revive ? ' · возрождение' : '') + (f.playerHp <= 0 ? ' · опасно: поражение' : f.outOfSeats ? ' · ходы закончатся' : '');
+}
+function renderRoundBudget() {
+  const panel=document.querySelector('#round-budget');
+  if(!panel)return;
+  panel.hidden=!G?.enemy||!['intro','play'].includes(G.phase);
+  if(panel.hidden)return;
+  const total=seatsCount(),left=Math.max(0,G.seatsLeft);
+  const signature=left+':'+total;
+  if(panel.dataset.budget===signature)return;
+  panel.dataset.budget=signature;
+  panel.classList.toggle('last-round',left===1);
+  panel.classList.toggle('no-rounds',left===0);
+  document.querySelector('#round-budget-title').textContent=left===1?'Последний ход!':left===0?'Ходы закончились':'Осталось ходов';
+  document.querySelector('#round-budget-note').textContent=left===1?'Победи сейчас, иначе поражение':left===0?'Враг должен быть повержен':'Розыгрыш всех столов = 1 ход';
+  document.querySelector('#rounds-left').textContent=left;
+  document.querySelector('#rounds-total').textContent='из '+total;
+  document.querySelector('#round-budget-track').innerHTML=Array.from({length:total},(_,i)=>'<i class="'+(i<total-left?'spent':'available')+'"></i>').join('');
+  panel.setAttribute('aria-label','Осталось ходов: '+left+' из '+total+(left===1?'. Последний ход':''));
 }
 function payCollector() {
   if (G.phase !== 'play' || G.seat?.locked || G.enemy?.id !== 'collector' || G.battle.bribed || G.money < 3 || !['attack','heavy','hex'].includes(G.enemy.intent?.kind)) return;

@@ -1087,7 +1087,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 </style>
 <link rel="stylesheet" href="assets/reference-theme.css">
 <link rel="stylesheet" href="assets/attack-fx.css">
-<link rel="stylesheet" href="assets/mobile-polish.css?v=20261028-2">
+<link rel="stylesheet" href="assets/mobile-polish.css?v=20261028-3">
 </head>
 <body>
 
@@ -1136,6 +1136,11 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
         <div class="battle-bar player" aria-label="Ваше здоровье"><i class="bar-ghost" id="player-health-ghost"></i><i id="player-health"></i></div>
         <div class="bp-sub"><span id="player-hp"></span><span id="player-status"></span><span id="player-seats"></span></div>
       </div>
+      <div id="round-budget" class="round-budget" role="status" aria-live="polite" hidden>
+        <div class="round-budget-copy"><b id="round-budget-title">Осталось ходов</b><span id="round-budget-note">Розыгрыш всех столов = 1 ход</span></div>
+        <div class="round-budget-value"><strong id="rounds-left">4</strong><span id="rounds-total">из 4</span></div>
+        <div id="round-budget-track" class="round-budget-track" aria-hidden="true"></div>
+      </div>
       <div id="battle-result" role="status" aria-live="polite"></div>
     </section>
     <div id="cons" aria-label="Расходники"></div>
@@ -1166,7 +1171,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
       <div id="actions">
       <button class="btn draw" id="btn-draw">Взять карту <kbd>Space</kbd></button>
       <button class="btn stop-table" id="btn-stop-table">Стоп на столе <kbd>D</kbd></button>
-      <button class="btn stand" id="btn-stand">Сыграть <kbd>S</kbd></button>
+      <button class="btn stand" id="btn-stand">Сыграть ход <kbd>S</kbd></button>
     </div>
     <div id="hint"></div>
     </div>
@@ -1201,7 +1206,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js"></script>
+<script src="assets/game-features.js?v=20261028-3"></script>
 <script src="assets/attack-fx.js"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
@@ -1408,7 +1413,7 @@ const COMBAT_JOKERS = [
   ['slayer','Боссоборец','⚔️','+20% урона боссам.']
 ];
 COMBAT_JOKERS.forEach(([id,name,emoji,desc]) => JOKERS.push({id,name,emoji,desc,price:6,rarity:'rare'}));
-JOKERS.push({id:'encore',name:'На бис',emoji:'📣',price:7,rarity:'rare',desc:'+1 место в каждом блайнде: обычно 5 вместо 4. Даёт ещё один раунд на победу над врагом.'});
+JOKERS.push({id:'encore',name:'На бис',emoji:'📣',price:7,rarity:'rare',desc:'+1 ход в каждом бою: обычно 5 вместо 4. Даёт ещё один розыгрыш всех столов на победу над врагом.'});
 Object.assign(RELICS, {
   vitality:{name:'Живое сердце',emoji:'❤️',desc:'+25 максимального и текущего HP при получении.'},
   mend:{name:'Бальзам',emoji:'🌿',desc:'Восстанавливает 5 HP после каждой победы.'},
@@ -2258,7 +2263,7 @@ function checkEnd() {
   if (G.phase !== 'play') return;
   if (G.player.hp <= 0) { G.lossReason='Здоровье закончилось.'; loseRun(); return; }
   if (G.enemy.hp <= 0) { winBlind(); return; }
-  if (G.seatsLeft <= 0) { G.lossReason='Места закончились, а противник ещё жив.'; loseRun(); return; }
+  if (G.seatsLeft <= 0) { G.lossReason='Ходы закончились, а противник ещё жив.'; loseRun(); return; }
   startSeat();
 }
 
@@ -3064,7 +3069,7 @@ function shopItemHTML(it, i) {
     kind = 'Навсегда'; emoji = '🎒'; name = 'Слот расходника +1';
     desc = 'Ещё один расходник до конца забега. Сейчас слотов: ' + consSlots() + '.';
   } else if (it.kind === 'table') {
-    kind = 'Место'; emoji = '🪑'; name = 'Четвёртый стол';
+    kind = 'Столы'; emoji = '🪑'; name = 'Четвёртый стол';
     desc = 'На каждом месте будет четыре стола вместо трёх. Больше комбо и запаса, но и перебора тоже.';
   }
   const noStock = it.kind === 'potion' && it.left <= 0;
@@ -3072,14 +3077,16 @@ function shopItemHTML(it, i) {
   const disabled = G.money < it.price || full || noStock ? 'disabled' : '';
   const label = noStock ? 'Нет в наличии' : full ? 'Нет слота' : 'Купить · $' + it.price;
   return (
-    '<div class="shop-item ' + extraClass + (it.reserved ? ' is-reserved' : '') + '">' +
+    '<div class="shop-item compact-offer ' + extraClass + (it.reserved ? ' is-reserved' : '') + '">' +
       '<div class="si-emoji">' + (it.kind === 'joker' ? itemArt('joker', it.joker.id) : it.kind === 'cons' ? itemArt('cons', it.key) : it.kind === 'potion' ? itemArt('cons', 'potion') : itemArt('relic', it.kind) || emoji) + '</div>' +
+      '<div class="offer-copy">' +
       '<div class="si-kind">' + kind + '</div>' +
       '<div class="si-name">' + name + '</div>' +
       '<div class="si-desc">' + desc + '</div>' +
+      '</div><div class="offer-actions">' +
       '<button class="buy" data-buy="' + i + '" ' + disabled + '>' + label + '</button>' +
-      (['joker','cons','up','mod'].includes(it.kind) ? '<button class="reserve-btn" data-reserve="'+i+'" aria-pressed="'+!!it.reserved+'">'+(it.reserved?'В резерве · отменить':'Отложить до магазина')+'</button>' : '') +
-    '</div>'
+      (['joker','cons','up','mod'].includes(it.kind) ? '<button class="reserve-btn" data-reserve="'+i+'" aria-pressed="'+!!it.reserved+'" title="'+(it.reserved?'Убрать из резерва':'Сохранить товар до следующего магазина по той же цене')+'">'+(it.reserved?'В резерве':'Отложить')+'</button>' : '') +
+    '</div></div>'
   );
 }
 
@@ -3288,7 +3295,7 @@ function showBlindIntro() {
     '<h2>' + G.enemy.name + ' <span class="thin">/ цель места ' + limitNow() + '</span></h2>' +
     '<div class="target-big">' + G.enemy.glyph + ' ' + fmt(G.enemy.hp) + ' HP</div>' +
     (enemyTrait() ? '<p class="trait-note">'+enemyTrait()+'</p>' : '') +
-    '<p class="sub">Победи противника за ' + seatsCount() + ' места. Очки становятся уроном; живой враг действует в ответ. Перебор добавляет 2 входящего урона за стол. Каждое место — отдельная раздача: ' + tablesPerSeat() + ' стола и общая колода. Взятая карта всегда идёт на текущий открытый стол, так что твоя задача — вовремя сказать «Стоп на столе» и «Сыграть». Неиспользованные места принесут деньги.</p>' +
+    '<p class="sub"><b>Ходов на бой: ' + seatsCount() + '.</b> Один ход — один розыгрыш всех столов кнопкой «Сыграть ход». Добор карт и «Стоп на столе» сами по себе ход не тратят. Победи врага, пока не закончатся ходы. Очки становятся уроном; живой враг действует в ответ. Перебор добавляет 2 входящего урона за стол. На ход: ' + tablesPerSeat() + ' стола и общая колода. Неиспользованные ходы принесут деньги.</p>' +
     (boss
       ? '<div class="boss-note"><div class="bn-title">Правило дома: ' + boss.name + '</div><div class="bn-desc">' + boss.desc + '</div></div>' + (G.boss2 ? '<div class="boss-note"><div class="bn-title">Второе правило: ' + BOSSES[G.boss2].name + '</div><div class="bn-desc">' + BOSSES[G.boss2].desc + '</div></div>' : '')
       : '') +
@@ -3371,6 +3378,7 @@ function cardElement(c, o) {
 }
 
 function renderHUD() {
+  renderRoundBudget();
   $('#hud-ante').textContent = G.ante;
   $('#hud-blind').textContent = BLIND_SHORT[G.blind];
   $('#hud-target').textContent = fmt(G.enemy ? G.enemy.hp : 0);
@@ -3460,7 +3468,8 @@ function renderActions() {
   $('#btn-draw').disabled = !play || activeTableIndex(s) === -1;
   $('#btn-draw').innerHTML = 'Взять карту <kbd>Space</kbd>'; 
   $('#btn-stand').disabled = !play;
-  $('#btn-stand').innerHTML = 'Сыграть <kbd>S</kbd>';
+  $('#btn-stand').innerHTML = 'Сыграть ход <kbd>S</kbd>';
+  $('#btn-stand').title = 'Разыграть все столы и потратить один ход';
   $('#btn-stop-table').disabled = !play || activeTableIndex(s) === -1 || !s.tables[activeTableIndex(s)].cards.length;
   $('#btn-stop-table').innerHTML = 'Стоп на столе <kbd>D</kbd>';
   $('#cons').innerHTML = G.cons.length
