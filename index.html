@@ -1087,6 +1087,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 </style>
 <link rel="stylesheet" href="assets/reference-theme.css">
 <link rel="stylesheet" href="assets/attack-fx.css">
+<link rel="stylesheet" href="assets/mobile-polish.css?v=20261028-2">
 </head>
 <body>
 
@@ -1137,6 +1138,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
       </div>
       <div id="battle-result" role="status" aria-live="polite"></div>
     </section>
+    <div id="cons" aria-label="Расходники"></div>
     <div id="hand"></div>
 
     <div id="seat-stats">
@@ -1167,7 +1169,6 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
       <button class="btn stand" id="btn-stand">Сыграть <kbd>S</kbd></button>
     </div>
     <div id="hint"></div>
-    <div id="cons"></div>
     </div>
   </section>
 
@@ -1560,10 +1561,11 @@ const BattleUI = {
     const intent = $('#enemy-intent');
     intent.className = e.hp <= 0 ? 'dead' : '';
     intent.textContent = e.hp <= 0 ? 'Противник повержен'
-      : i ? ('Далее: ' + this.labels[i.kind] + (i.amount ? ' · ' + fmt(i.amount) : '') + ' · перебор = +' + COMBAT.bustPenalty + ' урона тебе')
+      : i ? ('Далее: ' + this.labels[i.kind] + (i.amount ? ' · ' + fmt(i.amount) : ''))
       : 'Намерение появится в начале места';
+    intent.title='За каждый перебор дополнительно '+COMBAT.bustPenalty+' входящего урона, если враг выжил';
     if(G.phase==='play' && e.id==='collector' && ['attack','heavy','hex'].includes(i?.kind)) {
-      if(G.battle.bribed)intent.textContent='Откуп: атака отменена · перебор = +'+COMBAT.bustPenalty+' урона тебе';
+      if(G.battle.bribed)intent.textContent='Откуп принят · атака отменена';
       const button=document.createElement('button');button.className='bribe-btn';button.textContent=G.battle.bribed?'Откуп принят':'Откуп · $3';button.disabled=G.battle.bribed||G.money<3||G.seat?.locked;button.onclick=payCollector;intent.append(' ',button);
     }
     $('#enemy-portrait').title=enemyTrait(e);
@@ -2886,10 +2888,10 @@ function tableFx(s) {
   s.tables.forEach((t, i) => {
     const el = document.querySelector('#hand .tbl[data-t="' + i + '"]');
     if (!el) return;
-    if (t.locked && !t.fxL) { t.fxL = true; burst(el, ['#ffd86b', '#fff3b0', '#f2c14e', '#ffffff'], 26); }
+    if (t.locked && !t.fxL) t.fxL = true;
     if (!t.locked) t.fxL = false;
     if (t.dead && !t.fxD) {
-      t.fxD = true; burst(el, ['#ff6b76', '#ff9aa2', '#7a1f2a'], 16);
+      t.fxD = true;
       if (el.animate && !REDUCED) el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(0)' }], { duration: 380 });
     }
     if (!t.dead) t.fxD = false;
@@ -3449,7 +3451,7 @@ function renderStats() {
   $('#preview-note').classList.toggle('forecast-danger',!forecast.win && (forecast.playerHp <= 0 || forecast.revive || forecast.outOfSeats));
   $('#preview-note').title = (active === -1 ? 'Столы закрыты' : 'Карта идёт на стол '+(active+1)+' · ещё '+activeLeft+' карт') + ' · HP после хода: '+forecast.playerHp;
   // Color bonuses are already shown on their tables; keep this row for build effects.
-  $('#tags').innerHTML = res.tags.filter((t) => !/^[♥♠] /.test(t)).map((t) => '<span class="tag">' + t + '</span>').join('');
+  $('#tags').innerHTML = res.tags.filter((t) => !/^[♥♠] /.test(t) && !t.startsWith('перебор столов:')).map((t) => '<span class="tag">' + t + '</span>').join('');
 }
 
 function renderActions() {
@@ -3615,11 +3617,16 @@ function tgClosingConfirmation(on) {
 function initTelegram() {
   const wa = tg();
   if (!wa || !tgIsReal()) return;
+  updateTelegramInsets();
+  if(wa.onEvent){
+    ['safeAreaChanged','contentSafeAreaChanged','viewportChanged'].forEach(event=>wa.onEvent(event,updateTelegramInsets));
+  }
   try {
     wa.ready();
     wa.expand();
-    if (wa.setHeaderColor) wa.setHeaderColor('#0b1119');
-    if (wa.setBackgroundColor) wa.setBackgroundColor('#070a10');
+    if (wa.setHeaderColor) wa.setHeaderColor('#101e16');
+    if (wa.setBackgroundColor) wa.setBackgroundColor('#0b2419');
+    if (wa.setBottomBarColor) wa.setBottomBarColor('#101e16');
     if (wa.disableVerticalSwipes) wa.disableVerticalSwipes();
   } catch (e) {}
   tgClosingConfirmation(true);
@@ -3631,6 +3638,17 @@ function initTelegram() {
       });
     } catch (e) {}
   }
+}
+function updateTelegramInsets() {
+  const wa=tg();if(!wa||!tgIsReal())return;
+  const root=document.documentElement;
+  root.dataset.telegram='true';
+  ['top','bottom','left','right'].forEach(edge=>{
+    const system=Number(wa.safeAreaInset?.[edge]);
+    const content=Number(wa.contentSafeAreaInset?.[edge]);
+    if(Number.isFinite(system))root.style.setProperty('--app-system-'+edge,Math.max(0,system)+'px');
+    root.style.setProperty('--app-content-'+edge,Number.isFinite(content)?Math.max(0,content)+'px':(edge==='top'?'48px':'0px'));
+  });
 }
 document.addEventListener('DOMContentLoaded', initTelegram);
 
