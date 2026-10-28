@@ -1215,7 +1215,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261028-6"></script>
+<script src="assets/game-features.js?v=20261028-7"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js"></script>
 <script src="assets/heal-fx.js?v=20261028-4"></script>
@@ -1907,7 +1907,7 @@ function startSeat() {
     log('Вор украл «' + k.name + '»', 'bad');
   }
   const goal = limitForTurn();
-  G.seat = { goal, tables: makeTables(), sel: null, used: false, peek: false, locked: false };
+  G.seat = { goal, pendulum:bossIs('pendulum'), tables: makeTables(), sel: null, used: false, peek: false, locked: false };
   G.phase = 'play';
   render();
 }

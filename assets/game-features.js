@@ -227,8 +227,10 @@ function renderTargetCycle() {
   const turn = G.battle?.turn || 0;
   // The outgoing turn keeps its target until the next hand is created.
   const nextTurn = G.battle?.resolving ? turn : turn + 1;
-  const spent = seatsCount() - G.seatsLeft + (G.battle?.resolving ? 0 : 1);
+  const result = G.seat && !G.battle?.resolving ? evalSeat(G.seat) : null;
+  const phoenix = result && hasJoker('phoenix') && !G.phoenixUsed && result.total === 0 && result.bust;
+  const spent = seatsCount() - G.seatsLeft + (G.battle?.resolving || phoenix ? 0 : 1);
   const next = limitForTurn(nextTurn, spent);
   el.innerHTML = '<b>Маятник · цель сейчас '+limitNow()+'</b><span>21 → 18 → 25 → 21 · следующая цель: '+next+'</span>'+
-    (!bossIs('pendulum') ? '<small>Дипломат отключил правило: действует обычная цель.</small>' : '');
+    (!(G.seat?.pendulum ?? bossIs('pendulum')) ? '<small>Дипломат отключил правило: действует обычная цель.</small>' : '');
 }
