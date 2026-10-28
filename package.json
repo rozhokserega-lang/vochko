@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "test": "node tests/playtest/consumable-audit.cjs && node tests/playtest/tactical-clarity.cjs",
-    "test:balance": "node tests/playtest/playtest-runs.cjs"
+    "test:balance": "node tests/playtest/playtest-runs.cjs",
+    "test:balance:lab": "node tests/playtest/balance-lab.cjs"
   },
   "devDependencies": {"playwright": "1.64.1"}
 }

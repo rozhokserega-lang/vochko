@@ -1,9 +1,25 @@
 /* Deterministic policy. Reads draw order only while an in-game peek is active. */
 window.VochkoBot = {
- reset(seed,deck='classic',stake=0){
+ reset(seed,deck='classic',stake=0,opts={}){
   localStorage.clear();resetTestRandom(seed+1);cardSeq=0;lastBoss=null;
+  window.__lab={turns:0,damage:0,received:0};
   META={shop:defaultShop(),unlocked:{},ach:{},stats:{runs:0,wins:0,bestAnte:0,bestScore:0,endlessBest:0},daily:{},unlockAll:true};
   newGame(stake,deck);hideOverlay();
+  // Controlled additions for balance experiments. Defaults keep the original run untouched.
+  (opts.jokers||[]).forEach(id=>{
+   const def=JOKERS.find(j=>j.id===id);
+   if(def&&!G.jokers.some(j=>j.id===id))G.jokers.push(def.id==='xray'?{...def,charges:5}:{...def});
+  });
+  (opts.relics||[]).forEach(key=>{
+   if(!RELICS[key]||G.relics.includes(key))return;
+   G.relics.push(key);Effects.run('acquire',{id:key});
+  });
+  if((opts.relics||[]).includes('ward'))G.player.shield=Math.max(G.player.shield,COMBAT.items.ward);
+  if((opts.relics||[]).includes('kit')&&G.cons.length<consSlots())G.cons.push(CONS.minus2);
+  (opts.mods||[]).forEach(({mod,count=1})=>pickFree(count).forEach(c=>{c.mod=mod;}));
+  (opts.ups||[]).forEach(({rank=null,levels=1})=>G.runDeck.forEach(c=>{if(!rank||c.rank===rank)c.up=Math.min(3,(c.up||0)+levels);}));
+  G.seatsLeft=seatsCount();
+  if((opts.relics||[]).includes('vitality'))G.player.hp=G.player.maxHp;
  },
  jokerValue(j,owned=G.jokers){
   // Representative visible deck compositions, never upcoming draw order.
@@ -21,18 +37,24 @@ window.VochkoBot = {
   const values={vitality:G.player.hp<55?120:70,mend:G.player.hp<75?110:65,plating:95,revive:100,ward:85,opener:65,prism:90,slot: G.jokers.length>=maxJokers()?105:35,belt:25,anvil:40,kit:65,vault:70,piggy:55,echo:40,crown:60};
   return values[key]||30;
  },
- shop(saving,bought){
+ shop(saving,bought,style='balanced'){
   if(G.blind===2&&G.ante<8){openRelicChoice();if(G.relicChoice){let best=0;G.relicChoice.forEach((k,i)=>{if(this.relicValue(k)>this.relicValue(G.relicChoice[best]))best=i});pickRelic(best);}}
   else openShop();
   if(!G.shop)openShop();
+  if(style==='none')return;
+  // Healing stays available to every build arm; it is not the variable under test.
   if(shopHealOpen())while(G.player.hp<75&&G.money>=COMBAT.healPrice&&(G.shop.heals||0)<CONFIG.healsPerShop)Combat.buyHeal();
+  const allowed=it=>style==='jokers'?it.kind==='joker'
+   :style==='upgrades'?(it.kind==='up'||it.kind==='mod')
+   :style==='consumables'?(it.kind==='cons')
+   :true;
   const table=G.shop.items.findIndex(it=>it.kind==='table'&&!it.sold);
-  if(saving&&table>=0&&G.money>=G.shop.items[table].price){buyItem(table);bought.push('table');}
+  if((saving||style==='table')&&table>=0&&G.money>=G.shop.items[table].price){buyItem(table);bought.push('table');}
   // Build a small core first, then reserve cash for the fourth table.
-  const saveCash=saving&&!G.extraTables&&G.jokers.length>=2;
+  const saveCash=(saving||style==='table')&&!G.extraTables&&G.jokers.length>=2;
   const order=G.shop.items.map((it,i)=>({it,i,value:it.kind==='joker'?this.jokerValue(it.joker):0})).sort((a,b)=>b.value-a.value);
   for(const {it,i,value} of order){
-   if(it.sold||saveCash||it.price>G.money)continue;
+   if(it.sold||saveCash||it.price>G.money||!allowed(it))continue;
    if(it.kind==='joker'){
     if(G.jokers.some(j=>j.id===it.joker.id))continue;
     if(G.jokers.length>=maxJokers()){
@@ -43,7 +65,8 @@ window.VochkoBot = {
     buyItem(i);bought.push(it.joker.id);
    }else if(it.kind==='cons'&&G.cons.length<consSlots()&&['minus','plus','pct','freeze','remove','move','peek','peek3','burn','swap'].includes(CONS[it.key].kind)){
     buyItem(i);bought.push(it.key);
-   }else if(it.kind==='up'||it.kind==='mod'){buyItem(i);bought.push(it.kind);}
+   }else if(it.kind==='up'){buyItem(i);bought.push('up:'+it.rank);}
+   else if(it.kind==='mod'){buyItem(i);bought.push('mod:'+it.mod);}
   }
  },
  useItem(used){
@@ -72,15 +95,15 @@ window.VochkoBot = {
   else applyCons(best.ti);
   used[best.k.kind]=(used[best.k.kind]||0)+1;return true;
  },
- run({seed,threshold=18,saving=false,deck='classic',stake=0,tactical=true}){
-  this.reset(seed,deck,stake);
+ run({seed,threshold=18,saving=false,deck='classic',stake=0,tactical=true,style='balanced',jokers=[],relics=[],mods=[],ups=[]}){
+  this.reset(seed,deck,stake,{jokers,relics,mods,ups});
   const bought=[],used={},trace=[];let actions=0,error=null;
   try {
    while(!['over','won'].includes(G.phase)&&actions++<4000){
     if(G.phase==='intro'){startSeat();continue;}
     if(G.phase==='shop'){
-     trace.push({stage:G.ante,fight:G.blind,hp:G.player.hp,money:G.money,jokers:G.jokers.map(j=>j.id),fourthTable:!!G.extraTables});
-     this.shop(saving,bought);nextBlind();if(G.pending==='path')takeNode('straight');continue;
+     trace.push({stage:G.ante,fight:G.blind,hp:G.player.hp,money:G.money,jokers:G.jokers.map(j=>j.id),relics:G.relics.slice(),fourthTable:!!G.extraTables});
+     this.shop(saving,bought,style);nextBlind();if(G.pending==='path')takeNode('straight');continue;
     }
     if(G.phase!=='play')throw Error('Unexpected phase '+G.phase);
     const s=G.seat;
@@ -104,6 +127,7 @@ window.VochkoBot = {
    }
    if(!['over','won'].includes(G.phase))throw Error('Action limit exceeded');
   }catch(e){error=e.stack||e.message;}
-  return {seed,threshold,saving,deck,stake,tactical,phase:G.phase,blinds:G.stats.blinds,stage:G.ante,hp:G.player.hp,enemyHp:G.enemy?.hp,reason:G.lossReason,used,bought,trace,error,actions,fourthTable:!!G.extraTables};
+  const upgrades=bought.filter(x=>x.startsWith('up:')||x.startsWith('mod:')).length;
+  return {seed,threshold,saving,deck,stake,tactical,style,jokers,relics,mods,ups,phase:G.phase,blinds:G.stats.blinds,stage:G.ante,blind:G.blind,hp:G.player.hp,maxHp:G.player.maxHp,enemyHp:G.enemy?.hp,money:G.money,seatsLeft:G.seatsLeft,reason:G.lossReason,used,bought,upgrades,jokerCount:G.jokers.length,relicCount:G.relics.length,stats:{...G.stats},trace,error,actions,fourthTable:!!G.extraTables,turns:window.__lab?.turns||0,damage:window.__lab?.damage||0,received:window.__lab?.received||0};
  }
 };
