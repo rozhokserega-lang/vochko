@@ -12,6 +12,7 @@ The game entry point remains `index_vochko_v8.html`. It loads `assets/game-featu
 - Mobile readability: `assets/mobile-polish.css` gives sums 32px, HP 18px and touch controls 13–15px text with 44–54px targets. Consumables are immediately below the goal/deck row. Controls stay in normal flow so they never cover tables or the forecast; small screens scroll. Telegram system and content safe areas are combined and updated on SDK inset/viewport events, including overlays and bottom spacing. Fine gold borders replace small decorative frames; idle table confetti is removed.
 - Turn budget: a full-width banner in the battle panel shows remaining/total turns in large numbers with one segment per turn. One remaining turn uses an explicit last-turn warning. Draw and stop-table do not spend turns; "Сыграть ход" resolves one complete set of tables. The banner follows extra-turn jokers, difficulty and contracts, updates on impact, and hides outside battle. Shop offers use compact list rows with 30–36px art, 14px descriptions, and full-size purchase/reserve targets.
 - Healing feedback: `assets/heal-fx.js` and `.css` listen to actual HP restoration events rather than the final net HP delta. Green motes travel from red tables or the purchased item toward player HP, a separate +HP label shows the capped recovered amount, and health bars light up. Shop healing has its own visible bar; repeated purchases do not restart modal entry animations. Damage interrupts the restoring bar style without hiding the healing event. Full HP produces no false healing. Revival and relic healing use the same feedback; reduced motion retains static text and removes particles. No gameplay RNG is consumed.
+- Game menus: `assets/game-menu.js` and `.css` provide a dedicated illustrated title screen, Continue/New Game/Daily and collection navigation. Run setup is a separate deck carousel plus difficulty selector, retaining unlocks and selections. The in-game menu button flushes pending combat and saves before returning home. Route choices, events, forge, contracts and result screens share the original five-panel `assets/path-scenes.png` illustration atlas. Battle introductions show a portrait, HP/turn/target summary and collapsible instructions. UI-only navigation consumes no gameplay RNG.
 
 Verification (Node + bundled Playwright, installed Edge):
 
@@ -23,6 +24,7 @@ rtk proxy node .preview/check-attack-fx.cjs
 rtk proxy node .preview/check-telegram-layout.cjs
 rtk proxy node .preview/check-shop-rounds.cjs
 rtk proxy node .preview/check-healing-fx.cjs
+rtk proxy node .preview/check-menu-ui.cjs
 ```
 
 Layout checks cover 320–1440px, three/four tables and touch controls. Tactical checks compare forecast to complete real turns, reload different progression phases, exercise selection UIs, verify daily RNG and item references, and cover transfer/reservation rules.

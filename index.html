@@ -1089,6 +1089,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/attack-fx.css">
 <link rel="stylesheet" href="assets/mobile-polish.css?v=20261028-3">
 <link rel="stylesheet" href="assets/heal-fx.css?v=20261028-4">
+<link rel="stylesheet" href="assets/game-menu.css?v=20261028-5">
 </head>
 <body>
 
@@ -1110,7 +1111,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
     <div class="pill gold"><span class="label">Счёт</span><span class="val" id="hud-score">0</span></div>
     <div class="pill money"><span class="label">Касса</span><span class="val" id="hud-money">4</span></div>
     <button class="hud-btn" id="btn-rules" title="Правила" aria-label="Правила">?</button>
-    <button class="hud-btn" id="btn-restart" title="Новый забег" aria-label="Новый забег">⟳</button>
+    <button class="hud-btn" id="btn-restart" title="Главное меню" aria-label="Главное меню">☰</button>
   </div>
 </header>
 
@@ -1210,6 +1211,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/game-features.js?v=20261028-3"></script>
 <script src="assets/attack-fx.js"></script>
 <script src="assets/heal-fx.js?v=20261028-4"></script>
+<script src="assets/game-menu.js?v=20261028-5"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -1817,7 +1819,8 @@ function newGame(stake, deckKey, opts) {
   };
   lastBoss = null;
   tgClosingConfirmation(true);
-  if (!direct) { render(); showRunSetup(); return; }
+  if (!direct) { render(); GameMenu.main(); return; }
+  GameMenu.backTarget=null;
   if (daily) Math.random = mulberry32(hashStr(daily + '|start'));
   if (!daily) applyMetaBonuses();
   applyStartDeck(deckKey);
@@ -2468,12 +2471,7 @@ function openPath(resume = false) {
   if (!resume) { picks.push('straight'); G.path = picks; }
   else picks.push(...G.path);
   render();
-  showOverlay(
-    '<div class="kicker">Путь · анте ' + G.ante + '</div><h2>Что дальше? <span class="thin">/ перед блайндом</span></h2>' +
-    '<p class="sub">Следующий: ' + BLIND_NAMES[G.blind] + '. Выбери остановку по дороге.</p>' +
-    '<div class="shop-grid">' + picks.map((k) => { const n = NODES[k];
-      return '<div class="shop-item node-' + k + '"><div class="si-emoji">' + n.emoji + '</div><div class="si-kind">Узел</div><div class="si-name">' + n.name + '</div><div class="si-desc">' + n.desc + '</div><button class="buy" data-node="' + k + '">Выбрать</button></div>'; }).join('') + '</div>'
-  );
+  showOverlay(GameMenu.pathHTML(picks),true);
   document.querySelectorAll('#overlay [data-node]').forEach((b) => { b.onclick = () => takeNode(b.dataset.node); });
 }
 function takeNode(key) {
@@ -2490,7 +2488,7 @@ function nodeResult(title, msg, pendingTag) {
   G.pending = pendingTag || 'nodeDone';
   G.nodeResult = {title,msg,pendingTag};
   render();
-  showOverlay('<div class="kicker">' + title + '</div><h2>Готово</h2><p class="sub">' + msg + '</p><div class="row-btns"><button class="primary" id="ov-onward">Дальше →</button></div>');
+  showOverlay(GameMenu.resultHTML(title,msg));
   $('#ov-onward').onclick = leaveNode;
 }
 
@@ -2538,7 +2536,7 @@ function openEvent(resume = false) {
   if (!resume) { seedStage('event'); G.event = pick(EVENTS); }
   const ev = G.event;
   showOverlay(
-    '<div class="kicker">Событие · анте ' + G.ante + '</div><h2>' + ev.title + '</h2><p class="sub">' + ev.text + '</p>' +
+    GameMenu.sceneHeader('event','Событие · анте '+G.ante,ev.title,ev.text) +
     '<div class="evt-list">' + ev.options.map((o, i) => '<button class="evt-btn" data-opt="' + i + '"' + (o.can && !o.can() ? ' disabled' : '') + '>' + o.label + '</button>').join('') + '</div>'
   );
   document.querySelectorAll('#overlay [data-opt]').forEach((b) => { b.onclick = () => chooseEvent(Number(b.dataset.opt)); });
@@ -2556,8 +2554,7 @@ function openContract(resume = false) {
   G.phase = 'path'; G.pending = 'contract';
   if (!resume) { seedStage('contract'); G.contractOpts = shuffle(CONTRACTS.slice()).slice(0, 3); }
   showOverlay(
-    '<div class="kicker">Контракт · анте ' + G.ante + '</div><h2>Условия <span class="thin">/ за деньги</span></h2>' +
-    '<p class="sub">Усложни следующий блайнд и получи награду после победы. Можно отказаться.</p>' +
+    GameMenu.sceneHeader('contract','Контракт · анте '+G.ante,'Условия дома','Усложни следующий бой за дополнительную награду. Можно отказаться.') +
     '<div class="evt-list">' + G.contractOpts.map((c, i) => '<button class="evt-btn" data-ct="' + i + '"><b>' + c.name + '</b> — ' + c.desc + ' <span class="evt-rew">+$' + c.reward + '</span></button>').join('') +
     '<button class="evt-btn" data-ct="-1">Отказаться</button></div>'
   );
@@ -2574,9 +2571,8 @@ function takeContract(i) {
 function openCampfire() {
   G.phase = 'path'; G.pending = 'forge'; G.forgeMode = null;
   showOverlay(
-    '<div class="kicker">Кузница · анте ' + G.ante + '</div><h2>Костёр <span class="thin">/ одно действие</span></h2>' +
-    '<p class="sub">Выбери действие, затем карту колоды (' + G.runDeck.length + ' карт). Проклятые карты убираются здесь.</p>' +
-    '<div class="evt-list"><button class="evt-btn" data-forge="remove">🗑 Удалить карту</button><button class="evt-btn" data-forge="upgrade">🔨 Улучшить карту: +2 к значению и +20 чипов</button><button class="evt-btn" data-forge="copy">📋 Скопировать карту</button><button class="evt-btn" data-forge="leave">Уйти</button></div>'
+    GameMenu.sceneHeader('campfire','Кузница · анте '+G.ante,'Закали свою колоду','Одно действие: удалить, усилить или скопировать карту. Карт в колоде: '+G.runDeck.length+'.') +
+    '<div class="evt-list forge-actions"><button class="evt-btn" data-forge="remove">'+itemArt('cons','remove')+'<span>Удалить карту<small>Навсегда убрать из колоды</small></span></button><button class="evt-btn" data-forge="upgrade">'+itemArt('relic','up')+'<span>Улучшить карту<small>+2 к значению и +20 чипов</small></span></button><button class="evt-btn" data-forge="copy">'+itemArt('joker','pair')+'<span>Скопировать карту<small>Добавить ещё один экземпляр</small></span></button><button class="ghost" data-forge="leave">Пройти мимо</button></div>'
   );
   document.querySelectorAll('#overlay [data-forge]').forEach((b) => { b.onclick = () => forgeAction(b.dataset.forge); });
 }
@@ -2619,33 +2615,7 @@ function forgeApply(id) {
 
 /* ---------- запуск забега, достижения ---------- */
 let SETUP = { stake: 0, deck: 'classic' };
-function showRunSetup() {
-  G.pending = 'setup';
-  const saved = readSavedRun();
-  const un = unlockedStake();
-  if (SETUP.stake > un) SETUP.stake = un;
-  if (!isUnlocked('deck', SETUP.deck)) SETUP.deck = 'classic';
-  const today = META.daily[dateKey()], st = META.stats;
-  showOverlay(
-    '<div class="intro-brand"><span class="ib-spade">♠</span><span class="ib-name">ВОЧКО</span><span class="ib-sub">двадцать одно · рогалик</span></div>' +
-    '<div class="kicker">Новый забег</div><h2>Подготовка <span class="thin">/ колода и стейк</span></h2>' +
-    (saved ? '<button class="resume-run" id="ov-continue"><b>Продолжить забег</b><span>Анте '+saved.game.ante+' · '+BLIND_SHORT[saved.game.blind]+' · '+saved.game.player.hp+' HP · $'+saved.game.money+'</span></button>' : '') +
-    '<h4 class="sec">Колода</h4><div class="opt-grid">' + Object.keys(DECKS).map((k) => { const d = DECKS[k], ok = isUnlocked('deck', k);
-      return '<button class="opt' + (SETUP.deck === k ? ' sel' : '') + (ok ? '' : ' locked') + '" ' + (ok ? 'data-deck="' + k + '"' : 'disabled') + '><span class="o-e">' + (ok ? d.emoji : '🔒') + '</span><b>' + d.name + '</b><small>' + (ok ? d.desc : lockHint('deck', k)) + '</small></button>'; }).join('') + '</div>' +
-    '<h4 class="sec">Стейк</h4><div class="opt-grid">' + STAKES.map((x, i) => { const ok = i <= un;
-      return '<button class="opt' + (SETUP.stake === i ? ' sel' : '') + (ok ? '' : ' locked') + '" ' + (ok ? 'data-stake="' + i + '"' : 'disabled') + '><span class="o-e">' + (ok ? '★' : '🔒') + '</span><b>' + x.name + '</b><small>' + (ok ? x.desc : 'Победи на стейке «' + STAKES[i - 1].name + '»') + '</small></button>'; }).join('') + '</div>' +
-    '<div class="setup-rec">Забегов: ' + st.runs + ' · побед: ' + st.wins + ' · лучшее анте: ' + st.bestAnte + (st.endlessBest ? ' · эндлесс: анте ' + st.endlessBest : '') + '</div>' +
-    '<div class="row-btns"><button class="ghost" id="ov-meta">Достижения</button><button class="ghost" id="ov-lavka">🪙 Лавка · ' + META.shop.coins + '</button></div>' +
-    '<div class="row-btns"><button class="ghost" id="ov-daily">Ежедневный' + (today ? ' · анте ' + today.ante : '') + '</button><button class="primary" id="ov-go">Начать</button></div>'
-  );
-  document.querySelectorAll('#overlay [data-deck]').forEach((b) => { b.onclick = () => { SETUP.deck = b.dataset.deck; showRunSetup(); }; });
-  document.querySelectorAll('#overlay [data-stake]').forEach((b) => { b.onclick = () => { SETUP.stake = Number(b.dataset.stake); showRunSetup(); }; });
-  $('#ov-go').onclick = () => newGame(SETUP.stake, SETUP.deck);
-  $('#ov-daily').onclick = () => newGame(0, 'classic', { daily: true });
-  $('#ov-meta').onclick = showMeta;
-  $('#ov-lavka').onclick = () => showMetaShop('seals');
-  if ($('#ov-continue')) $('#ov-continue').onclick = resumeRun;
-}
+function showRunSetup() { GameMenu.setup(); }
 function showStakeSelect() { showRunSetup(); }
 function showMeta() {
   const st = META.stats;
@@ -2656,7 +2626,7 @@ function showMeta() {
     '<div class="setup-rec">Забегов: ' + st.runs + ' · побед: ' + st.wins + ' · лучшее анте: ' + st.bestAnte + ' · лучшее место: ' + fmt(st.bestScore) + (st.endlessBest ? ' · эндлесс: анте ' + st.endlessBest : '') + '</div>' +
     '<div class="row-btns"><button class="primary" id="ov-back">Назад</button></div>'
   );
-  $('#ov-back').onclick = showRunSetup;
+  $('#ov-back').onclick = () => GameMenu.back();
 }
 
 
@@ -2836,7 +2806,7 @@ function showMetaShop(tab) {
     else toast('Не хватает монеток');
     showMetaShop('look');
   }; });
-  $('#ov-back').onclick = () => { if (G && G.phase === 'won') showVictory(); else if (G && G.phase === 'over') showGameOver(); else showRunSetup(); };
+  $('#ov-back').onclick = () => GameMenu.back();
 }
 function pickSealCard(key) {
   const sh = META.shop, card = baseCards().find((c) => c.rank + c.suit === key);
@@ -3264,9 +3234,10 @@ function rerollShop() {
 
 function showOverlay(html, wide) {
   const ov = $('#overlay');
-  const updatingShop=!ov.classList.contains('hidden')&&!!ov.querySelector('.shop-health')&&html.includes('class="shop-health"');
+  const updatingShop=!ov.classList.contains('hidden')&&((!!ov.querySelector('.shop-health')&&html.includes('class="shop-health"'))||(!!ov.querySelector('.setup-screen')&&html.includes('class="setup-screen"')));
   ov.classList.remove('hidden');
   ov.innerHTML = '<div class="modal' + (wide ? ' wide' : '') + (updatingShop ? ' no-enter' : '') + '">' + html + '</div>';
+  GameMenu.decorate();
   saveRun();
 }
 
@@ -3279,6 +3250,7 @@ function hideOverlay() {
 
 // Закрывает оверлей и возвращает тот экран, который соответствует текущей фазе.
 function closeOverlay() {
+  if(G.pending==='setup'){GameMenu.main();return}
   if (G.phase === 'play' && G.seat && ['remove','move'].includes(G.cons[G.seat.sel]?.kind)) {
     G.seat.sel = null;
     render();
@@ -3291,22 +3263,7 @@ function closeOverlay() {
 }
 
 function showBlindIntro() {
-  const boss = G.boss ? BOSSES[G.boss] : null;
-  const names = BLIND_NAMES;
-  showOverlay(
-    '<div class="intro-brand"><span class="ib-spade">♠</span><span class="ib-name">ВОЧКО</span><span class="ib-sub">двадцать одно · рогалик</span></div>' +
-    '<div class="kicker">Анте ' + G.ante + ' · ' + names[G.blind] + (G.elite ? ' · элитный' : '') + (G.contract ? ' · контракт' : '') + (G.stake ? ' · стейк ' + STAKES[G.stake].name : '') + '</div>' +
-    '<h2>' + G.enemy.name + ' <span class="thin">/ цель места ' + limitNow() + '</span></h2>' +
-    '<div class="target-big">' + G.enemy.glyph + ' ' + fmt(G.enemy.hp) + ' HP</div>' +
-    (enemyTrait() ? '<p class="trait-note">'+enemyTrait()+'</p>' : '') +
-    '<p class="sub"><b>Ходов на бой: ' + seatsCount() + '.</b> Один ход — один розыгрыш всех столов кнопкой «Сыграть ход». Добор карт и «Стоп на столе» сами по себе ход не тратят. Победи врага, пока не закончатся ходы. Очки становятся уроном; живой враг действует в ответ. Перебор добавляет 2 входящего урона за стол. На ход: ' + tablesPerSeat() + ' стола и общая колода. Неиспользованные ходы принесут деньги.</p>' +
-    (boss
-      ? '<div class="boss-note"><div class="bn-title">Правило дома: ' + boss.name + '</div><div class="bn-desc">' + boss.desc + '</div></div>' + (G.boss2 ? '<div class="boss-note"><div class="bn-title">Второе правило: ' + BOSSES[G.boss2].name + '</div><div class="bn-desc">' + BOSSES[G.boss2].desc + '</div></div>' : '')
-      : '') +
-    (G.contract ? '<div class="boss-note"><div class="bn-title">Контракт: ' + G.contract.name + '</div><div class="bn-desc">' + G.contract.desc + ' Награда: +$' + G.contract.reward + '.</div></div>' : '') +
-    (G.elite ? '<div class="boss-note"><div class="bn-title">Элитный блайнд</div><div class="bn-desc">Цель ×1,35 и правило босса. После победы: реликвия и +$5.</div></div>' : '') +
-    '<div class="row-btns"><button class="ghost" id="ov-rules">Правила</button><button class="primary" id="ov-start">Начать</button></div>'
-  );
+  showOverlay(GameMenu.battleIntroHTML());
   $('#ov-start').onclick = () => {
     hideOverlay();
     startSeat();
@@ -3558,7 +3515,7 @@ function bindEvents() {
   $('#cons').onclick = (e) => { const b = e.target.closest('[data-cons]'); if (b) pickCons(Number(b.dataset.cons)); };
   $('#btn-rules').onclick = showRules;
   $('#btn-restart').onclick = () => {
-    if (window.confirm('Начать новый забег? Текущий прогресс сгорит.')) newGame();
+    AttackFX.flush();saveRun();newGame();
   };
 
   document.addEventListener('keydown', (e) => {
