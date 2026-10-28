@@ -3052,16 +3052,37 @@ function openShop() {
   renderShop();
 }
 
-// Stable atlas positions follow the item definitions; labels remain real HTML.
+// Explicit artwork order stays stable when gameplay definitions are reordered.
+const JOKER_ART_IDS = [
+  'ace','six','lucky7','redblack','tips','counter',
+  'cushion','gambler','miser','insurer','face','streak',
+  'hearts','triple','precision','suits','risk','refund',
+  'sync','tandem','ladder','relay','balance','crimson',
+  'blot','banker','alchemist','adrenaline','surgeon','ice',
+  'diplomat','allin','phoenix','pair','wide','xray',
+  'execution','bullseye','revenge','breaker','desperate','slayer'
+];
+// The painted atlas has uneven rows, not a uniform 6 × 7 grid.
+const JOKER_ART_X = [0,228,453,678,904,1130,1355];
+const JOKER_ART_Y = [0,178,343,517,684,848,1000,1161];
 function itemArt(type, id) {
   if (type === 'joker' && id === 'encore') return '<span class="marked-art">' + itemArt('relic','echo') + '<b>+1</b></span>';
+  if (type === 'joker') {
+    const index = JOKER_ART_IDS.indexOf(id);
+    if (index < 0) return '';
+    const col = index % 6, row = Math.floor(index / 6);
+    // Inset two source pixels to exclude the painted grid lines and neighbours.
+    const x = JOKER_ART_X[col] + 2, y = JOKER_ART_Y[row] + 2;
+    const w = JOKER_ART_X[col + 1] - x - 2, h = JOKER_ART_Y[row + 1] - y - 2;
+    return '<span class="item-art art-joker" aria-hidden="true" style="background-size:' + (1355 / w * 100) + '% ' + (1161 / h * 100) + '%;--art-x:' + (x / (1355 - w) * 100) + '%;--art-y:' + (y / (1161 - h) * 100) + '%"></span>';
+  }
   if (type === 'cons' && id === 'remove') return '<span class="marked-art">' + itemArt('cons','swap') + '<b>−</b></span>';
   if (type === 'cons' && id === 'move') return '<span class="marked-art">' + itemArt('cons','swap') + '<b>→</b></span>';
   const relicArtIds = ['vault','belt','slot','anvil','crown','prism','kit','piggy','echo','vitality','mend','ward','plating','opener','revive','up','mod','slotc','table','coins'];
-  const ids = type === 'joker' ? JOKERS.filter(j => j.id !== 'encore').map(j => j.id) : type === 'relic' ? relicArtIds : Object.keys(CONS).filter(k => !['remove','move'].includes(k)).concat('potion');
+  const ids = type === 'relic' ? relicArtIds : Object.keys(CONS).filter(k => !['remove','move'].includes(k)).concat('potion');
   const index = ids.indexOf(id);
   if (index < 0) return '';
-  const cols = type === 'joker' ? 6 : type === 'relic' ? 5 : 4, rows = type === 'joker' ? 7 : type === 'relic' ? 4 : 3;
+  const cols = type === 'relic' ? 5 : 4, rows = type === 'relic' ? 4 : 3;
   return '<span class="item-art art-' + type + '" aria-hidden="true" style="--art-x:' + (index % cols) * 100 / (cols - 1) + '%;--art-y:' + Math.floor(index / cols) * 100 / (rows - 1) + '%"></span>';
 }
 
