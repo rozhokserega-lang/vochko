@@ -1088,6 +1088,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/reference-theme.css">
 <link rel="stylesheet" href="assets/attack-fx.css">
 <link rel="stylesheet" href="assets/mobile-polish.css?v=20261028-3">
+<link rel="stylesheet" href="assets/heal-fx.css?v=20261028-4">
 </head>
 <body>
 
@@ -1208,6 +1209,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <script src="assets/game-features.js?v=20261028-3"></script>
 <script src="assets/attack-fx.js"></script>
+<script src="assets/heal-fx.js?v=20261028-4"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -1434,9 +1436,9 @@ const Effects = {
       ['relic','opener','attack',c=>{if(!G.battle.turn)c.mult+=COMBAT.items.opener;}],
       ['relic','plating','incoming',c=>{c.reduction+=COMBAT.items.plating;}],
       ['relic','ward','start',()=>{G.player.shield=COMBAT.items.ward;}],
-      ['relic','mend','win',()=>Combat.heal(COMBAT.items.mend)],
+      ['relic','mend','win',()=>Combat.heal(COMBAT.items.mend,'relic')],
       ['relic','vitality','acquire',c=>{if(c.id==='vitality'){G.player.maxHp+=COMBAT.items.vitality;Combat.heal(COMBAT.items.vitality);}}],
-      ['relic','revive','lethal',()=>{if(!G.player.revived){G.player.revived=true;G.player.hp=Math.min(G.player.maxHp,COMBAT.items.revive);log('Последний шанс спасает от смерти!','good');}}]
+      ['relic','revive','lethal',()=>{if(!G.player.revived){const before=G.player.hp;G.player.revived=true;G.player.hp=Math.min(G.player.maxHp,COMBAT.items.revive);HealingFX.record(G,G.player.hp-before,before,'revive');log('Последний шанс спасает от смерти!','good');}}]
     ];
     defs.forEach(([kind,id,event,fn])=>{if(event===hook && (kind==='joker'?hasJoker(id):hasRelic(id)))fn(ctx);});
     return ctx;
@@ -1487,7 +1489,7 @@ const Enemy = {
   }
 };
 const Combat = {
-  heal(n){const p=G.player,amount=Math.min(Math.max(0,n),p.maxHp-p.hp);p.hp+=amount;return amount;},
+  heal(n,source='heal'){const p=G.player,before=p.hp,amount=Math.min(Math.max(0,n),p.maxHp-p.hp);p.hp+=amount;HealingFX.record(G,amount,before,source);return amount;},
   damage(raw,shield,armor,bonus=0){
     const attack=Math.max(0,Math.floor(Number.isFinite(raw)?raw:0));
     const absorbed=Math.min(shield,Math.floor(attack*(1+bonus)));
@@ -1508,6 +1510,7 @@ const Combat = {
     const p=G.player,ctx=Effects.run('incoming',{reduction:0});
     const hit=this.damage(raw,p.shield,ctx.reduction);const actual=Math.min(p.hp,hit.hp);
     p.shield-=hit.absorbed;p.hp-=actual;
+    if(actual>0)HealingFX.onDamage(G);
     G.battle.lastReceived=(G.battle.lastReceived||0)+actual;
     log(source+': −'+actual+' HP'+(hit.absorbed?' · щит −'+hit.absorbed:''),'bad');
     if(p.hp<=0)Effects.run('lethal',{});
@@ -1519,7 +1522,7 @@ const Combat = {
   buyHeal(){
     if(G.phase!=='shop'||!G.shop||!shopHealOpen()||(G.shop.heals||0)>=CONFIG.healsPerShop||G.money<COMBAT.healPrice||G.player.hp>=G.player.maxHp)return;
     G.money-=COMBAT.healPrice;G.shop.heals=(G.shop.heals||0)+1;
-    log('Лечение: +'+this.heal(COMBAT.healAmount)+' HP','good');render();renderShop();
+    log('Лечение: +'+this.heal(COMBAT.healAmount,{kind:'shop',element:$('#btn-heal')})+' HP','good');render();renderShop();
   }
 };
 const BattleUI = {
@@ -1592,7 +1595,6 @@ const BattleUI = {
     if (de < 0) { this.float('\u2212' + fmt(-de), 'f-e dmg-e'); this.pulse('battle-impact'); }
     else if (de > 0) { this.float('+' + fmt(de), 'f-e heal-e'); }
     if (dp < 0) { this.float('\u2212' + fmt(-dp), 'f-p dmg-p'); this.pulse('battle-counter'); this.pulse('hurt', 520); }
-    else if (dp > 0) { this.float('+' + fmt(dp), 'f-p heal-p'); this.pulse('mend', 620); }
     if (cur.esh > this.prev.esh && de <= 0) this.float('\ud83d\udee1 +' + fmt(cur.esh - this.prev.esh), 'f-e sh');
     if (cur.psh > this.prev.psh && dp <= 0) this.float('\ud83d\udee1 +' + fmt(cur.psh - this.prev.psh), 'f-p sh');
     this.prev = cur;
@@ -1761,6 +1763,7 @@ function pickBoss() {
 
 function newGame(stake, deckKey, opts) {
   AttackFX.cancel();
+  HealingFX.cancel();
   Math.random = RNG0;
   const direct = typeof stake === 'number';
   const daily = direct && opts && opts.daily ? dateKey() : null;
@@ -2236,7 +2239,7 @@ function finishSeat(res, animated = false) {
   else G.seatsLeft = Math.max(0, G.seatsLeft - 1);
   let healed = 0;
   if (res.heal) {
-    healed = Combat.heal(res.heal);
+    healed = Combat.heal(res.heal,'tables');
     if (healed) { log('♥ Красные столы: +' + healed + ' HP', 'good'); tgHaptic('success'); }
   }
   res.tables.forEach((r) => {
@@ -3129,7 +3132,7 @@ function renderShop() {
     '<h2>Магазин</h2>' +
     '<p class="reserve-note">Можно бесплатно отложить один товар до следующего магазина. Цена сохранится.</p>' +
     rewardHTML +
-    '<p class="sub">♥ ' + G.player.hp + ' / ' + G.player.maxHp + ' HP · здоровье сохраняется между боями</p>' +
+    '<div class="shop-health"><div class="shop-health-top"><span>Твоё здоровье</span><strong id="shop-player-hp">♥ '+G.player.hp+' / '+G.player.maxHp+'</strong></div><div class="shop-health-bar"><i id="shop-player-health" style="width:'+100*G.player.hp/G.player.maxHp+'%"></i></div></div>' +
     (shopHealOpen()
       ? '<button class="ghost" id="btn-heal" ' + ((G.shop.heals || 0) >= CONFIG.healsPerShop || G.money < COMBAT.healPrice || G.player.hp >= G.player.maxHp ? 'disabled' : '') + '>Лечение +' + COMBAT.healAmount + ' HP · $' + COMBAT.healPrice + ' · ' + Math.max(0, CONFIG.healsPerShop - (G.shop.heals || 0)) + ' из ' + CONFIG.healsPerShop + '</button>'
       : '<div class="heal-locked">♥ Лечение и банки — только в магазине после босса. Пока держись.</div>') +
@@ -3193,7 +3196,7 @@ function buyItem(index) {
     if (G.player.hp >= G.player.maxHp) { flashHint('HP уже полное'); return; }
     G.money -= it.price;
     it.left -= 1;
-    const got = Combat.heal(it.heal);
+    const got = Combat.heal(it.heal,{kind:'shop',element:document.querySelector('[data-buy="'+index+'"]')});
     log('Банка HP: +' + got + ' HP', 'gold');
     tgHaptic('success');
     renderShop();
@@ -3261,8 +3264,9 @@ function rerollShop() {
 
 function showOverlay(html, wide) {
   const ov = $('#overlay');
+  const updatingShop=!ov.classList.contains('hidden')&&!!ov.querySelector('.shop-health')&&html.includes('class="shop-health"');
   ov.classList.remove('hidden');
-  ov.innerHTML = '<div class="modal' + (wide ? ' wide' : '') + '">' + html + '</div>';
+  ov.innerHTML = '<div class="modal' + (wide ? ' wide' : '') + (updatingShop ? ' no-enter' : '') + '">' + html + '</div>';
   saveRun();
 }
 
