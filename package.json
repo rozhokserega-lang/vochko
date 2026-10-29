@@ -9,7 +9,10 @@
     "test:visual": "node tests/playtest/visual-polish.cjs",
     "test:progression": "node tests/playtest/balance-patch.cjs && node tests/playtest/routes.cjs && node tests/playtest/deckcraft.cjs && node tests/playtest/joker-growth.cjs && node tests/playtest/talents.cjs && node tests/playtest/mobile-performance.cjs",
     "test:table-features": "node tests/playtest/table-features.cjs",
-    "test:fast-draw": "node tests/playtest/fast-draw.cjs"
+    "test:fast-draw": "node tests/playtest/fast-draw.cjs",
+    "test:campaign": "node tests/playtest/campaign.cjs && node tests/playtest/campaign-layout.cjs",
+    "test:campaign:runs": "node tests/playtest/campaign-runs.cjs",
+    "test:card-marking": "node tests/playtest/card-marking.cjs"
   },
   "devDependencies": {
     "playwright": "1.64.1"

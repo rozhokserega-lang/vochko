@@ -1,0 +1,16 @@
+{
+  "checks": [
+    "Five chapters, only dungeon playable",
+    "New-game UI starts dungeon level 1",
+    "Earned relic after level 4",
+    "Earned relic after level 8",
+    "Exactly ten wins complete dungeon and permanently unlock next chapter",
+    "Victory and reward are idempotent",
+    "Future chapter eligibility persists but unfinished content cannot start",
+    "Legacy run resumes without migration loss",
+    "Legacy three-fight transitions remain intact",
+    "Defeat restarts a fresh chapter run",
+    "Campaign daily has distinct level seeds and saved features"
+  ],
+  "errors": []
+}

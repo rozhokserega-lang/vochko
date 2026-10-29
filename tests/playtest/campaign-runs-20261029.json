@@ -1,0 +1,1397 @@
+{
+  "summary": [
+    {
+      "talent": "healer",
+      "runs": 30,
+      "wins": 18,
+      "meanWins": 8.6,
+      "hpLoss": 2,
+      "turnLoss": 10
+    },
+    {
+      "talent": "sharp",
+      "runs": 30,
+      "wins": 20,
+      "meanWins": 8.766666666666667,
+      "hpLoss": 2,
+      "turnLoss": 8
+    },
+    {
+      "talent": "daring",
+      "runs": 30,
+      "wins": 24,
+      "meanWins": 9.233333333333333,
+      "hpLoss": 1,
+      "turnLoss": 5
+    },
+    {
+      "talent": "warden",
+      "runs": 30,
+      "wins": 16,
+      "meanWins": 8.533333333333333,
+      "hpLoss": 2,
+      "turnLoss": 12
+    },
+    {
+      "talent": "scout",
+      "runs": 30,
+      "wins": 27,
+      "meanWins": 9.8,
+      "hpLoss": 0,
+      "turnLoss": 3
+    }
+  ],
+  "runs": [
+    {
+      "seed": 0,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 78,
+      "reason": null
+    },
+    {
+      "seed": 1,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 13,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 2,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 70,
+      "reason": null
+    },
+    {
+      "seed": 3,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 45,
+      "reason": null
+    },
+    {
+      "seed": 4,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 46,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 5,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 56,
+      "reason": null
+    },
+    {
+      "seed": 6,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 52,
+      "reason": null
+    },
+    {
+      "seed": 7,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 49,
+      "reason": null
+    },
+    {
+      "seed": 8,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 8,
+      "level": 9,
+      "hp": 41,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 9,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 81,
+      "reason": null
+    },
+    {
+      "seed": 10,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 73,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 11,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 52,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 12,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 81,
+      "reason": null
+    },
+    {
+      "seed": 13,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 3,
+      "level": 4,
+      "hp": 56,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 14,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 3,
+      "level": 4,
+      "hp": 63,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 15,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 7,
+      "level": 8,
+      "hp": 0,
+      "reason": "Здоровье закончилось."
+    },
+    {
+      "seed": 16,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 65,
+      "reason": null
+    },
+    {
+      "seed": 17,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 83,
+      "reason": null
+    },
+    {
+      "seed": 18,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 88,
+      "reason": null
+    },
+    {
+      "seed": 19,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 86,
+      "reason": null
+    },
+    {
+      "seed": 20,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 52,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 21,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 46,
+      "reason": null
+    },
+    {
+      "seed": 22,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 88,
+      "reason": null
+    },
+    {
+      "seed": 23,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 87,
+      "reason": null
+    },
+    {
+      "seed": 24,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 7,
+      "level": 8,
+      "hp": 20,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 25,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 78,
+      "reason": null
+    },
+    {
+      "seed": 26,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 42,
+      "reason": null
+    },
+    {
+      "seed": 27,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 0,
+      "reason": "Здоровье закончилось."
+    },
+    {
+      "seed": 28,
+      "talent": "healer",
+      "phase": "over",
+      "blinds": 8,
+      "level": 9,
+      "hp": 85,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 29,
+      "talent": "healer",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 37,
+      "reason": null
+    },
+    {
+      "seed": 0,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 78,
+      "reason": null
+    },
+    {
+      "seed": 1,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 31,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 2,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 86,
+      "reason": null
+    },
+    {
+      "seed": 3,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 45,
+      "reason": null
+    },
+    {
+      "seed": 4,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 58,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 5,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 81,
+      "reason": null
+    },
+    {
+      "seed": 6,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 83,
+      "reason": null
+    },
+    {
+      "seed": 7,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 49,
+      "reason": null
+    },
+    {
+      "seed": 8,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 8,
+      "level": 9,
+      "hp": 62,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 9,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 10,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 73,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 11,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 52,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 12,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 84,
+      "reason": null
+    },
+    {
+      "seed": 13,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 3,
+      "level": 4,
+      "hp": 51,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 14,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 3,
+      "level": 4,
+      "hp": 58,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 15,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 7,
+      "level": 8,
+      "hp": 0,
+      "reason": "Здоровье закончилось."
+    },
+    {
+      "seed": 16,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 47,
+      "reason": null
+    },
+    {
+      "seed": 17,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 83,
+      "reason": null
+    },
+    {
+      "seed": 18,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 83,
+      "reason": null
+    },
+    {
+      "seed": 19,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 86,
+      "reason": null
+    },
+    {
+      "seed": 20,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 44,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 21,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 78,
+      "reason": null
+    },
+    {
+      "seed": 22,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 35,
+      "reason": null
+    },
+    {
+      "seed": 23,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 50,
+      "reason": null
+    },
+    {
+      "seed": 24,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 38,
+      "reason": null
+    },
+    {
+      "seed": 25,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 78,
+      "reason": null
+    },
+    {
+      "seed": 26,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 42,
+      "reason": null
+    },
+    {
+      "seed": 27,
+      "talent": "sharp",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 0,
+      "reason": "Здоровье закончилось."
+    },
+    {
+      "seed": 28,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 67,
+      "reason": null
+    },
+    {
+      "seed": 29,
+      "talent": "sharp",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 36,
+      "reason": null
+    },
+    {
+      "seed": 0,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 77,
+      "reason": null
+    },
+    {
+      "seed": 1,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 87,
+      "reason": null
+    },
+    {
+      "seed": 2,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 62,
+      "reason": null
+    },
+    {
+      "seed": 3,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 45,
+      "reason": null
+    },
+    {
+      "seed": 4,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 5,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 6,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 51,
+      "reason": null
+    },
+    {
+      "seed": 7,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 88,
+      "reason": null
+    },
+    {
+      "seed": 8,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 79,
+      "reason": null
+    },
+    {
+      "seed": 9,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 10,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 77,
+      "reason": null
+    },
+    {
+      "seed": 11,
+      "talent": "daring",
+      "phase": "over",
+      "blinds": 6,
+      "level": 7,
+      "hp": 67,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 12,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 84,
+      "reason": null
+    },
+    {
+      "seed": 13,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 41,
+      "reason": null
+    },
+    {
+      "seed": 14,
+      "talent": "daring",
+      "phase": "over",
+      "blinds": 3,
+      "level": 4,
+      "hp": 58,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 15,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 92,
+      "reason": null
+    },
+    {
+      "seed": 16,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 75,
+      "reason": null
+    },
+    {
+      "seed": 17,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 83,
+      "reason": null
+    },
+    {
+      "seed": 18,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 87,
+      "reason": null
+    },
+    {
+      "seed": 19,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 86,
+      "reason": null
+    },
+    {
+      "seed": 20,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 64,
+      "reason": null
+    },
+    {
+      "seed": 21,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 99,
+      "reason": null
+    },
+    {
+      "seed": 22,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 23,
+      "talent": "daring",
+      "phase": "over",
+      "blinds": 3,
+      "level": 4,
+      "hp": 86,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 24,
+      "talent": "daring",
+      "phase": "over",
+      "blinds": 8,
+      "level": 9,
+      "hp": 27,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 25,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 78,
+      "reason": null
+    },
+    {
+      "seed": 26,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 27,
+      "talent": "daring",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 0,
+      "reason": "Здоровье закончилось."
+    },
+    {
+      "seed": 28,
+      "talent": "daring",
+      "phase": "over",
+      "blinds": 8,
+      "level": 9,
+      "hp": 79,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 29,
+      "talent": "daring",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 36,
+      "reason": null
+    },
+    {
+      "seed": 0,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 82,
+      "reason": null
+    },
+    {
+      "seed": 1,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 37,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 2,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 86,
+      "reason": null
+    },
+    {
+      "seed": 3,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 39,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 4,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 39,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 5,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 64,
+      "reason": null
+    },
+    {
+      "seed": 6,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 18,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 7,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 57,
+      "reason": null
+    },
+    {
+      "seed": 8,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 8,
+      "level": 9,
+      "hp": 62,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 9,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 76,
+      "reason": null
+    },
+    {
+      "seed": 10,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 73,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 11,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 56,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 12,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 69,
+      "reason": null
+    },
+    {
+      "seed": 13,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 3,
+      "level": 4,
+      "hp": 59,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 14,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 3,
+      "level": 4,
+      "hp": 66,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 15,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 7,
+      "level": 8,
+      "hp": 0,
+      "reason": "Здоровье закончилось."
+    },
+    {
+      "seed": 16,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 56,
+      "reason": null
+    },
+    {
+      "seed": 17,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 83,
+      "reason": null
+    },
+    {
+      "seed": 18,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 87,
+      "reason": null
+    },
+    {
+      "seed": 19,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 86,
+      "reason": null
+    },
+    {
+      "seed": 20,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 5,
+      "level": 6,
+      "hp": 59,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 21,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 41,
+      "reason": null
+    },
+    {
+      "seed": 22,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 79,
+      "reason": null
+    },
+    {
+      "seed": 23,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 24,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 7,
+      "level": 8,
+      "hp": 3,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 25,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 78,
+      "reason": null
+    },
+    {
+      "seed": 26,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 88,
+      "reason": null
+    },
+    {
+      "seed": 27,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 0,
+      "reason": "Здоровье закончилось."
+    },
+    {
+      "seed": 28,
+      "talent": "warden",
+      "phase": "over",
+      "blinds": 8,
+      "level": 9,
+      "hp": 84,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 29,
+      "talent": "warden",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 36,
+      "reason": null
+    },
+    {
+      "seed": 0,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 1,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 77,
+      "reason": null
+    },
+    {
+      "seed": 2,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 3,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 67,
+      "reason": null
+    },
+    {
+      "seed": 4,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 83,
+      "reason": null
+    },
+    {
+      "seed": 5,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 6,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 77,
+      "reason": null
+    },
+    {
+      "seed": 7,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 69,
+      "reason": null
+    },
+    {
+      "seed": 8,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 63,
+      "reason": null
+    },
+    {
+      "seed": 9,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 90,
+      "reason": null
+    },
+    {
+      "seed": 10,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 53,
+      "reason": null
+    },
+    {
+      "seed": 11,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 74,
+      "reason": null
+    },
+    {
+      "seed": 12,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 13,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 19,
+      "reason": null
+    },
+    {
+      "seed": 14,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 63,
+      "reason": null
+    },
+    {
+      "seed": 15,
+      "talent": "scout",
+      "phase": "over",
+      "blinds": 7,
+      "level": 8,
+      "hp": 41,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 16,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 98,
+      "reason": null
+    },
+    {
+      "seed": 17,
+      "talent": "scout",
+      "phase": "over",
+      "blinds": 9,
+      "level": 10,
+      "hp": 42,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 18,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 19,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 20,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 62,
+      "reason": null
+    },
+    {
+      "seed": 21,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 22,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 99,
+      "reason": null
+    },
+    {
+      "seed": 23,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 86,
+      "reason": null
+    },
+    {
+      "seed": 24,
+      "talent": "scout",
+      "phase": "over",
+      "blinds": 8,
+      "level": 9,
+      "hp": 42,
+      "reason": "Ходы закончились, а противник ещё жив."
+    },
+    {
+      "seed": 25,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 58,
+      "reason": null
+    },
+    {
+      "seed": 26,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 83,
+      "reason": null
+    },
+    {
+      "seed": 27,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 17,
+      "reason": null
+    },
+    {
+      "seed": 28,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 100,
+      "reason": null
+    },
+    {
+      "seed": 29,
+      "talent": "scout",
+      "phase": "won",
+      "blinds": 10,
+      "level": 10,
+      "hp": 63,
+      "reason": null
+    }
+  ],
+  "scope": "Dungeon only; no purchased meta boosts or pregranted items. All unlocks available. One heuristic, straight routes, earned relics and evolution. Not human win rates."
+}

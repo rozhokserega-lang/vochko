@@ -26,7 +26,7 @@ function acceptBargain(id){
 }
 function openRest(){
  G.phase='path';G.pending='rest';render();const actual=Math.min(20,G.player.maxHp-G.player.hp);
- showOverlay(GameMenu.sceneHeader('straight','Отдых · этап '+G.ante,'Переведи дух','Выбери одно действие. Подготовленный щит действует только в следующем бою.')+
+ showOverlay(GameMenu.sceneHeader('straight','Отдых · '+Campaign.label(),'Переведи дух','Выбери одно действие. Подготовленный щит действует только в следующем бою.')+
  '<div class="evt-list"><button class="evt-btn" id="rest-heal" '+(!actual?'disabled':'')+'>Восстановить '+actual+' HP<small>До 20 HP, без превышения максимума.</small></button><button class="evt-btn" id="rest-shield">Подготовиться: 8 щита<small>Получишь в начале следующего боя. Не переносится дальше.</small></button><button class="ghost" id="rest-leave">Пройти мимо</button></div>');
  $('#rest-heal').onclick=()=>takeRest('heal');$('#rest-shield').onclick=()=>takeRest('shield');$('#rest-leave').onclick=leaveNode;
 }

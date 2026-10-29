@@ -1,0 +1,20 @@
+{
+  "checks": [
+    "Select card before game; no charge before confirmation",
+    "Purchase costs 40 once; repeated confirmation does not charge again",
+    "Exactly one starter card is marked",
+    "Notch appears at top without revealing face or activating peek",
+    "Marked top card survives run reload",
+    "Fast draw transfers mark to face-up card and clears next back",
+    "Copy does not duplicate physical tear",
+    "Reassignment is free",
+    "Changing meta does not modify existing run mark",
+    "Mark survives suit conversion",
+    "Fair start has no marks",
+    "Daily has no marks",
+    "Missing starter card is not replaced with another mark",
+    "Cannot buy without coins",
+    "Mark does not move cards or change shuffle order"
+  ],
+  "errors": []
+}

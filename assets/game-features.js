@@ -51,7 +51,8 @@ function resumeRun() {
     if (G.evolutionChoice) showGrowthChoice(G.evolutionChoice);
     else if (G.relicChoice?.length) showRelicChoice();
     else if (G.shop) renderShop();
-    else if ((G.blind === 2 && (G.ante < CONFIG.maxAnte || G.endless)) || G.elite) openRelicChoice();
+    else if(Campaign.active()&&G.level===10){Campaign.victory();}
+    else if (Campaign.relicOffer()) openRelicChoice();
     else openShop();
   } else if (G.phase === 'path') {
     if (G.pending === 'event') openEvent(true);
@@ -148,7 +149,7 @@ function showDeckBook() {
   if (!G?.started || !['play','intro','shop'].includes(G.phase) || G.seat?.locked) return;
   const groups = new Map();
   for (const card of G.runDeck) {
-    const key = [card.rank,card.suit,card.up||0,card.mod||''].join('|');
+    const key = [card.rank,card.suit,card.up||0,card.mod||'',!!card.notched].join('|');
     if (!groups.has(key)) groups.set(key,{card,total:0,draw:0,discard:0,table:0});
     const group = groups.get(key); group.total++;
     if (G.deck.some(c => c.id === card.id)) group.draw++;

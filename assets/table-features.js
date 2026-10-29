@@ -7,7 +7,7 @@ const TABLE_FEATURES={
  near:{name:'Рядом',short:'Цель −1',bonus:20,desc:'Сумма на единицу ниже текущей цели, без перебора: урон этого стола +20%.',test:(t,r)=>r.sum===limitNow()-1}
 };
 function assignTableFeatures(){
- if(G.ante===1&&G.blind===0&&!G.elite){G.tableFeatures=[];return;}
+ if(G.campaign?G.level===1:(G.ante===1&&G.blind===0&&!G.elite)){G.tableFeatures=[];return;}
  const max3=[G.boss,G.boss2].includes('max3');
  G.tableFeatures=shuffle(Object.keys(TABLE_FEATURES).filter(id=>!max3||id!=='long')).slice(0,tablesPerSeat());
 }

@@ -1099,14 +1099,18 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/talents.css?v=20261029-2">
 <script src="assets/talents.js?v=20261029-3"></script>
 <link rel="stylesheet" href="assets/routes.css?v=20261029-1">
-<script src="assets/routes.js?v=20261029-4"></script>
+<script src="assets/routes.js?v=20261029-5"></script>
 <link rel="stylesheet" href="assets/joker-growth.css?v=20261029-1">
 <script src="assets/joker-growth.js?v=20261029-3"></script>
 <link rel="stylesheet" href="assets/deckcraft.css?v=20261029-1">
 <link rel="stylesheet" href="assets/visual-polish.css?v=20261029-1">
 <link rel="stylesheet" href="assets/table-features.css?v=20261029-1">
-<script src="assets/table-features.js?v=20261029-1"></script>
+<script src="assets/table-features.js?v=20261029-2"></script>
 <script src="assets/fast-draw.js?v=20261029-1"></script>
+<link rel="stylesheet" href="assets/campaign.css?v=20261029-1">
+<script src="assets/campaign.js?v=20261029-1"></script>
+<link rel="stylesheet" href="assets/card-marking.css?v=20261029-1">
+<script src="assets/card-marking.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
@@ -1230,11 +1234,11 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261029-10"></script>
+<script src="assets/game-features.js?v=20261029-12"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261029-2"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261029-12"></script>
+<script src="assets/game-menu.js?v=20261029-14"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -1356,7 +1360,7 @@ function consSlots() { return CONFIG.consSlots + (hasRelic('belt') ? 1 : 0) + ((
 function maxJokers() { return CONFIG.maxJokers + (hasRelic('slot') ? 1 : 0) + ((G && G.slotJ) || 0); }
 function tablesPerSeat() { return 3 + ((G && G.extraTables) ? 1 : 0); }
 // Лечение и банки продаются только в магазине после босса (или элитного боя).
-function shopHealOpen() { return !!(G && (G.blind === 2 || G.elite)); }
+function shopHealOpen() { return Campaign.active()?Campaign.healOpen():!!(G && (G.blind === 2 || G.elite)); }
 function baseReward() { return Math.max(0,CONFIG.baseReward - (G && G.stake >= 3 ? 1 : 0) - (hasBargain('pockets')?1:0)); }
 function seatsCount() { return CONFIG.seats + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
 function unlockedStake() {
@@ -1796,6 +1800,7 @@ function maxPlay() { return bossIs('max3') ? 3 : 4 + (hasJoker('wide') ? 1 : 0);
    ============================================================ */
 
 function targetFor(ante, blind) {
+  if(Campaign.active())return Campaign.target();
   const stakeMult = G.stake >= 4 ? 1.25 : G.stake >= 1 ? 1.1 : 1;
   return Math.round(CONFIG.baseTarget * Math.pow(CONFIG.growth, ante - 1) * CONFIG.blindMult[blind]) * stakeMult | 0;
 }
@@ -1812,12 +1817,14 @@ function newGame(stake, deckKey, opts) {
   HealingFX.cancel();
   Math.random = RNG0;
   const direct = typeof stake === 'number';
-  const daily = direct && opts && opts.daily ? dateKey() : null;
+  const daily = direct && opts && opts.daily ? (opts.campaign?dateKey()+'|dungeon-v1':dateKey()) : null;
   if (daily) { stake = 0; deckKey = 'classic'; }
+  if(direct&&opts?.campaign)stake=0;
   if (!direct) stake = 0;
   deckKey = DECKS[deckKey] ? deckKey : 'classic';
   G = {
     started:direct,
+    campaign:direct&&!!opts?.campaign,chapter:0,level:1,
     stake,
     player: {hp:COMBAT.playerHp,maxHp:COMBAT.playerHp,shield:0,effects:[],revived:false},
     enemy:null, battle:null,
@@ -1877,10 +1884,11 @@ function newGame(stake, deckKey, opts) {
 
 
 function startBlind() {
+  Campaign.prepare();
   seedStage('blind');
   G.pending = null;
   G.shop = null; G.relicChoice = null; G.legendChoice = null; G.nodeResult = null;
-  G.elite = !!G.nextElite; G.nextElite = false;
+  G.elite = !!G.nextElite||Campaign.elite(); G.nextElite = false;
   G.contract = G.nextContract || null; G.nextContract = null;
   G.consUsed = 0;
   G.score = 0;
@@ -1898,6 +1906,7 @@ function startBlind() {
   if (G.boss && G.blind === 2 && (G.stake >= 2 || G.ante >= 7)) {
     G.boss2 = pick(BOSS_KEYS.filter((k) => k !== G.boss && !(BOSS_CLASH[G.boss] || []).includes(k)));
   }
+  Campaign.applyRule();
   G.limit = 21 + (G.ante - 1);
   G.target = targetFor(G.ante, G.blind);
   if (G.elite) G.target = Math.round(G.target * 1.35);
@@ -1906,7 +1915,7 @@ function startBlind() {
   assignTableFeatures();
   Combat.start();
   if (hasRelic('kit') && G.cons.length < consSlots()) { G.cons.push(CONS.minus2); }
-  if (G.ante >= 4) unlockAch('ante4');
+  if (Campaign.active()?G.level>=7:G.ante>=4) unlockAch('ante4');
   G.phase = 'intro';
   render();
   showBlindIntro();
@@ -2376,7 +2385,7 @@ function winBlind() {
   if (G.elite) { G.money += 5; log('Элитный бой: +$5', 'gold'); }
   G.runPoints = (G.runPoints || 0) + G.score;
   if (!G.consUsed) unlockAch('clean');
-  if (G.blind === 2 && (G.boss === 'lock' || G.boss2 === 'lock')) unlockAch('lock');
+  if ((G.blind === 2 || (G.campaign&&G.elite)) && (G.boss === 'lock' || G.boss2 === 'lock')) unlockAch('lock');
   if (G.elite) unlockAch('elite');
   if (G.money >= 50) unlockAch('rich');
   G.stats.blinds++;
@@ -2394,7 +2403,8 @@ function winBlind() {
   const wonGame=G;
   setTimeout(() => {
     if (G !== wonGame || G.phase !== 'shop') return;
-    if ((G.blind === 2 && (G.ante < CONFIG.maxAnte || G.endless)) || G.elite) openRelicChoice();
+    if(Campaign.active()&&G.level===10){Campaign.victory();return;}
+    if (Campaign.relicOffer()) openRelicChoice();
     else openShop();
   }, 420);
 }
@@ -2438,7 +2448,7 @@ function dateKey() {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 function seedStage(tag) {
-  if (G && G.daily) Math.random = mulberry32(hashStr(G.daily + '|' + G.ante + '|' + G.blind + '|' + tag));
+  if (G && G.daily) Math.random = mulberry32(hashStr(G.daily + '|' + (G.campaign?'chapter'+G.chapter+'level'+G.level:G.ante+'|'+G.blind) + '|' + tag));
   else Math.random = RNG0;
 }
 function MOD_KEYS() { return Object.keys(MODS).filter((k) => k !== 'curse'); }
@@ -2464,7 +2474,7 @@ const ACHS = {
   wipe: { name: 'Полный провал', desc: 'Все занятые столы перебрали за один ход', reward: { joker: 'adrenaline' } },
   big: { name: 'Крупный счёт', desc: '10 000 очков за один ход', reward: { joker: 'allin' } },
   lock: { name: 'Взломщик', desc: 'Победить босса «Замок»', reward: { joker: 'diplomat' } },
-  ante4: { name: 'Дальний путь', desc: 'Дойти до этапа 4', reward: { deck: 'short' } },
+  ante4: { name: 'Дальний путь', desc: 'Дойти до уровня 7 Темницы (в старом забеге — до этапа 4)', reward: { deck: 'short' } },
   win: { name: 'Победитель', desc: 'Выиграть забег', reward: { deck: 'gold' } },
   rich: { name: 'Богач', desc: 'Накопить $50', reward: { deck: 'glass' } },
   elite: { name: 'Охотник', desc: 'Победить элитный бой', reward: { deck: 'alchemy' } },
@@ -2472,6 +2482,7 @@ const ACHS = {
   blackout: { name: 'Чёрная полоса', desc: 'Сыграть 10 чёрных столов за забег', reward: { joker: 'blot' } },
 };
 function isUnlocked(kind, id) {
+  if(G?.campaign&&G.daily)return true;
   if (META.unlockAll) return true;
   const gated = Object.values(ACHS).some((a) => a.reward[kind] === id);
   return !gated || !!META.unlocked[kind + ':' + id];
@@ -2503,6 +2514,7 @@ function unlockAch(id) {
   if (typeof tgHaptic === 'function') tgHaptic('success');
 }
 function metaRunEnd(win) {
+  if(Campaign.active()){Campaign.recordEnd(win);return;}
   if (!G || G.metaDone) return;
   G.metaDone = true;
   const st = META.stats;
@@ -2562,7 +2574,7 @@ function openPath(resume = false) {
   G.phase = 'path'; G.pending = 'path';
   if (!resume) seedStage('path');
   const w = { event: 30, campfire: 22, elite: 14 + G.ante * 2, contract: 24 };
-  w.rest=20;
+  w.rest=20;Campaign.pathWeights(w);
   if(Object.keys(BARGAINS).some(id=>!hasBargain(id)))w.bargain=18;
   const picks = [];
   while (!resume && picks.length < 2) {
@@ -2570,7 +2582,7 @@ function openPath(resume = false) {
     let r = Math.random() * pool.reduce((a, k) => a + w[k], 0);
     picks.push(pool.find((k) => (r -= w[k]) < 0) || pool[pool.length - 1]);
   }
-  if (!resume) { picks.push('straight'); G.path = picks;G.pathEliteBoss=picks.includes('elite')?pick(BOSS_KEYS.filter(k=>k!==lastBoss)):null; }
+  if (!resume) { picks.push('straight');picks.splice(0,picks.length,...Campaign.adjustPath(picks)); G.path = picks;G.pathEliteBoss=picks.includes('elite')?pick(BOSS_KEYS.filter(k=>k!==lastBoss)):null; }
   else picks.push(...G.path);
   render();
   showOverlay(GameMenu.pathHTML(picks),true);
@@ -2675,7 +2687,7 @@ function takeContract(i) {
 function openCampfire() {
   G.phase = 'path'; G.pending = 'forge'; G.forgeMode = null; G.forgeSelection=null;G.forgeSuit=null;render();
   showOverlay(
-    GameMenu.sceneHeader('campfire','Кузница · этап '+G.ante,'Закали свою колоду','Одно действие: удалить, усилить, скопировать карту или изменить масть. Карт в колоде: '+G.runDeck.length+'.') +
+    GameMenu.sceneHeader('campfire','Кузница · '+Campaign.label(),'Закали свою колоду','Одно действие: удалить, усилить, скопировать карту или изменить масть. Карт в колоде: '+G.runDeck.length+'.') +
     '<div class="evt-list forge-actions"><button class="evt-btn" data-forge="remove">'+itemArt('cons','remove')+'<span>Удалить карту<small>Навсегда убрать из колоды</small></span></button><button class="evt-btn" data-forge="upgrade">'+itemArt('relic','up')+'<span>Улучшить карту<small>+2 к значению и +20 чипов</small></span></button><button class="evt-btn" data-forge="copy">'+itemArt('joker','pair')+'<span>Скопировать карту<small>Добавить ещё один экземпляр</small></span></button><button class="evt-btn" data-forge="suit"><span>♥ ♠</span><span>Изменить масть<small>Значение и чипы сохраняются</small></span></button><button class="ghost" data-forge="leave">Пройти мимо</button></div>'
   );
   document.querySelectorAll('#overlay [data-forge]').forEach((b) => { b.onclick = () => forgeAction(b.dataset.forge); });
@@ -2710,7 +2722,7 @@ function forgeApply(id) {
     msg = 'Карта ' + c.rank + c.suit + ' стала сильнее: +2 к значению.';
   } else {
     if (G.runDeck.length >= 60) { flashHint('Колода уже слишком велика'); return; }
-    G.runDeck.push({ ...c, id: ++cardSeq });
+    G.runDeck.push({ ...c, id: ++cardSeq,notched:false });
     msg = 'В колоде появилась копия ' + c.rank + c.suit + '.';
   }
   log('Кузница: ' + msg, 'gold');
@@ -2738,7 +2750,7 @@ function showMeta() {
    ЛАВКА: МОНЕТКИ, ПЕЧАТИ, СТАРТОВЫЕ БОНУСЫ, ОБЛИК
    ============================================================ */
 function defaultShop() {
-  return { coins: 0, seals: {}, cash: 0, extraCons: null, startJoker: null, jokerSlot: 0, owned: { back: ['classic'], felt: ['classic'] }, active: { back: 'classic', felt: 'classic' } };
+  return { coins: 0, markOwned:false, markCard:null, seals: {}, cash: 0, extraCons: null, startJoker: null, jokerSlot: 0, owned: { back: ['classic'], felt: ['classic'] }, active: { back: 'classic', felt: 'classic' } };
 }
 function mergeShop(r) {
   const d = defaultShop(); r = r || {};
@@ -2770,6 +2782,7 @@ function pickFree(n) {
 }
 function applyMetaBonuses() {
   const sh = META.shop;
+  CardMark.apply();
   G.slotJ = sh.jokerSlot || 0;
   G.runDeck.forEach((c) => { const m = sh.seals[c.rank + c.suit]; if (m && MODS[m]) c.mod = m; });
   G.money += sh.cash || 0;
@@ -2792,7 +2805,7 @@ function coinSummaryHTML() {
   const c = G && G.coinInfo;
   if (!c) return '';
   return '<div class="coin-box"><div class="coin-head">🪙 +' + c.total + ' монет</div><div class="coin-lines">Очков за забег: ' + fmt(c.points) + ' → ' + c.pts +
-    '<br>Пройдено этапов: +' + c.antes + (c.winB ? '<br>Победа: +' + c.winB : '') + (c.mult > 1 ? '<br>Множитель уровня сложности: ×' + c.mult : '') +
+    '<br>'+(Campaign.active()?'Пройденные уровни':'Пройдено этапов')+': +' + c.antes + (c.winB ? '<br>Победа: +' + c.winB : '') + (c.mult > 1 ? '<br>Множитель уровня сложности: ×' + c.mult : '') +
     '</div><div class="coin-sub">Всего монет: ' + META.shop.coins + '. Трать их в «Лавке».</div></div>';
 }
 /* --- покупки --- */
@@ -2887,14 +2900,15 @@ function lookTabHTML() {
 function showMetaShop(tab) {
   if (tab) SHOP_TAB = tab;
   const sh = META.shop;
-  const tabs = [['seals', 'Печати', 'mod'], ['start', 'Старт', 'opener'], ['look', 'Облик', 'table']];
-  const body = SHOP_TAB === 'seals' ? sealsTabHTML() : SHOP_TAB === 'start' ? startTabHTML() : lookTabHTML();
+  const tabs = [['mark','Метка','opener'],['seals', 'Печати', 'mod'], ['start', 'Старт', 'opener'], ['look', 'Облик', 'table']];
+  const body = SHOP_TAB === 'mark' ? CardMark.html() : SHOP_TAB === 'seals' ? sealsTabHTML() : SHOP_TAB === 'start' ? startTabHTML() : lookTabHTML();
   showOverlay(
     '<div class="meta-shop"><div class="kicker">Лавка</div><h2>Лавка колоды <span class="thin">/ навсегда</span></h2>' +
     '<div class="coin-bar">' + itemArt('relic','coins') + ' <b>' + sh.coins + '</b> монет</div>' +
     '<div class="shop-tabs">' + tabs.map((t) => '<button class="tab' + (t[0] === SHOP_TAB ? ' on' : '') + '" data-tab="' + t[0] + '">' + itemArt('relic', t[2]) + t[1] + '</button>').join('') + '</div>' + body +
     '<div class="row-btns"><button class="primary" id="ov-back">Назад</button></div></div>'
   );
+  if(SHOP_TAB==='mark')CardMark.bind();
   const ov = document.getElementById('overlay');
   ov.querySelectorAll('[data-tab]').forEach((b) => { b.onclick = () => showMetaShop(b.dataset.tab); });
   ov.querySelectorAll('[data-seal]').forEach((b) => { b.onclick = () => { SEAL_SEL = b.dataset.seal; showMetaShop('seals'); }; });
@@ -2983,6 +2997,7 @@ function tableFx(s) {
   });
 }
 function victory() {
+  if(Campaign.active()){Campaign.victory();return;}
   setTimeout(confetti, 350);
   G.phase = 'won';
   unlockAch('win');
@@ -2998,6 +3013,7 @@ function victory() {
 }
 
 function nextBlind() {
+  if(Campaign.active()){Campaign.next();return;}
   carryReservedItem();
   hideOverlay();
   G.blind++;
@@ -3014,6 +3030,7 @@ function nextBlind() {
 }
 
 function startEndless() {
+  if(Campaign.active())return;
   if (!G || G.phase !== 'won') return;
   G.endless = true; G.metaDone = false; G.runPoints = 0;
   tgClosingConfirmation(true);
@@ -3071,7 +3088,7 @@ function showRelicChoice() {
   const pool=G.relicChoice,leg=G.legendChoice;
   const legSlot = G.jokers.length < maxJokers();
   showOverlay(
-    '<div class="kicker">' + (G.elite ? 'Элитный бой повержен' : 'Босс повержен') + ' · этап ' + G.ante + '</div><h2>Реликвия <span class="thin">/ навсегда</span></h2>' +
+    '<div class="kicker">' + (Campaign.active()?Campaign.label()+' пройден':(G.elite ? 'Элитный бой повержен' : 'Босс повержен') + ' · этап ' + G.ante) + '</div><h2>Реликвия <span class="thin">/ навсегда</span></h2>' +
     '<p class="sub">Выбери одну. Реликвии работают до конца забега и не занимают слоты джокеров.</p>' +
     '<div class="shop-grid">' + pool.map((k, i) =>
       '<div class="shop-item"><div class="si-emoji">' + itemArt('relic', k) + '</div><div class="si-kind">Реликвия</div><div class="si-name">' + RELICS[k].name + '</div><div class="si-desc">' + RELICS[k].desc + '</div><button class="buy" data-relic="' + i + '">Взять</button></div>').join('') +
@@ -3224,14 +3241,14 @@ function renderShop() {
     : '<div class="owned" style="border-style:dashed;opacity:.6">Пока пусто</div>';
 
   showOverlay(
-    '<div class="kicker">Этап ' + G.ante + ' · ' + BLIND_NAMES[G.blind] + ' пройден</div>' +
+    '<div class="kicker">' + (Campaign.active()?Campaign.label():('Этап '+G.ante+' · '+BLIND_NAMES[G.blind])) + ' пройден</div>' +
     '<h2>Магазин</h2>' +
     '<p class="reserve-note">Можно бесплатно отложить один товар до следующего магазина. Цена сохранится.</p>' +
     rewardHTML +
     '<div class="shop-health"><div class="shop-health-top"><span>Твоё здоровье</span><strong id="shop-player-hp">♥ '+G.player.hp+' / '+G.player.maxHp+'</strong></div><div class="shop-health-bar"><i id="shop-player-health" style="width:'+100*G.player.hp/G.player.maxHp+'%"></i></div></div>' +
     (shopHealOpen()
       ? '<button class="ghost" id="btn-heal" ' + ((G.shop.heals || 0) >= CONFIG.healsPerShop || G.money < COMBAT.healPrice || G.player.hp >= G.player.maxHp ? 'disabled' : '') + '>Лечение +' + COMBAT.healAmount + ' HP · $' + COMBAT.healPrice + ' · ' + Math.max(0, CONFIG.healsPerShop - (G.shop.heals || 0)) + ' из ' + CONFIG.healsPerShop + '</button>'
-      : '<div class="heal-locked">♥ Лечение и банки — только в магазине после босса. Пока держись.</div>') +
+      : '<div class="heal-locked">'+(Campaign.active()?'♥ Лечение — после уровней 4, 8 и 9 или элитного боя.':'♥ Лечение и банки — только в магазине после босса. Пока держись.')+'</div>') +
     shelvesHTML +
     growthSummary(true)+'<h4 style="margin:18px 0 8px;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#8ea0b8">Твои джокеры' +
       ' <span style="opacity:.6">(' + G.jokers.length + '/' + maxJokers() + ')</span> <span style="opacity:.55;letter-spacing:.6px;text-transform:none">· наведи или нажми — увидишь описание</span></h4>' +
@@ -3241,7 +3258,7 @@ function renderShop() {
       '<div class="row-btns" style="margin:0">' +
         '<button class="ghost" id="btn-shop-rules">Правила</button>' +
         '<button class="ghost" id="btn-reroll" ' + (G.money < CONFIG.rerollPrice ? 'disabled' : '') + '>Реролл · $' + CONFIG.rerollPrice + '</button>' +
-        '<button class="primary" style="flex:0 0 auto;padding:11px 22px" id="btn-next">Дальше →</button>' +
+        '<button class="primary" style="flex:0 0 auto;padding:11px 22px" id="btn-next">' + (Campaign.active()?'Уровень '+(G.level+1)+' →':'Дальше →') + '</button>' +
       '</div>' +
     '</div>',
     true
@@ -3409,6 +3426,7 @@ function showBlindIntro() {
 }
 
 function showGameOver() {
+  if(Campaign.active()){Campaign.showLoss();return;}
   showOverlay(
     '<div class="kicker">Забег окончен · этап ' + G.ante + (G.endless ? ' · эндлесс' : '') + (G.daily ? ' · ежедневный' : '') + '</div>' +
     '<h2>Дом <span class="thin">забрал своё</span></h2>' +
@@ -3426,6 +3444,7 @@ function showGameOver() {
 }
 
 function showVictory() {
+  if(Campaign.active()){Campaign.showVictory();return;}
   showOverlay(
     '<div class="kicker">Этап ' + CONFIG.maxAnte + ' · босс повержен</div>' +
     '<h2>Ты <span class="thin">сломал дом</span></h2>' +
@@ -3443,6 +3462,7 @@ function showVictory() {
 }
 
 function showRules() {
+  if(!G?.started||Campaign.active()){Campaign.rules();return;}
   showOverlay(
     '<div class="kicker">Как это работает</div>' +
     '<h2>Двадцать одно <span class="thin">/ срезы и усилители</span></h2>' +
@@ -3471,7 +3491,7 @@ function cardElement(c, o) {
   o = o || {};
   const pipCount = /^([2-9]|10)$/.test(c.rank) ? Number(c.rank) : 0;
   const pips = pipCount ? '<span class="c-pips" data-count="' + pipCount + '" aria-hidden="true">' + Array.from({length:pipCount}, () => '<i>' + c.suit + '</i>').join('') + '</span>' : '';
-  return '<div class="card ' + c.color + (['J', 'Q', 'K', 'A'].includes(c.rank) ? ' face' : '') + (o.mini ? ' mini' : '') + (G.lastDrawn === c.id ? ' fromdeck' : '') + (o.scoring ? ' scoring' : '') + (c.mod ? ' m-' + c.mod : '') + '" data-id="' + c.id + '" data-r="' + c.rank + '" data-s="' + c.suit + '" data-g="' + ({ K: '♚', Q: '♛', J: '♞', A: '✦' }[c.rank] || '') + '" style="--rot:0deg;--lift:0px">' +
+  return '<div class="card ' + c.color + (['J', 'Q', 'K', 'A'].includes(c.rank) ? ' face' : '') + (o.mini ? ' mini' : '') + (G.lastDrawn === c.id ? ' fromdeck' : '') + (o.scoring ? ' scoring' : '') + (c.notched?' notched':'') + (c.mod ? ' m-' + c.mod : '') + '" data-id="' + c.id + '" data-r="' + c.rank + '" data-s="' + c.suit + '" data-g="' + ({ K: '♚', Q: '♛', J: '♞', A: '✦' }[c.rank] || '') + '" style="--rot:0deg;--lift:0px">' +
     '<span class="c-rank" data-suit="' + c.suit + '">' + c.rank + '</span><span class="c-suit">' + c.suit + '</span>' + pips +
     (o.mini ? '' : '<span class="c-chips">' + (c.mod === 'wild' ? '1–11' : cv(c) + ' · ' + cardChips(c)) + '</span>') + (c.mod && !o.mini ? '<span class="c-mod">' + MODS[c.mod].emoji + '</span>' : '') + '</div>';
 }
@@ -3487,6 +3507,7 @@ function renderHUD() {
   const bar = $('#hud-bar');
   bar.style.width = pct + '%';
   bar.parentElement.classList.toggle('hot', !!G.enemy && G.enemy.hp <= 0);
+  Campaign.renderHUD();
 }
 
 function tableHTML(s, t, ti, scored=null) {
@@ -3525,12 +3546,13 @@ function renderTable(fast=false) {
   const s = G.seat;
   const nx = G.deck.length ? G.deck[G.deck.length - 1] : null;
   const n = G.deck.length, layers = n > 20 ? 3 : n > 8 ? 2 : n > 0 ? 1 : 0;
-  let pile = '<div class="pile' + (n ? '' : ' empty') + '" role="button" tabindex="0" aria-label="Просмотреть оставшиеся карты колоды">';
+  let pile = '<div class="pile' + (n ? '' : ' empty') + (nx?.notched?' pile-notched':'')+'" role="button" tabindex="0" aria-label="Просмотреть оставшиеся карты колоды'+(nx?.notched?'. На верхней карте надорван уголок':'')+'">';
   for (let k = layers; k >= 1; k--) pile += '<div class="card back mini p' + k + '"><span></span></div>';
-  pile += '<span class="pcount" title="В колоде: ' + n + ' · сброс: ' + G.discard.length + '"><b>' + n + '</b> / ' + G.runDeck.length + '</span></div>';
+  pile += '<span class="pcount" title="В колоде: ' + n + ' · сброс: ' + G.discard.length + '"><b>' + n + '</b> / ' + G.runDeck.length + '</span><span class="notch-cue" aria-hidden="true">надрыв</span></div>';
   const oldCount=$('#dealer .pcount');
   if(fast&&s&&!s.peek&&!s.peek3&&!hasJoker('xray')&&oldCount&&document.querySelectorAll('#dealer .pile .card').length===layers){
     FastDraw.html(oldCount,'<b>'+n+'</b> / '+G.runDeck.length);oldCount.title='В колоде: '+n+' · сброс: '+G.discard.length;
+    const pileNode=$('#dealer .pile');pileNode.classList.toggle('pile-notched',!!nx?.notched);pileNode.setAttribute('aria-label','Просмотреть оставшиеся карты колоды'+(nx?.notched?'. На верхней карте надорван уголок':''));
   }else $('#dealer').innerHTML=G.phase==='play'||s?pile+(s?nextCardsHTML(s):''):'';
   const previewSeat = s || { tables: Array.from({ length: tablesPerSeat() }, newTable), sel: null, locked: false };
   const tableScores=evalSeat(previewSeat);
@@ -3612,7 +3634,7 @@ function renderJokers() {
   let talentPanel=$('#run-talent-panel');
   if(!talentPanel){talentPanel=document.createElement('div');talentPanel.id='run-talent-panel';$('#jokers').parentElement.insertAdjacentElement('afterend',talentPanel);}
   const opened=[...talentPanel.querySelectorAll('[data-run-panel][open]')].map(el=>el.dataset.runPanel);
-  talentPanel.innerHTML=talentSummary()+bargainSummary()+growthSummary()+tableFeaturesSummary();
+  talentPanel.innerHTML=talentSummary()+bargainSummary()+growthSummary()+tableFeaturesSummary()+CardMark.runSummary();
   talentPanel.querySelectorAll('[data-run-panel]').forEach(el=>{if(opened.includes(el.dataset.runPanel))el.open=true;});
 }
 
@@ -3622,7 +3644,7 @@ function renderSide() {
   $('#side-deck').textContent = G.deck.length + ' / ' + G.runDeck.length;
   $('#side-best').textContent = fmt(G.stats.bestSeat);
   const rp = $('#relic-panel');
-  if (rp) rp.innerHTML = '<h4>Реликвии · ' + STAKES[G.stake || 0].name + '</h4>' +
+  if (rp) rp.innerHTML = '<h4>Реликвии · ' + (Campaign.active()?'Темница':STAKES[G.stake || 0].name) + '</h4>' +
     (G.relics.length ? G.relics.map((k) => '<div class="kv" title="' + RELICS[k].desc + '"><span>' + itemArt('relic', k) + ' ' + RELICS[k].name + '</span><b></b></div>').join('')
       : '<div style="font-size:11px;color:#6d7f97;line-height:1.4">Дадут за победу над боссом.</div>') +
     (G.stake ? '<div style="font-size:11px;color:#9fd8bc;margin-top:6px">' + STAKES[G.stake].desc + '</div>' : '');
@@ -3810,6 +3832,7 @@ applyCosmetics();
 const fxLayer = document.createElement('div');
 fxLayer.id = 'fx';
 document.body.appendChild(fxLayer);
+Campaign.install();
 syncProgressionUnlocks();
 newGame();
 
