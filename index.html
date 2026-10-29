@@ -1096,12 +1096,14 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/ui-refinements.css?v=20261028-2">
 <link rel="stylesheet" href="assets/mobile-performance.css?v=20261029-1">
 <link rel="stylesheet" href="assets/shop-rarity.css?v=20261029-1">
-<link rel="stylesheet" href="assets/talents.css?v=20261029-1">
-<script src="assets/talents.js?v=20261029-1"></script>
+<link rel="stylesheet" href="assets/talents.css?v=20261029-2">
+<script src="assets/talents.js?v=20261029-2"></script>
 <link rel="stylesheet" href="assets/routes.css?v=20261029-1">
-<script src="assets/routes.js?v=20261029-1"></script>
+<script src="assets/routes.js?v=20261029-2"></script>
 <link rel="stylesheet" href="assets/joker-growth.css?v=20261029-1">
-<script src="assets/joker-growth.js?v=20261029-1"></script>
+<script src="assets/joker-growth.js?v=20261029-2"></script>
+<link rel="stylesheet" href="assets/deckcraft.css?v=20261029-1">
+<script src="assets/deckcraft.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
 </head>
@@ -1224,11 +1226,11 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261029-9"></script>
+<script src="assets/game-features.js?v=20261029-10"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261029-1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261029-9"></script>
+<script src="assets/game-menu.js?v=20261029-10"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -1816,7 +1818,8 @@ function newGame(stake, deckKey, opts) {
     player: {hp:COMBAT.playerHp,maxHp:COMBAT.playerHp,shield:0,effects:[],revived:false},
     enemy:null, battle:null,
     deckKey,
-    talent: !daily && direct && TALENTS[opts?.talent] ? opts.talent : null,
+    talent: !daily && direct && TALENTS[opts?.talent] && isUnlocked('talent',opts.talent) ? opts.talent : null,
+    fairStart:!daily&&!!opts?.fairStart,
     bargains: [],
     jokerGrowth: {},
     daily,
@@ -1863,7 +1866,7 @@ function newGame(stake, deckKey, opts) {
   if (!direct) { render(); GameMenu.main(); return; }
   GameMenu.backTarget=null;
   if (daily) Math.random = mulberry32(hashStr(daily + '|start'));
-  if (!daily) applyMetaBonuses();
+  if (!daily && !G.fairStart) applyMetaBonuses();
   applyStartDeck(deckKey);
   startBlind();
 }
@@ -1921,7 +1924,7 @@ function startSeat() {
     log('Вор украл «' + k.name + '»', 'bad');
   }
   const goal = limitForTurn();
-  G.seat = { goal, pendulum:bossIs('pendulum'), tables: makeTables(), sel: null, used: false, peek: false, locked: false };
+  G.seat = { goal, pendulum:bossIs('pendulum'), tables: makeTables(), sel: null, used: false, peek: G.talent==='scout'&&G.battle.turn===0, locked: false };
   G.phase = 'play';
   render();
 }
@@ -2050,8 +2053,8 @@ function evalSeat(s) {
   const tags = pre.slice();
   if (hasJoker('precision') && exact) { const bonus=growthIs('precision','master')?.35:.25;total = Math.round(total * (1 + bonus * exact)); tags.push('точность x' + (1 + bonus * exact)); }
   if(growthIs('precision','remedy')&&exact){heal+=3*exact;tags.push('Верная рука: +'+3*exact+' HP');}
-  const growthShield=growthIs('crimson','ward')?T.filter(r=>!r.empty&&!r.bust&&r.paint?.kind==='heal').length*4:0;
-  if(growthShield)tags.push('Терновый щит: +'+growthShield);
+  const growthShield=(growthIs('crimson','ward')?T.filter(r=>!r.empty&&!r.bust&&r.paint?.kind==='heal').length*4:0)+(G.talent==='warden'?T.filter(r=>!r.empty&&!r.bust&&r.paint?.kind==='dmg').length*4:0);
+  if(growthShield)tags.push('Щит от столов: +'+growthShield);
   if (hasJoker('suits')) {
     const ht = s.tables.filter((t) => t.cards.some((c) => c.suit === '♥')).length;
     if (ht >= 2) { total = Math.round(total * (1 + 0.15 * ht)); tags.push('масти x' + fmtMult(1 + 0.15 * ht)); }
@@ -2327,7 +2330,7 @@ function finishSeat(res, animated = false) {
   });
   if (res.tables.some((r) => r.paint && r.paint.kind === 'heal')) G.stats.redHeal += healed;
   if (G.stats.redHeal >= 30) unlockAch('redhand');
-  if (G.stats.blackTables >= 10) unlockAch('blackout');
+  if (G.stats.blackTables >= 10) {unlockAch('blackout');unlockAch('nightdeck');}
   G.player.shield+=(res.growthShield||0);
   Combat.attack(res);
   const game=G;
@@ -2444,6 +2447,10 @@ function metaSave() {
   try { const c = { ...META }; delete c.unlockAll; localStorage.setItem(META_KEY, JSON.stringify(c)); } catch (e) {}
 }
 const ACHS = {
+  repaint:{name:'Первый штрих',desc:'Изменить масть карты в кузнице',reward:{talent:'scout'}},
+  palette:{name:'Своя палитра',desc:'Трижды изменить масть в кузнице за один забег',reward:{deck:'scarlet'}},
+  nightdeck:{name:'Ночной клуб',desc:'Сыграть 10 чёрных столов за забег',reward:{deck:'nocturne'}},
+  evolution:{name:'Вторая жизнь',desc:'Выбрать улучшение любого джокера',reward:{talent:'warden'}},
   exact3: { name: 'Снайпер', desc: '3 точных стола за один ход', reward: { joker: 'ladder' } },
   clean: { name: 'Чистая работа', desc: 'Выиграть бой, не использовав расходников', reward: { joker: 'alchemist' } },
   wipe: { name: 'Полный провал', desc: 'Все занятые столы перебрали за один ход', reward: { joker: 'adrenaline' } },
@@ -2462,6 +2469,7 @@ function isUnlocked(kind, id) {
   return !gated || !!META.unlocked[kind + ':' + id];
 }
 function rewardName(r) {
+  if(r.talent)return 'талант «'+TALENTS[r.talent].name+'»';
   if (r.joker) return 'джокер «' + JOKERS.find((j) => j.id === r.joker).name + '»';
   return 'колода «' + DECKS[r.deck].name + '»';
 }
@@ -2503,6 +2511,8 @@ function metaRunEnd(win) {
 }
 
 const DECKS = {
+  scarlet:{name:'Алая',emoji:'♥',desc:'39 красных и 13 чёрных карт. Все трефы заменены бубнами. Стартовых денег на $2 меньше.'},
+  nocturne:{name:'Ночная',emoji:'♠',desc:'39 чёрных и 13 красных карт. Все бубны заменены трефами. Стартовых денег на $2 меньше.'},
   classic: { name: 'Классическая', emoji: '🂡', desc: 'Стандартные 52 карты.' },
   short: { name: 'Короткая', emoji: '✂️', desc: 'Без 2 и 3 (44 карты): выше средняя карта, но меньше точной настройки. +$3.' },
   gold: { name: 'Золотая', emoji: '💰', desc: '4 случайные карты золотые, но стартовых денег на $2 меньше.' },
@@ -2510,6 +2520,7 @@ const DECKS = {
   alchemy: { name: 'Алхимическая', emoji: '⚗️', desc: 'Старт с тремя случайными расходниками, денег на $2 меньше.' },
 };
 function applyStartDeck(key) {
+  if(key==='scarlet'||key==='nocturne'){const from=key==='scarlet'?'♣':'♦',to=key==='scarlet'?'♦':'♣';G.runDeck.forEach(c=>{if(c.suit===from){c.suit=to;c.color=key==='scarlet'?'red':'black';}});G.money=Math.max(0,G.money-2);}
   if (key === 'short') { G.runDeck = G.runDeck.filter((c) => !['2', '3'].includes(c.rank)); G.money += 3; }
   else if (key === 'gold') { pickFree(4).forEach((c) => { c.mod = 'gold'; }); G.money = Math.max(0, G.money - 2); }
   else if (key === 'glass') { pickFree(6).forEach((c) => { c.mod = 'glass'; }); G.cons.push(CONS.minus4); }
@@ -2526,7 +2537,7 @@ function nextCardsHTML(s) {
 /* ---------- путь ---------- */
 const NODES = {
   event: { emoji: '❓', name: 'Событие', desc: 'Случайная встреча: риск или выгода.' },
-  campfire: { emoji: '🔥', name: 'Кузница', desc: 'Удалить, улучшить или скопировать карту колоды.' },
+  campfire: { emoji: '🔥', name: 'Кузница', desc: 'Удалить, улучшить, скопировать карту или изменить её масть.' },
   elite: { emoji: '👹', name: 'Элитный бой', desc: 'Цель ×1,35 и правило босса. Награда: реликвия и +$5.' },
   contract: { emoji: '📜', name: 'Контракт', desc: 'Добровольно усложни бой за деньги.' },
   rest: {name:'Отдых',desc:'Выбери: восстановить до 20 HP или получить 8 щита в следующем бою.'},
@@ -2654,18 +2665,18 @@ function takeContract(i) {
 
 /* ---------- кузница ---------- */
 function openCampfire() {
-  G.phase = 'path'; G.pending = 'forge'; G.forgeMode = null; G.forgeSelection=null;render();
+  G.phase = 'path'; G.pending = 'forge'; G.forgeMode = null; G.forgeSelection=null;G.forgeSuit=null;render();
   showOverlay(
-    GameMenu.sceneHeader('campfire','Кузница · этап '+G.ante,'Закали свою колоду','Одно действие: удалить, усилить или скопировать карту. Карт в колоде: '+G.runDeck.length+'.') +
-    '<div class="evt-list forge-actions"><button class="evt-btn" data-forge="remove">'+itemArt('cons','remove')+'<span>Удалить карту<small>Навсегда убрать из колоды</small></span></button><button class="evt-btn" data-forge="upgrade">'+itemArt('relic','up')+'<span>Улучшить карту<small>+2 к значению и +20 чипов</small></span></button><button class="evt-btn" data-forge="copy">'+itemArt('joker','pair')+'<span>Скопировать карту<small>Добавить ещё один экземпляр</small></span></button><button class="ghost" data-forge="leave">Пройти мимо</button></div>'
+    GameMenu.sceneHeader('campfire','Кузница · этап '+G.ante,'Закали свою колоду','Одно действие: удалить, усилить, скопировать карту или изменить масть. Карт в колоде: '+G.runDeck.length+'.') +
+    '<div class="evt-list forge-actions"><button class="evt-btn" data-forge="remove">'+itemArt('cons','remove')+'<span>Удалить карту<small>Навсегда убрать из колоды</small></span></button><button class="evt-btn" data-forge="upgrade">'+itemArt('relic','up')+'<span>Улучшить карту<small>+2 к значению и +20 чипов</small></span></button><button class="evt-btn" data-forge="copy">'+itemArt('joker','pair')+'<span>Скопировать карту<small>Добавить ещё один экземпляр</small></span></button><button class="evt-btn" data-forge="suit"><span>♥ ♠</span><span>Изменить масть<small>Значение и чипы сохраняются</small></span></button><button class="ghost" data-forge="leave">Пройти мимо</button></div>'
   );
   document.querySelectorAll('#overlay [data-forge]').forEach((b) => { b.onclick = () => forgeAction(b.dataset.forge); });
 }
 function forgeAction(mode) {
   if (G.pending !== 'forge') return;
   if (mode === 'leave') { leaveNode(); return; }
-  G.forgeMode = mode;G.forgeSelection=null;render();
-  const titles = { remove: 'Удалить карту', upgrade: 'Улучшить карту', copy: 'Скопировать карту' };
+  G.forgeMode = mode;G.forgeSelection=null;G.forgeSuit=null;render();
+  const titles = { remove: 'Удалить карту', upgrade: 'Улучшить карту', copy: 'Скопировать карту', suit:'Изменить масть' };
   const order = RANKS.map((r) => r[0]);
   const cards = G.runDeck.slice().sort((a, b) => (b.mod === 'curse') - (a.mod === 'curse') || order.indexOf(a.rank) - order.indexOf(b.rank));
   showOverlay(
@@ -3774,6 +3785,7 @@ applyCosmetics();
 const fxLayer = document.createElement('div');
 fxLayer.id = 'fx';
 document.body.appendChild(fxLayer);
+syncProgressionUnlocks();
 newGame();
 
 </script>

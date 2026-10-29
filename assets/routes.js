@@ -37,6 +37,7 @@ function takeRest(kind){
 }
 function eliteRouteText(){const boss=G.pathEliteBoss&&BOSSES[G.pathEliteBoss];return 'HP врага '+fmt(Math.round(targetFor(G.ante,G.blind)*1.35))+' (×1,35). Атаки +20%. '+(boss?'Правило: '+boss.name+' — '+boss.desc:'Правило босса.')+' Награда за победу: выбор реликвии и +$5 сверх обычной награды.';}
 function forgeConfirm(id){
+ if(G.forgeMode==='suit'){forgeSuitChoice(id);return;}
  if(G.phase!=='path'||G.pending!=='forge'||!['remove','upgrade','copy'].includes(G.forgeMode))return;
  const c=G.runDeck.find(c=>c.id===id);if(!c)return;
  const mode=G.forgeMode,preview={...c,up:(c.up||0)+(mode==='upgrade'?2:0)};

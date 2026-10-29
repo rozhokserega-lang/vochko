@@ -14,7 +14,7 @@ const checks=await page.evaluate(()=>{
  for(const talent of Object.keys(TALENTS)){reset(talent);G.player.hp=70;G.seat.tables[0].cards=[card('2','♥'),card('3','♥'),card('4','♦')];G.seat.tables[1].cards=[card('A'),card('K')];G.seat.tables[2].cards=[card('K'),card('Q'),card('5')];const res=evalSeat(G.seat),forecast=combatForecast(res);finishSeat(res);check('Forecast '+talent,G.player.hp===forecast.playerHp&&G.enemy.hp===Math.max(0,G.enemy.maxHp-forecast.hit.hp));}
  reset('sharp');saveRun();check('Save talent',readSavedRun().game.talent==='sharp');resumeRun();check('Resume talent',G.talent==='sharp');delete G.talent;saveRun();resumeRun();check('Legacy save no talent',activeTalent()===null);
  newGame(0,'classic',{daily:true,talent:'healer'});check('Daily has no talent',G.talent===null);newGame(0,'classic',{talent:'bad'});check('Invalid talent ignored',G.talent===null);
- showRunSetup();check('Three talent choices',document.querySelectorAll('[data-talent]').length===3);
+ showRunSetup();check('All talent choices shown',document.querySelectorAll('[data-talent]').length===Object.keys(TALENTS).length);
  return checks;
 });
 await page.locator('[data-talent="healer"]').click();await page.locator('#ov-go').click();assert.equal(await page.evaluate(()=>G.talent),'healer');await page.reload();await page.locator('#ov-continue').click();assert.equal(await page.evaluate(()=>G.talent),'healer');assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,ui:'Select/start/reload/continue passed',errors},null,2));

@@ -3,7 +3,7 @@ const GameMenu={
  backTarget:null,
  routeArt(key){key=({rest:'straight',bargain:'contract'})[key]||key;const index=['event','campfire','elite','contract','straight'].indexOf(key);return '<span class="route-art" aria-hidden="true" style="--route-x:'+Math.max(0,index)*25+'%"></span>'},
  deckArt(key){
-  const art={classic:['joker','ace'],short:['cons','minus4'],gold:['relic','coins'],glass:['relic','revive'],alchemy:['joker','alchemist']}[key]||['joker','ace'];
+  const art={scarlet:['joker','crimson'],nocturne:['joker','blot'],classic:['joker','ace'],short:['cons','minus4'],gold:['relic','coins'],glass:['relic','revive'],alchemy:['joker','alchemist']}[key]||['joker','ace'];
   return itemArt(...art);
  },
  main(){
@@ -39,23 +39,24 @@ const GameMenu={
   if(SETUP.stake>unlocked)SETUP.stake=unlocked;
   if(!isUnlocked('deck',SETUP.deck))SETUP.deck='classic';
   const deck=DECKS[SETUP.deck];
-  if(!TALENTS[SETUP.talent])SETUP.talent='sharp';
+  if(!TALENTS[SETUP.talent]||!isUnlocked('talent',SETUP.talent))SETUP.talent='sharp';
   showOverlay('<div class="setup-screen"><button class="menu-back" id="setup-back">← Главное меню</button><div class="kicker">Новый забег</div><h2>Твоя колода</h2><p class="sub">Выбери, с чем войдёшь в казино.</p>'+
    '<div class="chosen-deck"><span class="chosen-deck-art">'+this.deckArt(SETUP.deck)+'</span><div><h3>'+deck.name+'</h3><p>'+deck.desc+'</p></div></div>'+
-   '<div class="deck-selector" aria-label="Выбор колоды">'+Object.entries(DECKS).map(([key,value])=>{
+   '<div class="deck-selector" aria-label="Выбор колоды">'+Object.entries(DECKS).sort(([a],[b])=>['classic','short','gold','glass','alchemy','scarlet','nocturne'].indexOf(a)-['classic','short','gold','glass','alchemy','scarlet','nocturne'].indexOf(b)).map(([key,value])=>{
     const enabled=isUnlocked('deck',key),selected=key===SETUP.deck;
     return '<button class="deck-option'+(selected?' selected':'')+'" data-deck="'+key+'" aria-pressed="'+selected+'" '+(!enabled?'disabled':'')+' title="'+(enabled?value.desc:lockHint('deck',key))+'">'+this.deckArt(key)+'<b>'+value.name+'</b><small>'+(enabled?(selected?'Выбрана':'Выбрать'):'Закрыта')+'</small></button>';
    }).join('')+'</div>'+
-   '<h3 class="talent-heading">Стартовый талант</h3><div class="talent-options" aria-label="Выбор таланта">'+Object.entries(TALENTS).map(([key,t])=>'<button class="talent-option" data-talent="'+key+'" aria-pressed="'+(key===SETUP.talent)+'"><span class="talent-mark" aria-hidden="true">'+t.mark+'</span><span><b>'+t.name+'</b><small>'+t.desc+'</small></span><span class="talent-check" aria-hidden="true">'+(key===SETUP.talent?'✓':'')+'</span></button>').join('')+'</div><p class="talent-note">Один талант до конца забега. Не занимает слот джокера.</p>'+
+   '<h3 class="talent-heading">Стартовый талант</h3><div class="talent-options" aria-label="Выбор таланта">'+Object.entries(TALENTS).sort(([a],[b])=>['healer','sharp','daring','warden','scout'].indexOf(a)-['healer','sharp','daring','warden','scout'].indexOf(b)).map(([key,t])=>{const enabled=isUnlocked('talent',key);return '<button class="talent-option" data-talent="'+key+'" aria-pressed="'+(key===SETUP.talent)+'" '+(!enabled?'disabled':'')+'><span class="talent-mark" aria-hidden="true">'+t.mark+'</span><span><b>'+t.name+'</b><small>'+t.desc+'</small>'+(!enabled?'<small class="talent-lock">'+lockHint('talent',key)+'</small>':'')+'</span><span class="talent-check" aria-hidden="true">'+(key===SETUP.talent?'✓':!enabled?'·':'')+'</span></button>';}).join('')+'</div><p class="talent-note">Один талант до конца забега. Не занимает слот джокера.</p>'+
    '<div class="setup-stake"><label for="setup-stake">Сложность</label><select id="setup-stake">'+STAKES.map((stake,index)=>'<option value="'+index+'" '+(index===SETUP.stake?'selected ':'')+(index>unlocked?'disabled':'')+'>'+stake.name+(index>unlocked?' · закрыто':'')+'</option>').join('')+'</select><p>'+STAKES[SETUP.stake].desc+'</p></div>'+
-   '<div class="setup-footer"><button class="home-start" id="ov-go">Начать забег</button>'+(readSavedRun()?'<small>Новый забег заменит текущее сохранение.</small>':'<small>Прогресс сохраняется автоматически.</small>')+'</div></div>');
+   '<label class="fair-start"><input type="checkbox" id="setup-fair" '+(SETUP.fairStart?'checked':'')+'><span><b>Честный старт</b>Без стартовых денег, печатей, джокера и слотов из лавки. Открытые колоды и таланты доступны; покупки сохраняются.</span></label><p class="setup-openings">Новые варианты открываются за достижения. Купленные бонусы лавки не удаляются.</p><div class="setup-footer"><button class="home-start" id="ov-go">Начать забег</button>'+(readSavedRun()?'<small>Новый забег заменит текущее сохранение.</small>':'<small>Прогресс сохраняется автоматически.</small>')+'</div></div>');
   $('#overlay .modal').classList.add('game-setup');
   document.querySelector('.deck-selector').scrollLeft=previousScroll;
   $('#setup-back').onclick=()=>this.main();
   document.querySelectorAll('[data-deck]').forEach(button=>button.onclick=()=>{SETUP.deck=button.dataset.deck;this.setup()});
   $('#setup-stake').onchange=event=>{SETUP.stake=Number(event.target.value);this.setup()};
-  document.querySelectorAll('[data-talent]').forEach(button=>button.onclick=()=>{const modal=$('#overlay .modal'),scroll=modal.scrollTop;SETUP.talent=button.dataset.talent;this.setup();$('#overlay .modal').scrollTop=scroll;});
-  $('#ov-go').onclick=()=>{this.backTarget=null;newGame(SETUP.stake,SETUP.deck,{talent:SETUP.talent})};
+  $('#setup-fair').onchange=event=>{SETUP.fairStart=event.target.checked;};
+  document.querySelectorAll('[data-talent]').forEach(button=>button.onclick=()=>{if(!isUnlocked('talent',button.dataset.talent))return;const modal=$('#overlay .modal'),scroll=modal.scrollTop;SETUP.talent=button.dataset.talent;this.setup();$('#overlay .modal').scrollTop=scroll;});
+  $('#ov-go').onclick=()=>{this.backTarget=null;newGame(SETUP.stake,SETUP.deck,{talent:SETUP.talent,fairStart:!!SETUP.fairStart})};
   tgShowBack(true);
  },
  pathHTML(picks){
@@ -76,7 +77,7 @@ const GameMenu={
   const rule=key=>'<div class="brief-house-rule"><b>'+BOSSES[key].name+'</b><p>'+BOSSES[key].desc+'</p></div>';
   return '<div class="battle-brief"><header class="brief-header"><div class="brief-portrait" aria-hidden="true" style="--portrait-x:'+portrait+'"></div><div><div class="kicker">Этап '+G.ante+' · '+BLIND_NAMES[G.blind]+'</div><h2>'+enemy.name+'</h2><p>'+(G.elite?'Элитный противник':enemy.type==='boss'?'Босс казино':enemy.type==='mini'?'Мини-босс':'Следующий противник')+'</p></div></header>'+
    '<div class="brief-stats"><div><span>HP врага</span><strong>'+fmt(enemy.hp)+'</strong></div><div><span>Ходов на бой</span><strong>'+seatsCount()+'</strong></div><div><span>Цель карт</span><strong>'+limitNow()+'</strong></div></div>'+
-   talentSummary()+bargainSummary()+(enemyTrait()?'<p class="brief-trait">'+enemyTrait()+'</p>':'')+
+   (G.fairStart?'<p class="talent-note">Честный старт: бонусы лавки отключены на этот забег.</p>':'')+talentSummary()+bargainSummary()+(enemyTrait()?'<p class="brief-trait">'+enemyTrait()+'</p>':'')+
    (boss?'<div class="brief-rules-title">Правило дома</div>'+rule(G.boss)+(G.boss2?rule(G.boss2):''):'')+
    (G.contract?'<div class="brief-house-rule"><b>Контракт: '+G.contract.name+'</b><p>'+G.contract.desc+' Награда: +$'+G.contract.reward+'.</p></div>':'')+
    '<details class="brief-help"><summary>Как проходит бой?</summary><p>Разыгрывай '+tablesPerSeat()+' стола за один ход. Кнопка «Сыграть ход» тратит ход, добор карт и остановка стола — нет. Очки становятся уроном. Победи врага, пока не закончатся ходы или HP. При переборе — ещё '+bustPenalty()+' входящего урона за стол.</p></details>'+

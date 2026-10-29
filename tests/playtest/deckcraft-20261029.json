@@ -1,0 +1,28 @@
+{
+  "checks": [
+    "New talent initially locked",
+    "New decks initially locked",
+    "No edit before confirmation",
+    "Restore suit confirmation",
+    "Suit changes colour, keeps properties",
+    "Suit counted once",
+    "Scout unlocked",
+    "Scarlet unlocked by three edits",
+    "Old blackout achievement grants night deck",
+    "scarlet has 52 unique cards",
+    "scarlet 39/13 colour split",
+    "scarlet money cost",
+    "nocturne has 52 unique cards",
+    "nocturne 39/13 colour split",
+    "nocturne money cost",
+    "Scout first turn peek",
+    "Scout later turn no peek",
+    "Warden unlocked",
+    "Warden black table shield",
+    "Fair start omits all purchased boosts",
+    "Normal start retains purchased boosts",
+    "Purchases not erased"
+  ],
+  "combinedCombatCases": 120,
+  "errors": []
+}

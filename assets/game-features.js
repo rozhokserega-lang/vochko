@@ -56,7 +56,7 @@ function resumeRun() {
   } else if (G.phase === 'path') {
     if (G.pending === 'event') openEvent(true);
     else if (G.pending === 'contract') openContract(true);
-    else if (G.pending === 'forge') { const mode = G.forgeMode,id=G.forgeSelection; openCampfire(); if (mode) {forgeAction(mode);if(id)forgeConfirm(id);} }
+    else if (G.pending === 'forge') { const mode = G.forgeMode,id=G.forgeSelection,suit=G.forgeSuit; openCampfire(); if (mode) {forgeAction(mode);G.forgeSuit=suit;if(id)forgeConfirm(id);} }
     else if (G.pending === 'rest') openRest();
     else if (G.pending === 'bargains') { const id=G.bargainSelection;openBargains();if(id)confirmBargain(id); }
     else if (G.nodeResult) nodeResult(G.nodeResult.title, G.nodeResult.msg, G.nodeResult.pendingTag);

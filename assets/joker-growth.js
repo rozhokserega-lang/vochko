@@ -31,5 +31,5 @@ function showGrowthChoice(id){
 }
 function chooseGrowth(id,branch){
  const def=JOKER_GROWTH[id],state=growthState(id);if(G.phase!=='shop'||G.evolutionChoice!==id||!hasJoker(id)||!def?.branches[branch]||state.branch||state.progress<def.goal)return;
- G.jokerGrowth=G.jokerGrowth||{};G.jokerGrowth[id]={progress:def.goal,branch};G.evolutionChoice=null;log('Развитие: '+def.branches[branch].name,'gold');render();renderShop();saveRun();
+ G.jokerGrowth=G.jokerGrowth||{};G.jokerGrowth[id]={progress:def.goal,branch};G.evolutionChoice=null;unlockAch('evolution');log('Развитие: '+def.branches[branch].name,'gold');render();renderShop();saveRun();
 }
