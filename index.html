@@ -1095,6 +1095,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/game-menu.css?v=20261028-5">
 <link rel="stylesheet" href="assets/ui-refinements.css?v=20261028-2">
 <link rel="stylesheet" href="assets/mobile-performance.css?v=20261029-1">
+<link rel="stylesheet" href="assets/shop-rarity.css?v=20261029-1">
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
 </head>
@@ -3097,7 +3098,7 @@ function shopItemHTML(it, i) {
   let desc = '';
   let extraClass = '';
   if (it.kind === 'joker') {
-    kind = 'Джокер · ' + RARITY[it.joker.rarity].name;
+    kind = '<span class="rarity-badge"><span aria-hidden="true">' + ({common:'◆',rare:'◆◆',legendary:'◆◆◆'}[it.joker.rarity]) + '</span> ' + RARITY[it.joker.rarity].name + '</span><span class="rarity-type">Джокер</span>';
     emoji = it.joker.emoji;
     name = it.joker.name;
     desc = it.joker.desc;
