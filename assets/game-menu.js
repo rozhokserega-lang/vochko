@@ -1,7 +1,7 @@
 /* Dedicated title screen, focused run setup, and illustrated intermissions. */
 const GameMenu={
  backTarget:null,
- routeArt(key){const index=['event','campfire','elite','contract','straight'].indexOf(key);return '<span class="route-art" aria-hidden="true" style="--route-x:'+Math.max(0,index)*25+'%"></span>'},
+ routeArt(key){key=({rest:'straight',bargain:'contract'})[key]||key;const index=['event','campfire','elite','contract','straight'].indexOf(key);return '<span class="route-art" aria-hidden="true" style="--route-x:'+Math.max(0,index)*25+'%"></span>'},
  deckArt(key){
   const art={classic:['joker','ace'],short:['cons','minus4'],gold:['relic','coins'],glass:['relic','revive'],alchemy:['joker','alchemist']}[key]||['joker','ace'];
   return itemArt(...art);
@@ -60,7 +60,7 @@ const GameMenu={
  },
  pathHTML(picks){
   return '<div class="path-screen"><div class="kicker">Этап '+G.ante+' · между боями</div><h2>Выбери свой путь</h2><p class="sub">Впереди '+BLIND_NAMES[G.blind].toLowerCase()+'. Куда заглянем по дороге?</p><div class="route-options">'+picks.map((key,index)=>{
-   const node=NODES[key];return '<button class="route-card route-'+key+'" data-node="'+key+'">'+this.routeArt(key)+'<span class="route-copy"><small>Путь '+(index+1)+'</small><b>'+node.name+'</b><span>'+node.desc+'</span><em>Выбрать →</em></span></button>';
+   const node=NODES[key];return '<button class="route-card route-'+key+'" data-node="'+key+'">'+this.routeArt(key)+'<span class="route-copy"><small>Путь '+(index+1)+'</small><b>'+node.name+'</b><span>'+(key==='elite'?eliteRouteText():node.desc)+'</span><em>Выбрать →</em></span></button>';
   }).join('')+'</div><p class="path-hint">Любой путь ведёт к следующему бою.</p></div>';
  },
  sceneHeader(type,kicker,title,text=''){
@@ -76,7 +76,7 @@ const GameMenu={
   const rule=key=>'<div class="brief-house-rule"><b>'+BOSSES[key].name+'</b><p>'+BOSSES[key].desc+'</p></div>';
   return '<div class="battle-brief"><header class="brief-header"><div class="brief-portrait" aria-hidden="true" style="--portrait-x:'+portrait+'"></div><div><div class="kicker">Этап '+G.ante+' · '+BLIND_NAMES[G.blind]+'</div><h2>'+enemy.name+'</h2><p>'+(G.elite?'Элитный противник':enemy.type==='boss'?'Босс казино':enemy.type==='mini'?'Мини-босс':'Следующий противник')+'</p></div></header>'+
    '<div class="brief-stats"><div><span>HP врага</span><strong>'+fmt(enemy.hp)+'</strong></div><div><span>Ходов на бой</span><strong>'+seatsCount()+'</strong></div><div><span>Цель карт</span><strong>'+limitNow()+'</strong></div></div>'+
-   talentSummary()+(enemyTrait()?'<p class="brief-trait">'+enemyTrait()+'</p>':'')+
+   talentSummary()+bargainSummary()+(enemyTrait()?'<p class="brief-trait">'+enemyTrait()+'</p>':'')+
    (boss?'<div class="brief-rules-title">Правило дома</div>'+rule(G.boss)+(G.boss2?rule(G.boss2):''):'')+
    (G.contract?'<div class="brief-house-rule"><b>Контракт: '+G.contract.name+'</b><p>'+G.contract.desc+' Награда: +$'+G.contract.reward+'.</p></div>':'')+
    '<details class="brief-help"><summary>Как проходит бой?</summary><p>Разыгрывай '+tablesPerSeat()+' стола за один ход. Кнопка «Сыграть ход» тратит ход, добор карт и остановка стола — нет. Очки становятся уроном. Победи врага, пока не закончатся ходы или HP. При переборе — ещё 2 входящего урона за стол.</p></details>'+

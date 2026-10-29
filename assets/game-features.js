@@ -55,7 +55,9 @@ function resumeRun() {
   } else if (G.phase === 'path') {
     if (G.pending === 'event') openEvent(true);
     else if (G.pending === 'contract') openContract(true);
-    else if (G.pending === 'forge') { const mode = G.forgeMode; openCampfire(); if (mode) forgeAction(mode); }
+    else if (G.pending === 'forge') { const mode = G.forgeMode,id=G.forgeSelection; openCampfire(); if (mode) {forgeAction(mode);if(id)forgeConfirm(id);} }
+    else if (G.pending === 'rest') openRest();
+    else if (G.pending === 'bargains') { const id=G.bargainSelection;openBargains();if(id)confirmBargain(id); }
     else if (G.nodeResult) nodeResult(G.nodeResult.title, G.nodeResult.msg, G.nodeResult.pendingTag);
     else openPath(true);
   }
@@ -84,6 +86,7 @@ function enemyResponse(result, intent = G.enemy.intent) {
   const longTable = result.tables.some((table,index) => !table.empty && !table.bust && G.seat.tables[index].cards.length >= 4);
   if (G.enemy.id === 'brawler' && intent.kind === 'heavy' && longTable) amount = Math.floor(amount * .6);
   if (G.enemy.id === 'usurer' && intent.kind === 'heal' && result.exact >= 2) amount = 0;
+  if(hasBargain('fury')&&['attack','heavy','hex'].includes(intent.kind))amount+=2;
   const paid = G.enemy.id === 'collector' && G.battle.bribed;
   return {raw:['attack','heavy','hex'].includes(intent.kind) && !paid ? amount : 0, kind:intent.kind, amount, paid};
 }
