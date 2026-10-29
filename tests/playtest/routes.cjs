@@ -5,9 +5,9 @@ const checks=await p.evaluate(()=>{
  function reset(){newGame(0,'classic',{talent:'sharp'});hideOverlay();G.phase='path';G.bargains=[];G.slotJ=G.slotC=0;}
  for(const id of Object.keys(BARGAINS)){
   reset();const slots=maxJokers(),cons=consSlots(),reward=baseReward();G.player.hp=90;openBargains();confirmBargain(id);check('No mutation before confirm '+id,!hasBargain(id));acceptBargain(id);check('Accepted '+id,hasBargain(id));const state=JSON.stringify(G);acceptBargain(id);check('No double reward '+id,JSON.stringify(G)===state);
-  if(id==='velvet'){check('Joker slot',maxJokers()===slots+1);const price=buildShopItems().find(x=>x.kind==='cons');check('Surcharge',price.price===CONS[price.key].price+2);}
+  if(id==='velvet'){check('Joker slot',maxJokers()===slots+1);const price=buildShopItems().find(x=>x.kind==='cons');check('Surcharge',price.price===CONS[price.key].price+1);}
   if(id==='blood')check('Blood clamps HP',G.player.maxHp===75&&G.player.hp===75&&G.money>=18);
-  if(id==='pockets')check('Pockets slots/reward',consSlots()===cons+2&&baseReward()===Math.max(0,reward-2));
+  if(id==='pockets')check('Pockets slots/reward',consSlots()===cons+2&&baseReward()===Math.max(0,reward-1));
   saveRun();resumeRun();check('Save accepted '+id,hasBargain(id)&&G.pending==='bargainDone');
  }
  reset();openBargains();confirmBargain('blood');saveRun();resumeRun();check('Restore confirmation',G.bargainSelection==='blood'&&!!document.querySelector('#bargain-accept'));acceptBargain('blood');check('Restored confirmation accepts',hasBargain('blood'));

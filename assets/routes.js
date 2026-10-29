@@ -1,9 +1,9 @@
 /* Permanent run bargains and one-action rest stops. No timers or idle effects. */
 const BARGAINS={
- velvet:{name:'Бархатное кресло',gain:'+1 слот джокера.',cost:'Все новые товары в магазинах дороже на $2. Отложенные ранее товары сохраняют цену.',can:()=>true,apply:()=>{G.slotJ=(G.slotJ||0)+1;}},
+ velvet:{name:'Бархатное кресло',gain:'+1 слот джокера.',cost:'Все новые товары в магазинах дороже на $1. Отложенные ранее товары сохраняют цену.',can:()=>true,apply:()=>{G.slotJ=(G.slotJ||0)+1;}},
  blood:{name:'Цена крови',gain:'Сразу +$18.',cost:'Максимальное HP −25. Текущее HP обрезается до нового максимума; лечение этого не вернёт.',can:()=>G.player.maxHp>25,apply:()=>{G.player.maxHp-=25;G.player.hp=Math.min(G.player.hp,G.player.maxHp);G.money+=18;}},
  fury:{name:'Ярость должника',gain:'Общий урон каждого хода +20%.',cost:'Каждая атака врага сильнее на 2 до защиты. Штраф за перебор не меняется.',can:()=>true,apply:()=>{}},
- pockets:{name:'Бездонные карманы',gain:'+2 слота расходников.',cost:'Базовая награда за каждый выигранный бой −$2. Остальные награды не меняются.',can:()=>true,apply:()=>{G.slotC=(G.slotC||0)+2;}}
+ pockets:{name:'Бездонные карманы',gain:'+2 слота расходников.',cost:'Базовая награда за каждый выигранный бой −$1. Остальные награды не меняются.',can:()=>true,apply:()=>{G.slotC=(G.slotC||0)+2;}}
 };
 function hasBargain(id){return !!G?.bargains?.includes(id);}
 function bargainSummary(){return G?.bargains?.length?'<details class="run-talent"><summary>Сделки: '+G.bargains.length+'</summary>'+G.bargains.filter(k=>BARGAINS[k]).map(k=>'<p><b>'+BARGAINS[k].name+'</b><br>'+BARGAINS[k].gain+'<br><span class="bargain-cost">'+BARGAINS[k].cost+'</span></p>').join('')+'</details>':'';}

@@ -4,7 +4,9 @@
   "scripts": {
     "test": "node tests/playtest/consumable-audit.cjs && node tests/playtest/tactical-clarity.cjs && node tests/playtest/combinations.cjs",
     "test:balance": "node tests/playtest/playtest-runs.cjs",
-    "test:balance:lab": "node tests/playtest/balance-lab.cjs"
+    "test:balance:lab": "node tests/playtest/balance-lab.cjs",
+    "test:balance:progression": "node tests/playtest/balance-progression.cjs",
+    "test:progression": "node tests/playtest/balance-patch.cjs && node tests/playtest/routes.cjs && node tests/playtest/deckcraft.cjs && node tests/playtest/joker-growth.cjs && node tests/playtest/talents.cjs && node tests/playtest/mobile-performance.cjs"
   },
   "devDependencies": {
     "playwright": "1.64.1"

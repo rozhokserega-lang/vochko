@@ -1099,7 +1099,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/talents.css?v=20261029-2">
 <script src="assets/talents.js?v=20261029-2"></script>
 <link rel="stylesheet" href="assets/routes.css?v=20261029-1">
-<script src="assets/routes.js?v=20261029-2"></script>
+<script src="assets/routes.js?v=20261029-3"></script>
 <link rel="stylesheet" href="assets/joker-growth.css?v=20261029-1">
 <script src="assets/joker-growth.js?v=20261029-2"></script>
 <link rel="stylesheet" href="assets/deckcraft.css?v=20261029-1">
@@ -1353,7 +1353,7 @@ function maxJokers() { return CONFIG.maxJokers + (hasRelic('slot') ? 1 : 0) + ((
 function tablesPerSeat() { return 3 + ((G && G.extraTables) ? 1 : 0); }
 // Лечение и банки продаются только в магазине после босса (или элитного боя).
 function shopHealOpen() { return !!(G && (G.blind === 2 || G.elite)); }
-function baseReward() { return Math.max(0,CONFIG.baseReward - (G && G.stake >= 3 ? 1 : 0) - (hasBargain('pockets')?2:0)); }
+function baseReward() { return Math.max(0,CONFIG.baseReward - (G && G.stake >= 3 ? 1 : 0) - (hasBargain('pockets')?1:0)); }
 function seatsCount() { return CONFIG.seats + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
 function unlockedStake() {
   try { return Math.min(STAKES.length - 1, Number(localStorage.getItem('vochko.stake') || 0)); } catch (e) { return 0; }
@@ -2517,14 +2517,14 @@ const DECKS = {
   short: { name: 'Короткая', emoji: '✂️', desc: 'Без 2 и 3 (44 карты): выше средняя карта, но меньше точной настройки. +$3.' },
   gold: { name: 'Золотая', emoji: '💰', desc: '4 случайные карты золотые, но стартовых денег на $2 меньше.' },
   glass: { name: 'Хрупкая', emoji: '🔷', desc: '6 стеклянных карт (очки ×2, но могут разбиться) и лишний Срез −4.' },
-  alchemy: { name: 'Алхимическая', emoji: '⚗️', desc: 'Старт с тремя случайными расходниками, денег на $2 меньше.' },
+  alchemy: { name: 'Алхимическая', emoji: '⚗️', desc: 'Старт: один случайный срез и два других случайных расходника. Денег на $2 меньше.' },
 };
 function applyStartDeck(key) {
   if(key==='scarlet'||key==='nocturne'){const from=key==='scarlet'?'♣':'♦',to=key==='scarlet'?'♦':'♣';G.runDeck.forEach(c=>{if(c.suit===from){c.suit=to;c.color=key==='scarlet'?'red':'black';}});G.money=Math.max(0,G.money-2);}
   if (key === 'short') { G.runDeck = G.runDeck.filter((c) => !['2', '3'].includes(c.rank)); G.money += 3; }
   else if (key === 'gold') { pickFree(4).forEach((c) => { c.mod = 'gold'; }); G.money = Math.max(0, G.money - 2); }
   else if (key === 'glass') { pickFree(6).forEach((c) => { c.mod = 'glass'; }); G.cons.push(CONS.minus4); }
-  else if (key === 'alchemy') { G.cons = shuffle(Object.keys(CONS)).slice(0, 3).map((k) => CONS[k]); G.money = Math.max(0, G.money - 2); }
+  else if (key === 'alchemy') { const rescue=pick(['minus2','minus4','pct30']);G.cons=[CONS[rescue],...shuffle(Object.keys(CONS).filter(k=>k!==rescue)).slice(0,2).map(k=>CONS[k])]; G.money = Math.max(0, G.money - 2); }
 }
 function makeCurse() { return { id: ++cardSeq, rank: '☠', val: 8, suit: '✖', color: 'black', up: 0, mod: 'curse' }; }
 
@@ -3042,7 +3042,7 @@ function buildShopItems() {
   items.push({ kind: 'slotc', price: CONFIG.slotPriceC + CONFIG.slotStepC * (G.slotC || 0), sold: false });
   if (!G.extraTables) items.push({ kind: 'table', price: CONFIG.tablePrice, sold: false });
   items.forEach((it) => {
-    if(hasBargain('velvet'))it.price+=2;
+    if(hasBargain('velvet'))it.price+=1;
     if (it.kind !== 'table' && it.kind !== 'slotc') it.price += G.stake >= 5 ? 1 : 0;
   });
   return items;
