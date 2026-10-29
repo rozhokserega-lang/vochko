@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');const {launch,load,writeReport}=require('./runtime.cjs');
+(async()=>{const b=await launch();try{const checks=[];
+const p=await b.newPage({viewport:{width:390,height:844},hasTouch:true,reducedMotion:'no-preference'});await load(p);
+await p.evaluate(()=>{newGame(0,'classic');hideOverlay();startSeat();G.deck=G.runDeck.filter(c=>['2','3','4'].includes(c.rank));render();});
+const original=await p.evaluate(()=>G.deck.length);for(let i=0;i<6;i++)await p.locator('#btn-draw').tap();assert.equal(await p.evaluate(()=>G.seat.tables.reduce((s,t)=>s+t.cards.length,0)),6);assert.equal(await p.evaluate(()=>G.deck.length),original-6);checks.push('Six taps produce six cards without queuing or double dealing');
+assert.equal(await p.evaluate(()=>document.querySelector('#run-talent-panel')?.isConnected),true);checks.push('Build panel survives fast draw rendering');
+await p.evaluate(()=>{G.enemy.hp=G.enemy.maxHp=100000;G.enemy.intent={kind:'attack',amount:4};document.querySelector('#seat-stats').scrollIntoView();});
+await p.locator('#btn-stand').tap();
+const points=await p.evaluate(()=>[...document.querySelectorAll('.attack-orb,.attack-caption')].map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top)})));assert.ok(points.length>0&&points.every(pt=>pt.x>=0&&pt.x<=390&&pt.y>=0&&pt.y<=844));checks.push('Charge stays in visible viewport after scrolling');
+await p.waitForFunction(()=>document.querySelector('.combat-receipt')?.textContent.includes('ПОПАДАНИЕ'));const receipt=await p.locator('.combat-receipt').boundingBox();assert.ok(receipt.y>=0&&receipt.y+receipt.height<=844);checks.push('Damage receipt visible after impact');await p.waitForFunction(()=>!AttackFX.active);assert.equal(await p.evaluate(()=>G.seatsLeft),3);checks.push('One attack and one spent turn');
+const reduced=await b.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});await load(reduced);await reduced.evaluate(()=>{newGame(0,'classic');hideOverlay();startSeat();G.seat.tables[0].cards=G.runDeck.filter(c=>['A','K'].includes(c.rank)&&c.suit==='♠');G.enemy.hp=G.enemy.maxHp=100000;render();stand();});assert.equal(await reduced.locator('.attack-fx-layer').count(),0);assert.ok(await reduced.locator('.combat-receipt').textContent().then(t=>t.includes('ПОПАДАНИЕ')));checks.push('Reduced motion retains static damage feedback');await reduced.evaluate(()=>newGame(0,'classic'));assert.equal(await reduced.locator('.combat-receipt').count(),0);checks.push('Restart removes stale receipt');
+writeReport('input-feedback.json',{checks});console.log(checks.join('\n'));
+}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

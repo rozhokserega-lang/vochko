@@ -1,6 +1,19 @@
 /* Cosmetic-only choreography. All game mutations still go through finishSeat. */
 const AttackFX = {
-  active:null,
+  active:null,receipt:null,receiptTimer:0,
+  visiblePoint(point){
+    const style=getComputedStyle(document.body),top=parseFloat(style.paddingTop)||0,bottom=parseFloat(style.paddingBottom)||0;
+    return {x:Math.max(40,Math.min(innerWidth-40,point.x)),y:Math.max(top+55,Math.min(innerHeight-bottom-135,point.y))};
+  },
+  clearReceipt(){clearTimeout(this.receiptTimer);this.receipt?.getAnimations().forEach(a=>a.cancel());this.receipt?.remove();this.receipt=null},
+  showReceipt(hit,result){
+    if(document.hidden)return;this.clearReceipt();
+    const el=document.createElement('div');el.className='combat-receipt';el.setAttribute('role','status');
+    el.textContent=hit.hp?'ПОПАДАНИЕ −'+fmt(hit.hp)+' HP'+(hit.absorbed?' · ЩИТ −'+fmt(hit.absorbed):''):hit.absorbed?'ЩИТ −'+fmt(hit.absorbed):result.bust?'ПЕРЕБОР · БЕЗ УРОНА':'БЕЗ УРОНА';
+    document.body.appendChild(el);this.receipt=el;
+    if(!REDUCED&&el.animate)el.animate([{opacity:0,translate:'0 6px'},{opacity:1,translate:'0 0',offset:.15},{opacity:1,offset:.8},{opacity:0,translate:'0 -6px'}],{duration:700});
+    this.receiptTimer=setTimeout(()=>{if(this.receipt===el)this.clearReceipt()},750);
+  },
   center(element) {
     if(!element)return null;
     const rect=element.getBoundingClientRect();
@@ -23,7 +36,7 @@ const AttackFX = {
     run.tables.forEach(element=>element.classList.remove('attack-charging','attack-fizzle'));
     if(run.accumulator&&(!this.active||this.active===run))run.accumulator.classList.remove('attack-accumulator');
   },
-  cancel() {if(this.active)this.cleanup(this.active)},
+  cancel() {if(this.active)this.cleanup(this.active);this.clearReceipt()},
   flush() {
     const run=this.active;if(!run)return;
     if(this.valid(run)){
@@ -42,14 +55,15 @@ const AttackFX = {
     this.cancel();
     const root=document.createElement('div');root.className='attack-fx-layer';root.setAttribute('aria-hidden','true');document.body.appendChild(root);
     const run={game,seat,root,animations:[],tables:[],committed:false,frame:0};this.active=run;
-    run.commit=animated=>{if(this.valid(run)&&!run.committed){run.committed=true;finishSeat(result,animated)}};
+    run.commit=animated=>{if(this.valid(run)&&!run.committed){run.committed=true;const hit=attackPreview(result);finishSeat(result,animated);this.showReceipt(hit,result)}};
     const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     try{
       if(REDUCED||document.hidden||typeof root.animate!=='function'){run.commit(false);return}
       document.body.classList.add('attack-busy');$('#btn-rules').disabled=true;
       run.accumulator=$('.fbox.result');
-      const origin=this.center(run.accumulator),target=this.center($('#enemy-portrait'));
-      if(!origin||!target){run.commit(false);return}
+      const rawOrigin=this.center(run.accumulator),rawTarget=this.center($('#enemy-portrait'));
+      if(!rawOrigin||!rawTarget){run.commit(false);return}
+      const origin=this.visiblePoint(rawOrigin),target=this.visiblePoint(rawTarget);
       const forecast=combatForecast(result);
       const caption=this.node(run,'attack-caption',{x:origin.x,y:origin.y+29},result.total?'ЗАРЯД':'НЕТ УРОНА');
       const orb=this.node(run,'attack-orb',origin);
@@ -113,4 +127,4 @@ const AttackFX = {
     }finally{this.cleanup(run)}
   }
 };
-document.addEventListener('visibilitychange',()=>{if(document.hidden)AttackFX.flush()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){AttackFX.flush();AttackFX.clearReceipt()}});

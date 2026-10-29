@@ -20,3 +20,4 @@ body.attack-busy #btn-rules{opacity:.45;pointer-events:none}
 #battle-panel.battle-impact #enemy-portrait{animation:portraitStrike .32s ease-out}
 @keyframes portraitStrike{0%,100%{translate:0 0}30%{translate:4px -2px}65%{translate:-2px 1px}}
 @media(prefers-reduced-motion:reduce){.attack-fx-layer{display:none}.tbl.attack-charging,.attack-accumulator{box-shadow:none!important}#battle-panel.battle-impact #enemy-portrait{animation:none}}
+.combat-receipt{position:fixed;top:calc(var(--ui-top,0px) + 68px);left:50%;transform:translateX(-50%);z-index:145;max-width:calc(100vw - 28px);padding:10px 14px;border:1px solid #d2af65;border-radius:7px;background:#142b20f5;color:#ffe2a0;box-shadow:0 4px 12px #0006;font:700 15px/1.35 'Segoe UI',sans-serif;text-align:center;pointer-events:none}
