@@ -1100,6 +1100,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/talents.js?v=20261029-1"></script>
 <link rel="stylesheet" href="assets/routes.css?v=20261029-1">
 <script src="assets/routes.js?v=20261029-1"></script>
+<link rel="stylesheet" href="assets/joker-growth.css?v=20261029-1">
+<script src="assets/joker-growth.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
 </head>
@@ -1222,11 +1224,11 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261029-8"></script>
+<script src="assets/game-features.js?v=20261029-9"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261029-1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261029-8"></script>
+<script src="assets/game-menu.js?v=20261029-9"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -1499,7 +1501,7 @@ const Enemy = {
     else if(i.kind==='heal'){const n=Math.min(response.amount,e.maxHp-e.hp);e.hp+=n;log(n?'Враг лечится: +'+fmt(n):'Два точных стола отменили лечение','bad');}
     else if(i.kind==='rage'){Effects.add(e,'rage',COMBAT.rage);log('Враг усилил следующую атаку ×1,5','bad');}
     // Bust punishment is incoming damage even on a defensive enemy turn.
-    if(busts&&G.player.hp>0)Combat.receive(busts*COMBAT.bustPenalty,'Перебор');
+    if(busts&&G.player.hp>0)Combat.receive(busts*bustPenalty(),'Перебор');
   },
   phase() {
     const e=G.enemy;
@@ -1816,6 +1818,7 @@ function newGame(stake, deckKey, opts) {
     deckKey,
     talent: !daily && direct && TALENTS[opts?.talent] ? opts.talent : null,
     bargains: [],
+    jokerGrowth: {},
     daily,
     endless: false,
     metaDone: false,
@@ -1994,7 +1997,7 @@ function paintOf(t, preview) {
   if (!red && !black) return null;
   const value0 = n >= 4 ? CONFIG.redHeal4 : CONFIG.redHeal3;
   const dmg0 = n >= 4 ? CONFIG.blackBonus4 : CONFIG.blackBonus3;
-  const value = Math.round(value0 * (hasJoker('crimson') ? 1.5 : 1) * (G.talent === 'healer' ? 1.5 : 1));
+  const value = Math.round(value0 * (hasJoker('crimson') ? (growthIs('crimson','bloom')?2:1.5) : 1) * (G.talent === 'healer' ? 1.5 : 1));
   const dmg = hasJoker('blot') ? dmg0 + 10 : dmg0;
   return red ? { kind: 'heal', value, n } : { kind: 'dmg', value: dmg, n };
 }
@@ -2045,7 +2048,10 @@ function evalSeat(s) {
   let total = live.reduce((a, r) => a + r.score, 0);
   const chips = live.reduce((a, r) => a + r.chips, 0);
   const tags = pre.slice();
-  if (hasJoker('precision') && exact) { total = Math.round(total * (1 + 0.25 * exact)); tags.push('точность x' + (1 + 0.25 * exact)); }
+  if (hasJoker('precision') && exact) { const bonus=growthIs('precision','master')?.35:.25;total = Math.round(total * (1 + bonus * exact)); tags.push('точность x' + (1 + bonus * exact)); }
+  if(growthIs('precision','remedy')&&exact){heal+=3*exact;tags.push('Верная рука: +'+3*exact+' HP');}
+  const growthShield=growthIs('crimson','ward')?T.filter(r=>!r.empty&&!r.bust&&r.paint?.kind==='heal').length*4:0;
+  if(growthShield)tags.push('Терновый щит: +'+growthShield);
   if (hasJoker('suits')) {
     const ht = s.tables.filter((t) => t.cards.some((c) => c.suit === '♥')).length;
     if (ht >= 2) { total = Math.round(total * (1 + 0.15 * ht)); tags.push('масти x' + fmtMult(1 + 0.15 * ht)); }
@@ -2071,7 +2077,7 @@ function evalSeat(s) {
   if (G.talent === 'daring' && bust === 1 && total > 0) { total=Math.round(total*1.3);tags.push('Авантюрист: один перебор +30%'); }
   if(hasBargain('fury')&&total>0){total=Math.round(total*1.2);tags.push('Ярость должника +20%');}
   if (bust) tags.push('перебор столов: ' + bust);
-  return { tables: T, total, exact, bust, chips, tags, closed, heal };
+  return { tables: T, total, exact, bust, chips, tags, closed, heal, growthShield };
 }
 
 function autoFinish(s) {
@@ -2273,6 +2279,7 @@ function finishSeat(res, animated = false) {
   if (G.phase !== 'play' || !s || G.battle.resolving) return;
   recordTurnStart(res);
   G.battle.resolving = true;
+  recordJokerGrowth(res,s);
   G.battle.lastReceived = 0;
   G.battle.lastAction = G.enemy.intent && G.enemy.intent.kind;
   G.score += res.total;
@@ -2289,7 +2296,7 @@ function finishSeat(res, animated = false) {
   const goodCards = [];
   s.tables.forEach((t, i) => { if (!res.tables[i].empty && !res.tables[i].bust) goodCards.push(...t.cards); });
   G.lowCardsRun += goodCards.filter((c) => c.val >= 2 && c.val <= 5).length;
-  if (res.bust && hasJoker('insurer')) { G.money += 2 * res.bust; log('Страховщик: +$' + 2 * res.bust, 'gold'); }
+  if (res.bust && hasJoker('insurer')) { const rate=growthIs('insurer','premium')?3:2;G.money += rate * res.bust; log('Страховщик: +$' + rate * res.bust, 'gold'); }
   const gold = goodCards.filter((c) => c.mod === 'gold').length;
   if (gold) { G.money += gold; log('Золотые карты: +$' + gold, 'gold'); }
   const broken = goodCards.filter((c) => c.mod === 'glass' && Math.random() < 0.25);
@@ -2321,6 +2328,7 @@ function finishSeat(res, animated = false) {
   if (res.tables.some((r) => r.paint && r.paint.kind === 'heal')) G.stats.redHeal += healed;
   if (G.stats.redHeal >= 30) unlockAch('redhand');
   if (G.stats.blackTables >= 10) unlockAch('blackout');
+  G.player.shield+=(res.growthShield||0);
   Combat.attack(res);
   const game=G;
   const respond=()=>{
@@ -3205,7 +3213,7 @@ function renderShop() {
       ? '<button class="ghost" id="btn-heal" ' + ((G.shop.heals || 0) >= CONFIG.healsPerShop || G.money < COMBAT.healPrice || G.player.hp >= G.player.maxHp ? 'disabled' : '') + '>Лечение +' + COMBAT.healAmount + ' HP · $' + COMBAT.healPrice + ' · ' + Math.max(0, CONFIG.healsPerShop - (G.shop.heals || 0)) + ' из ' + CONFIG.healsPerShop + '</button>'
       : '<div class="heal-locked">♥ Лечение и банки — только в магазине после босса. Пока держись.</div>') +
     shelvesHTML +
-    '<h4 style="margin:18px 0 8px;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#8ea0b8">Твои джокеры' +
+    growthSummary(true)+'<h4 style="margin:18px 0 8px;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#8ea0b8">Твои джокеры' +
       ' <span style="opacity:.6">(' + G.jokers.length + '/' + maxJokers() + ')</span> <span style="opacity:.55;letter-spacing:.6px;text-transform:none">· наведи или нажми — увидишь описание</span></h4>' +
     '<div class="owned-list">' + ownedHTML + '</div>' +
     '<div class="shop-foot">' +
@@ -3219,6 +3227,7 @@ function renderShop() {
     true
   );
 
+  bindGrowthButtons();
   const ov = $('#overlay');
   ov.querySelectorAll('[data-buy]').forEach((btn) => {
     btn.onclick = () => buyItem(Number(btn.dataset.buy));
@@ -3560,11 +3569,11 @@ function renderJokers() {
     const j = G.jokers[i];
     if (j) {
       html +=
-        '<div class="joker r-' + j.rarity + '">' +
+        '<div class="joker r-' + j.rarity + (growthState(j.id).branch?' evolved':'')+'">' +
           '<span class="j-price">$' + j.price + '</span>' +
           '<span class="j-emoji">' + itemArt('joker', j.id) + '</span>' +
           '<span class="j-name">' + j.name + (j.charges ? ' · ' + j.charges : '') + '</span>' +
-          '<div class="tip"><div class="tip-rar r-' + j.rarity + '">' + RARITY[j.rarity].name + '</div><b>' + j.name + '</b><br>' + j.desc + (j.charges ? '<br><i>Осталось ходов: ' + j.charges + '</i>' : '') + '</div>' +
+          '<div class="tip"><div class="tip-rar r-' + j.rarity + '">' + RARITY[j.rarity].name + '</div><b>' + j.name + '</b><br>' + j.desc + growthTooltip(j.id) + (j.charges ? '<br><i>Осталось ходов: ' + j.charges + '</i>' : '') + '</div>' +
         '</div>';
     } else {
       html += '<div class="joker empty">+</div>';
@@ -3573,7 +3582,7 @@ function renderJokers() {
   $('#jokers').innerHTML = html;
   let talentPanel=$('#run-talent-panel');
   if(!talentPanel){talentPanel=document.createElement('div');talentPanel.id='run-talent-panel';$('#jokers').parentElement.insertAdjacentElement('afterend',talentPanel);}
-  talentPanel.innerHTML=talentSummary()+bargainSummary();
+  talentPanel.innerHTML=talentSummary()+bargainSummary()+growthSummary();
 }
 
 function renderSide() {

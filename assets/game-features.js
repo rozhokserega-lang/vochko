@@ -48,7 +48,8 @@ function resumeRun() {
   hideOverlay(); render(); tgClosingConfirmation(true);
   if (G.phase === 'intro') showBlindIntro();
   else if (G.phase === 'shop') {
-    if (G.relicChoice?.length) showRelicChoice();
+    if (G.evolutionChoice) showGrowthChoice(G.evolutionChoice);
+    else if (G.relicChoice?.length) showRelicChoice();
     else if (G.shop) renderShop();
     else if ((G.blind === 2 && (G.ante < CONFIG.maxAnte || G.endless)) || G.elite) openRelicChoice();
     else openShop();
@@ -96,7 +97,7 @@ function combatForecast(result) {
   const response = enemyResponse(result);
   const win = hit.hp >= enemy.hp;
   const reduction = Effects.run('incoming', {reduction:0}).reduction;
-  let hp = player.hp + healed, shield = player.shield, incoming = 0, revive = false;
+  let hp = player.hp + healed, shield = player.shield + (result.growthShield||0), incoming = 0, revive = false;
   let revived = player.revived;
   const receive = raw => {
     const damage = Combat.damage(raw,shield,reduction);
@@ -106,7 +107,7 @@ function combatForecast(result) {
   };
   if (!win) {
     receive(response.raw);
-    if (hp > 0 && result.bust) receive(result.bust * COMBAT.bustPenalty);
+    if (hp > 0 && result.bust) receive(result.bust * bustPenalty());
   } else if (hasRelic('mend')) hp = Math.min(player.maxHp,hp + COMBAT.items.mend);
   const healEnemy = !win && response.kind === 'heal' ? Math.min(response.amount,enemy.maxHp - (enemy.hp - hit.hp)) : 0;
   const extraLife = hasJoker('phoenix') && !G.phoenixUsed && result.total === 0 && result.bust;
