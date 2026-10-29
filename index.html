@@ -1106,6 +1106,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/visual-polish.css?v=20261029-1">
 <link rel="stylesheet" href="assets/table-features.css?v=20261029-1">
 <script src="assets/table-features.js?v=20261029-1"></script>
+<script src="assets/fast-draw.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
@@ -2260,6 +2261,7 @@ function stand() {
   if (G.phase !== 'play' || !s || s.locked) return;
   if (!s.tables.some((t) => t.cards.length)) { flashHint('Положи хотя бы одну карту'); return; }
   const res = evalSeat(s);
+  FastDraw.flush();
   s.locked = true;
   tgHaptic('medium');
   document.querySelectorAll('#hand .card').forEach(card=>card.getAnimations().forEach(a=>a.cancel()));
@@ -2930,6 +2932,7 @@ const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: red
 function flyIn(id) {
   if (REDUCED) return;
   const el = document.querySelector('#hand .card[data-id="' + id + '"]');
+  if(MOBILE_FX){if(el)FastDraw.appear(el);return;}
   const pile = document.querySelector('#dealer .pile');
   if (!el || !pile || !el.animate) return;
   const a = pile.getBoundingClientRect(), b = el.getBoundingClientRect();
@@ -3511,7 +3514,7 @@ function tableHTML(s, t, ti, scored=null) {
     '<div class="t-footer"><span class="t-title">Стол ' + (ti + 1) + '</span><div class="t-score" title="Очки стола до общих бонусов хода">' + (r && !r.bust ? '+' + fmt(scored?r.score:Math.round(r.score*featureMultiplier(t,ti,r))) : '') + '</div></div></div>';
 }
 
-function renderTable() {
+function renderTable(fast=false) {
   $('#tbl-limit').textContent = limitNow();
   renderTargetCycle();
   $('#table-upgrade').textContent = G.extraTables ? '4 стола открыто' : '4-й стол · $' + CONFIG.tablePrice;
@@ -3525,12 +3528,17 @@ function renderTable() {
   let pile = '<div class="pile' + (n ? '' : ' empty') + '" role="button" tabindex="0" aria-label="Просмотреть оставшиеся карты колоды">';
   for (let k = layers; k >= 1; k--) pile += '<div class="card back mini p' + k + '"><span></span></div>';
   pile += '<span class="pcount" title="В колоде: ' + n + ' · сброс: ' + G.discard.length + '"><b>' + n + '</b> / ' + G.runDeck.length + '</span></div>';
-  $('#dealer').innerHTML = G.phase === 'play' || s
-    ? pile + (s ? nextCardsHTML(s) : '')
-    : '';
+  const oldCount=$('#dealer .pcount');
+  if(fast&&s&&!s.peek&&!s.peek3&&!hasJoker('xray')&&oldCount&&document.querySelectorAll('#dealer .pile .card').length===layers){
+    FastDraw.html(oldCount,'<b>'+n+'</b> / '+G.runDeck.length);oldCount.title='В колоде: '+n+' · сброс: '+G.discard.length;
+  }else $('#dealer').innerHTML=G.phase==='play'||s?pile+(s?nextCardsHTML(s):''):'';
   const previewSeat = s || { tables: Array.from({ length: tablesPerSeat() }, newTable), sel: null, locked: false };
   const tableScores=evalSeat(previewSeat);
-  $('#hand').innerHTML = '<div class="tables' + (tablesPerSeat() > 3 ? ' four' : '') + '">' + previewSeat.tables.map((t, i) => tableHTML(previewSeat, t, i,tableScores.tables[i])).join('') + '</div>';
+  const laneHTML=previewSeat.tables.map((t,i)=>tableHTML(previewSeat,t,i,tableScores.tables[i]));
+  if(!fast||!FastDraw.hand(previewSeat,tableScores,laneHTML)){
+    $('#hand').innerHTML='<div class="tables'+(tablesPerSeat()>3?' four':'')+'">'+laneHTML.join('')+'</div>';
+    FastDraw.remember(laneHTML);
+  }
   tableFx(s);
   return tableScores;
 }
@@ -3567,18 +3575,20 @@ function renderActions() {
   const s = G.seat;
   const play = G.phase === 'play' && !!s && !s.locked;
   $('#btn-draw').disabled = !play || activeTableIndex(s) === -1;
-  $('#btn-draw').innerHTML = 'Взять карту <kbd>Space</kbd>'; 
+  FastDraw.html($('#btn-draw'),'Взять карту <kbd>Space</kbd>');
   $('#btn-stand').disabled = !play;
-  $('#btn-stand').innerHTML = 'Сыграть ход <kbd>S</kbd>';
+  FastDraw.html($('#btn-stand'),'Сыграть ход <kbd>S</kbd>');
   $('#btn-stand').title = 'Разыграть все столы и потратить один ход';
   $('#btn-stop-table').disabled = !play || activeTableIndex(s) === -1 || !s.tables[activeTableIndex(s)].cards.length;
-  $('#btn-stop-table').innerHTML = 'Стоп на столе <kbd>D</kbd>';
-  $('#cons').innerHTML = G.cons.length
+  FastDraw.html($('#btn-stop-table'),'Стоп на столе <kbd>D</kbd>');
+  const consHTML = G.cons.length
     ? G.cons.map((k, i) => '<button class="cons-btn' + (s && s.sel === i ? ' on' : '') + '" data-cons="' + i + '" title="' + k.desc + '">' + itemArt('cons', Object.keys(CONS).find(id => CONS[id] === k)) + k.name + '</button>').join('')
     : '<span class="hand-empty">нет расходников</span>';
   const consEl = $('#cons');
+  const consChanged=consEl.innerHTML!==consHTML||consEl._drawWidth!==innerWidth;
+  FastDraw.html(consEl,consHTML);consEl._drawWidth=innerWidth;
   const consOverflow = () => consEl.classList.toggle('more', consEl.scrollLeft + consEl.clientWidth < consEl.scrollWidth - 2);
-  consOverflow();
+  if(consChanged)consOverflow();
   consEl.onscroll = consOverflow;
 }
 
@@ -3642,7 +3652,7 @@ function renderSide() {
 
 function renderDraw() {
   // A draw changes cards, forecast and controls, not the shop, journal or build.
-  const tableScores=renderTable();renderStats(tableScores);renderActions();saveRun();
+  const tableScores=renderTable(true);renderStats(tableScores);renderActions();FastDraw.save();
 }
 
 function render() {

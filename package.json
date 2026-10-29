@@ -8,7 +8,8 @@
     "test:balance:progression": "node tests/playtest/balance-progression.cjs",
     "test:visual": "node tests/playtest/visual-polish.cjs",
     "test:progression": "node tests/playtest/balance-patch.cjs && node tests/playtest/routes.cjs && node tests/playtest/deckcraft.cjs && node tests/playtest/joker-growth.cjs && node tests/playtest/talents.cjs && node tests/playtest/mobile-performance.cjs",
-    "test:table-features": "node tests/playtest/table-features.cjs"
+    "test:table-features": "node tests/playtest/table-features.cjs",
+    "test:fast-draw": "node tests/playtest/fast-draw.cjs"
   },
   "devDependencies": {
     "playwright": "1.64.1"
