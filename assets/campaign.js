@@ -10,13 +10,13 @@ const DUNGEON_LEVELS=[
  {name:'Крысолов',enemy:'collector',hp:1800,blind:0},
  {name:'Надзиратель',enemy:'brawler',hp:2400,blind:0},
  {name:'Камерный шулер',enemy:'collector',hp:3000,blind:0},
- {name:'Ключник',enemy:'sentinel',hp:4200,blind:1,rule:'max3',relic:true},
- {name:'Скупщик',enemy:'collector',hp:4800,blind:0},
- {name:'Тюремный лекарь',enemy:'usurer',hp:5600,blind:1},
- {name:'Смотритель',enemy:'sentinel',hp:6500,blind:0},
- {name:'Палач',enemy:'brawler',hp:7200,blind:1,rule:'hot',elite:true,relic:true},
- {name:'Страж ворот',enemy:'sentinel',hp:8200,blind:0},
- {name:'Начальник темницы',enemy:'jailer',hp:11000,blind:2,rule:'pendulum'}
+ {name:'Ключник',enemy:'sentinel',hp:4300,blind:1,rule:'max3',relic:true},
+ {name:'Скупщик',enemy:'collector',hp:5100,blind:0},
+ {name:'Тюремный лекарь',enemy:'usurer',hp:6200,blind:1},
+ {name:'Смотритель',enemy:'sentinel',hp:7300,blind:0},
+ {name:'Палач',enemy:'brawler',hp:8400,blind:1,rule:'hot',elite:true,relic:true},
+ {name:'Страж ворот',enemy:'sentinel',hp:9800,blind:0},
+ {name:'Начальник темницы',enemy:'jailer',hp:13000,blind:2,rule:'pendulum'}
 ];
 const Campaign={
  active(){return !!G?.campaign;},

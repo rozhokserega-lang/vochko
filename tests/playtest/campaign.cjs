@@ -6,7 +6,7 @@ for(let level=1;level<=10;level++){
  assert.equal(await p.evaluate(()=>G.enemy.portraitIndex),level-1);assert.ok(await p.evaluate(()=>getComputedStyle(document.querySelector('#enemy-portrait')).backgroundImage.includes('dungeon-opponents.webp')));
  assert.equal(await p.evaluate(()=>G.tableFeatures.length),0);
  if(level===4){assert.equal(await p.evaluate(()=>G.boss),'max3');assert.equal(await p.evaluate(()=>G.elite),false);}
- if(level===8){assert.equal(await p.evaluate(()=>G.elite),true);assert.equal(await p.evaluate(()=>G.enemy.hp),9720);}
+ if(level===8){assert.equal(await p.evaluate(()=>G.elite),true);assert.equal(await p.evaluate(()=>G.enemy.hp),await p.evaluate(()=>Math.round(DUNGEON_LEVELS[7].hp*1.35)));}
  if(level===10){assert.equal(await p.evaluate(()=>G.boss),'pendulum');assert.equal(await p.evaluate(()=>G.enemy.name),'Начальник темницы');}
  await p.locator('#ov-start').click();await p.evaluate(()=>{G.enemy.hp=1;const card=drawFromDeck();G.seat.tables[0].cards.push(card);finishSeat(evalSeat(G.seat));});
  await p.waitForFunction(()=>G.phase==='won'||!!G.shop||!!G.relicChoice?.length);
