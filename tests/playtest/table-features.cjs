@@ -15,6 +15,14 @@ const checks=await p.evaluate(()=>{
  for(const talent of Object.keys(TALENTS))for(const feature of Object.keys(TABLE_FEATURES)){
   reset();G.talent=talent;G.tableFeatures=[feature];G.player.hp=60;G.enemy.hp=G.enemy.maxHp=100000;G.enemy.intent={kind:'attack',amount:7};G.seat.tables[0].cards=[c('7'),c('6'),c('5')];const result=evalSeat(G.seat),forecast=combatForecast(result);finishSeat(result);check('Forecast '+talent+'/'+feature,G.player.hp===forecast.playerHp&&G.enemy.hp===100000-forecast.hit.hp);
  }
+ newGame(0,'classic',{campaign:true});hideOverlay();
+ for(let level=1;level<=10;level++){
+  G.level=level;startBlind();hideOverlay();startSeat();check('Dungeon level '+level+' has no assigned features',G.tableFeatures.length===0);
+  G.tableFeatures=['duo','trio','low'];G.seat.tables[0].cards=[c('10'),c('9')];
+  check('Old dungeon bonuses disabled '+level,featureMultiplier(G.seat.tables[0],0)===1&&tableFeature(0)===null);
+  check('Old dungeon descriptions hidden '+level,tableFeaturesSummary()===''&&tableFeatureBadge(G.seat.tables[0],0)==='');
+ }
+ saveRun();resumeRun();check('Resumed dungeon stays plain',tableFeature(0)===null&&tableFeaturesSummary()==='');
  reset();delete G.tableFeatures;saveRun();resumeRun();check('Legacy save stays plain',!tableFeature(0));
  return checks;
 });assert.deepEqual(errors,[]);writeReport('table-features.json',{checks,errors});console.log(checks.length+' table-feature checks passed');

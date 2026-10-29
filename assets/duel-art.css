@@ -48,3 +48,15 @@ body.campaign-run .brief-portrait{background-image:url('dungeon-opponents.webp')
 body.duel-roomy .t-cards{height:180px;min-height:180px;flex-basis:180px;padding-top:7px}body.duel-roomy .t-cards .card.mini{width:83px;height:116px}body.duel-roomy .t-cards .card.mini+.card.mini{margin-top:-98px}body.duel-roomy .t-cards .card.mini .c-rank{font-size:23px;top:3px}body.duel-roomy .t-cards .card.face::before{inset:29px 4px 4px}body.duel-roomy .tables.four .t-cards .card.mini{width:64px;height:91px}body.duel-roomy .tables.four .t-cards .card.mini+.card.mini{margin-top:-73px}
 @media(min-width:601px){body.duel-roomy .t-cards{height:196px;min-height:196px;flex-basis:196px}body.duel-roomy .t-cards .card.mini{width:95px;height:133px}body.duel-roomy .t-cards .card.mini+.card.mini{margin-top:-115px}body.duel-roomy .tables.four .t-cards .card.mini{width:76px;height:107px}body.duel-roomy .tables.four .t-cards .card.mini+.card.mini{margin-top:-89px}}
 @media(max-height:950px){body.campaign-run #table .player-row{grid-column:1/-1}body.campaign-run #table .round-budget{grid-column:1/-1;left:50%;right:10px;width:auto}body.campaign-run #table .round-budget-track{gap:4px}body.campaign-run #table .round-budget-track i{height:20px;width:20px;flex-basis:20px}body.campaign-run #table .round-budget-value strong{font-size:27px}}
+/* Keep totals above the cards; every label gets its own row on compact screens. */
+body .tbl>.t-head{order:-3;margin:0;min-height:36px}
+body .tbl>.t-state{order:-2;position:static;min-height:14px;inset:auto;z-index:auto}
+body .tbl>.table-feature{order:-1;flex-shrink:0}
+body .tbl>.combo-badge{order:0}
+body .tbl>.t-cards{order:1}
+body .tbl>.t-bonus{order:2;position:static;inset:auto;height:auto;min-height:0;white-space:normal;line-height:1.3}
+body .tbl>.t-footer{order:3;margin-top:auto}
+body .tbl .t-sum{font-family:Arial,Helvetica,sans-serif;font-size:28px;font-style:normal;font-weight:700;line-height:32px;font-variant-numeric:lining-nums tabular-nums;letter-spacing:0;text-shadow:none}
+body .tbl .t-title{font-family:Arial,Helvetica,sans-serif;font-size:12px;font-style:normal;letter-spacing:0}
+body .tbl .table-feature{font-family:Arial,Helvetica,sans-serif}
+@media(max-width:380px){body .tbl .t-sum{font-size:25px;line-height:30px}}
