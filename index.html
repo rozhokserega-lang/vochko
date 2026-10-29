@@ -1112,6 +1112,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/card-marking.css?v=20261029-1">
 <script src="assets/card-marking.js?v=20261029-1"></script>
 <link rel="stylesheet" href="assets/tutorial.css?v=20261029-1">
+<link rel="stylesheet" href="assets/duel-field.css?v=20261029-1">
+<script src="assets/duel-field.js?v=20261029-1"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
@@ -1189,7 +1191,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
       </div>
       <div class="preview-note" id="preview-note"></div>
       <div id="tags"></div>
-      <button class="ghost damage-details-btn" id="damage-details">Как считается урон?</button>
+      <button class="ghost damage-details-btn" id="damage-details" aria-label="Как считается урон">Разбор</button>
     </div>
 
     <div id="jokers-bar" aria-label="Ваши джокеры">
@@ -3412,6 +3414,7 @@ function hideOverlay() {
 
 // Закрывает оверлей и возвращает тот экран, который соответствует текущей фазе.
 function closeOverlay() {
+  if(document.querySelector('.inventory-screen')){hideOverlay();return;}
   if(G.pending==='setup'){GameMenu.main();return}
   if (G.phase === 'play' && G.seat && ['remove','move'].includes(G.cons[G.seat.sel]?.kind)) {
     G.seat.sel = null;
@@ -3612,7 +3615,7 @@ function renderActions() {
   $('#btn-stop-table').disabled = !play || activeTableIndex(s) === -1 || !s.tables[activeTableIndex(s)].cards.length;
   FastDraw.html($('#btn-stop-table'),'Стоп на столе <kbd>D</kbd>');
   const consHTML = G.cons.length
-    ? G.cons.map((k, i) => '<button class="cons-btn' + (s && s.sel === i ? ' on' : '') + '" data-cons="' + i + '" title="' + k.desc + '">' + itemArt('cons', Object.keys(CONS).find(id => CONS[id] === k)) + k.name + '</button>').join('')
+    ? G.cons.map((k, i) => '<button class="cons-btn' + (s && s.sel === i ? ' on' : '') + '"'+(i>=3?' hidden':'')+' data-cons="' + i + '" title="' + k.desc + '">' + itemArt('cons', Object.keys(CONS).find(id => CONS[id] === k)) + k.name + '</button>').join('') + (G.cons.length>3?'<button class="cons-btn inventory-more'+(s&&s.sel>=3?' on':'')+'" data-cons-more>Ещё +'+(G.cons.length-3)+'</button>':'')
     : '<span class="hand-empty">нет расходников</span>';
   const consEl = $('#cons');
   const consChanged=consEl.innerHTML!==consHTML||consEl._drawWidth!==innerWidth;
@@ -3620,6 +3623,7 @@ function renderActions() {
   const consOverflow = () => consEl.classList.toggle('more', consEl.scrollLeft + consEl.clientWidth < consEl.scrollWidth - 2);
   if(consChanged)consOverflow();
   consEl.onscroll = consOverflow;
+
 }
 
 function renderJokers() {
@@ -3644,6 +3648,7 @@ function renderJokers() {
   const opened=[...talentPanel.querySelectorAll('[data-run-panel][open]')].map(el=>el.dataset.runPanel);
   talentPanel.innerHTML=talentSummary()+bargainSummary()+growthSummary()+tableFeaturesSummary()+CardMark.runSummary();
   talentPanel.querySelectorAll('[data-run-panel]').forEach(el=>{if(opened.includes(el.dataset.runPanel))el.open=true;});
+  DuelField.jokers();
 }
 
 function renderSide() {
@@ -3709,7 +3714,7 @@ function bindEvents() {
   $('#btn-stand').onclick = stand;
   $('#btn-stop-table').onclick = stopCurrentTable;
   $('#hand').onclick = (e) => { const t = e.target.closest('.tbl'); if (t) tableClick(Number(t.dataset.t)); };
-  $('#cons').onclick = (e) => { const b = e.target.closest('[data-cons]'); if (b) pickCons(Number(b.dataset.cons)); };
+  $('#cons').onclick = (e) => { if(e.target.closest('[data-cons-more]')){DuelField.consumables();return;} const b = e.target.closest('[data-cons]'); if (b) pickCons(Number(b.dataset.cons)); };
   $('#btn-rules').onclick = showRules;
   $('#btn-restart').onclick = () => {
     AttackFX.flush();saveRun();newGame();
