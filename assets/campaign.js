@@ -58,13 +58,11 @@ const Campaign={
   track.innerHTML=DUNGEON_LEVELS.map((l,i)=>'<span class="'+(i+1<G.level?'done':i+1===G.level?'current':'')+(l.rule?' special':'')+'" title="'+(i+1)+'. '+l.name+'">'+(i+1)+'</span>').join('');
  },
  locations(){
-  this.preloadPortraits();
-  const progress=this.progress();GameMenu.backTarget='home';G.pending='setup';
-  showOverlay('<div class="kicker">Пять ступеней к хозяину казино</div><h2>Выбери локацию</h2><p class="sub">Каждая локация — отдельный забег из 10 уровней. Победа открывает следующую ступень навсегда.</p><div class="chapter-list">'+CHAPTERS.map((c,i)=>{
-   const unlocked=i<=progress.unlocked,ready=unlocked&&c.ready;
-   return '<section class="chapter-card '+(i===0?'chapter-dungeon':'chapter-future')+'"><span class="chapter-number">'+(i+1)+'</span><div><h3>'+c.name+'</h3><p>'+c.desc+'</p><small>'+(ready?'10 уровней · рекорд '+(progress.bestLevels[i]||0)+' / 10':unlocked?'Открыто · содержимое готовится':'После прохождения: «'+CHAPTERS[i-1].name+'»')+'</small></div><button class="'+(ready?'primary':'ghost')+'" data-chapter="'+i+'" '+(!ready?'disabled':'')+'>'+(ready?'Подготовиться':unlocked?'Скоро':'Закрыто')+'</button></section>';
-  }).join('')+'</div><div class="row-btns"><button class="ghost" id="locations-back">Главное меню</button></div>',true);
-  document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.chapter);if(i<=progress.unlocked&&CHAPTERS[i].ready){SETUP.chapter=i;GameMenu.setup();}});$('#locations-back').onclick=()=>GameMenu.main();tgShowBack(true);
+  this.preloadPortraits();const progress=this.progress();GameMenu.backTarget='home';G.pending='setup';
+  const best=Math.min(10,progress.bestLevels[0]||0);
+  showOverlay('<div class="location-screen"><button class="menu-back" id="locations-back">← Главное меню</button><header><div class="kicker">Пять ступеней к хозяину казино</div><h2>Путь к свободе</h2><p class="sub">Начни в Темнице. Пройди 10 боёв, чтобы открыть следующую главу.</p></header><section class="location-hero"><div class="location-hero-copy"><span class="location-label">Глава I · доступна</span><h3>Темница</h3><p>Десять противников. Одна дверь на свободу.</p><div class="location-progress"><span>Лучший результат</span><b>'+best+' / 10</b></div><div class="location-steps" aria-label="Рекорд '+best+' из 10">'+Array.from({length:10},(_,i)=>'<i class="'+(i<best?'done':'')+'"></i>').join('')+'</div><button class="home-start" data-chapter="0">Выбрать колоду <span aria-hidden="true">→</span></button></div></section><div class="location-next-label">Дальше по пути</div><div class="location-path">'+CHAPTERS.slice(1).map((c,index)=>{const i=index+1,unlocked=i<=progress.unlocked;return '<section class="location-locked"><span class="location-node" aria-hidden="true">'+['II','III','IV','V'][index]+'</span><div><h3>'+c.name+'</h3><p>'+c.desc+'</p><small>'+(unlocked?'Открыто · содержимое готовится':'После главы «'+CHAPTERS[i-1].name+'»')+'</small></div><span class="location-lock">'+(unlocked?'Скоро':'Закрыто')+'</span></section>';}).join('')+'</div></div>',true);
+  $('#overlay .modal').classList.add('location-menu');
+  $('[data-chapter="0"]').onclick=()=>{SETUP.chapter=0;GameMenu.setup();};$('#locations-back').onclick=()=>GameMenu.main();tgShowBack(true);
  },
  setupHTML(){return '<div class="campaign-choice"><div><small>Локация 1 из 5</small><b>Темница · 10 уровней</b></div><button class="ghost" id="setup-location">Карта локаций</button></div>';},
  recordEnd(win){
