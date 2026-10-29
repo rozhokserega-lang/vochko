@@ -1107,7 +1107,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/table-features.css?v=20261029-1">
 <script src="assets/table-features.js?v=20261029-2"></script>
 <script src="assets/fast-draw.js?v=20261029-1"></script>
-<link rel="stylesheet" href="assets/campaign.css?v=20261029-1">
+<link rel="stylesheet" href="assets/campaign.css?v=20261029-2">
 <script src="assets/campaign.js?v=20261029-1"></script>
 <link rel="stylesheet" href="assets/card-marking.css?v=20261029-1">
 <script src="assets/card-marking.js?v=20261029-1"></script>
@@ -3391,6 +3391,7 @@ function rerollShop() {
 
 function showOverlay(html, wide) {
   const ov = $('#overlay');
+  ov.classList.toggle('home-overlay',html.includes('class="home-screen"'));
   const updatingShop=!ov.classList.contains('hidden')&&((!!ov.querySelector('.shop-health')&&html.includes('class="shop-health"'))||(!!ov.querySelector('.setup-screen')&&html.includes('class="setup-screen"')));
   const previousScroll = updatingShop ? ov.querySelector('.modal').scrollTop : 0;
   const offerHeights = updatingShop ? [...ov.querySelectorAll('[data-offer]')].map(el => [el.dataset.offer, el.getBoundingClientRect().height]) : [];

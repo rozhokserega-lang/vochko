@@ -1,6 +1,6 @@
 /* The dungeon is a static location, not another layer of ambient animation. */
 .campaign-run{background:linear-gradient(#07110ce0,#07130ced),url('dungeon-room.png') center top/cover fixed}
-body:has(.game-home) #overlay{background:linear-gradient(#07120d15,#07120d65 35%,#07120dec 75%),url('dungeon-room.png') center/cover}
+#overlay.home-overlay{padding:0;background:linear-gradient(#07120d15,#07120d65 35%,#07120dec 75%),url('dungeon-room.png') center/cover no-repeat,#07120d;backdrop-filter:none;-webkit-backdrop-filter:none}
 .campaign-run #battle-panel{background:linear-gradient(90deg,#09170ee8,#13241bc7),url('dungeon-room.png') center 25%/cover}
 .campaign-run #hud-blind{font-size:13px}.campaign-run #hud-ante{font-size:21px;white-space:nowrap}
 .campaign-track{order:1;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;min-width:0;padding:3px 0}
