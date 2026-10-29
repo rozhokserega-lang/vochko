@@ -1,8 +1,8 @@
-const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const {launch,load}=require('./runtime.cjs');
 const assert=require('node:assert/strict');
-(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{
-const page=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://telegram.org/**',r=>r.abort());await page.goto((process.env.GAME_URL||require('node:url').pathToFileURL(require('node:path').resolve(__dirname,'../../index.html')).href));
-for(const width of [320,390]){await page.setViewportSize({width,height:844});await page.evaluate(()=>showRunSetup());assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);if(width===390)await page.screenshot({path:'D:/vochko/.preview/talents-setup.png'});}
+(async()=>{const browser=await launch();try{
+const page=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});const errors=[];page.on('pageerror',e=>errors.push(e.message));await load(page);
+for(const width of [320,390]){await page.setViewportSize({width,height:844});await page.evaluate(()=>showRunSetup());assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);if(width===390)await page.screenshot({path:'test-results/talents-setup.png'});}
 const checks=await page.evaluate(()=>{
  const checks=[];function check(label,ok){if(!ok)throw Error(label);checks.push(label);}
  function reset(talent){newGame(0,'classic',{talent});hideOverlay();startSeat();G.jokers=[];G.relics=[];}

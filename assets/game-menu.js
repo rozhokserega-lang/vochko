@@ -49,7 +49,7 @@ const GameMenu={
    }).join('')+'</div>'+
    '<h3 class="talent-heading">Стартовый талант</h3><div class="talent-options" aria-label="Выбор таланта">'+Object.entries(TALENTS).sort(([a],[b])=>['healer','sharp','daring','warden','scout'].indexOf(a)-['healer','sharp','daring','warden','scout'].indexOf(b)).map(([key,t])=>{const enabled=isUnlocked('talent',key);return '<button class="talent-option" data-talent="'+key+'" aria-pressed="'+(key===SETUP.talent)+'" '+(!enabled?'disabled':'')+'><span class="talent-mark" aria-hidden="true">'+t.mark+'</span><span><b>'+t.name+'</b><small>'+(enabled?(key===SETUP.talent?'Выбран':'Выбрать'):lockHint('talent',key))+'</small>'+'</span><span class="talent-check" aria-hidden="true">'+(key===SETUP.talent?'✓':!enabled?'·':'')+'</span></button>';}).join('')+'</div><div class="talent-current" aria-live="polite"><b>'+TALENTS[SETUP.talent].mark+' '+TALENTS[SETUP.talent].name+'</b>'+TALENTS[SETUP.talent].desc+'<small>'+TALENTS[SETUP.talent].hint+'</small></div><p class="talent-note">Один талант до конца забега. Не занимает слот джокера.</p>'+
 
-   '<label class="fair-start"><input type="checkbox" id="setup-fair" '+(SETUP.fairStart?'checked':'')+'><span><b>Честный старт</b>Без стартовых денег, печатей, джокера и слотов из лавки. Открытые колоды и таланты доступны; покупки сохраняются.</span></label><p class="setup-openings">Новые варианты открываются за достижения. Купленные бонусы лавки не удаляются.</p><div class="setup-footer"><button class="home-start" id="ov-go">Начать забег</button>'+(readSavedRun()?'<small>Новый забег заменит текущее сохранение.</small>':'<small>Прогресс сохраняется автоматически.</small>')+'</div></div>');
+   '<label class="fair-start"><input type="checkbox" id="setup-fair" '+(SETUP.fairStart?'checked':'')+'><span><b>Честный старт</b>Без стартовых денег, печатей, джокера и слотов из лавки. Открытые колоды и таланты доступны; покупки сохраняются.</span></label><p class="setup-openings">Новые варианты открываются за достижения. Купленные бонусы лавки не удаляются.</p>'+CardMark.setupHTML()+'<div class="setup-footer"><button class="home-start" id="ov-go">Начать забег</button>'+(readSavedRun()?'<small>Новый забег заменит текущее сохранение.</small>':'<small>Прогресс сохраняется автоматически.</small>')+'</div></div>');
   $('#overlay .modal').classList.add('game-setup');
   document.querySelector('.deck-selector').scrollLeft=previousScroll;
   $('#setup-back').onclick=()=>Campaign.locations();
@@ -57,6 +57,7 @@ const GameMenu={
 
 
   $('#setup-fair').onchange=event=>{SETUP.fairStart=event.target.checked;};
+  $('#setup-mark').onclick=()=>{this.backTarget='setup-mark';showMetaShop('mark');$('#overlay .modal')?.classList.add('game-menu-page');$('#ov-back').onclick=()=>this.back();tgShowBack(true);};
   document.querySelectorAll('[data-talent]').forEach(button=>button.onclick=()=>{if(!isUnlocked('talent',button.dataset.talent))return;const modal=$('#overlay .modal'),scroll=modal.scrollTop;SETUP.talent=button.dataset.talent;this.setup();$('#overlay .modal').scrollTop=scroll;});
   $('#ov-go').onclick=()=>{this.backTarget=null;newGame(0,SETUP.deck,{campaign:true,talent:SETUP.talent,fairStart:!!SETUP.fairStart})};
   tgShowBack(true);
