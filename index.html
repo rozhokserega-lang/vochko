@@ -1096,6 +1096,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/ui-refinements.css?v=20261028-2">
 <link rel="stylesheet" href="assets/mobile-performance.css?v=20261029-1">
 <link rel="stylesheet" href="assets/shop-rarity.css?v=20261029-1">
+<link rel="stylesheet" href="assets/talents.css?v=20261029-1">
+<script src="assets/talents.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
 </head>
@@ -1222,7 +1224,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261029-1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261028-6"></script>
+<script src="assets/game-menu.js?v=20261029-7"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -1810,6 +1812,7 @@ function newGame(stake, deckKey, opts) {
     player: {hp:COMBAT.playerHp,maxHp:COMBAT.playerHp,shield:0,effects:[],revived:false},
     enemy:null, battle:null,
     deckKey,
+    talent: !daily && direct && TALENTS[opts?.talent] ? opts.talent : null,
     daily,
     endless: false,
     metaDone: false,
@@ -1986,7 +1989,7 @@ function paintOf(t, preview) {
   if (!red && !black) return null;
   const value0 = n >= 4 ? CONFIG.redHeal4 : CONFIG.redHeal3;
   const dmg0 = n >= 4 ? CONFIG.blackBonus4 : CONFIG.blackBonus3;
-  const value = hasJoker('crimson') ? Math.round(value0 * 1.5) : value0;
+  const value = Math.round(value0 * (hasJoker('crimson') ? 1.5 : 1) * (G.talent === 'healer' ? 1.5 : 1));
   const dmg = hasJoker('blot') ? dmg0 + 10 : dmg0;
   return red ? { kind: 'heal', value, n } : { kind: 'dmg', value: dmg, n };
 }
@@ -2008,6 +2011,10 @@ function evalSeat(s) {
       }
     });
     if (T.some((r, i) => i > 0 && !r.empty && !r.bust && T[i - 1].exact)) pre.push('эстафета +40');
+  }
+  if (G.talent === 'sharp') {
+    T.forEach(r=>{if(r.exact)r.score=Math.round(r.score*1.15);});
+    if(T.some(r=>r.exact))pre.push('Картёжник: точные столы +15%');
   }
   T.forEach((r, i) => { r.frozen = !!(s.tables[i].adj && s.tables[i].adj.fz); });
   // Красный стол лечит, чёрный — бьёт сильнее. Работает на 3+ картах и только без перебора.
@@ -2056,6 +2063,7 @@ function evalSeat(s) {
       else { total = 0; tags.push('всё или ничего: 0'); }
     } else if (total) { total = Math.round(total * 2); tags.push('всё или ничего x2'); }
   }
+  if (G.talent === 'daring' && bust === 1 && total > 0) { total=Math.round(total*1.3);tags.push('Авантюрист: один перебор +30%'); }
   if (bust) tags.push('перебор столов: ' + bust);
   return { tables: T, total, exact, bust, chips, tags, closed, heal };
 }
@@ -3550,6 +3558,9 @@ function renderJokers() {
     }
   }
   $('#jokers').innerHTML = html;
+  let talentPanel=$('#run-talent-panel');
+  if(!talentPanel){talentPanel=document.createElement('div');talentPanel.id='run-talent-panel';$('#jokers').parentElement.insertAdjacentElement('afterend',talentPanel);}
+  talentPanel.innerHTML=talentSummary();
 }
 
 function renderSide() {
