@@ -1111,6 +1111,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/campaign.js?v=20261029-1"></script>
 <link rel="stylesheet" href="assets/card-marking.css?v=20261029-1">
 <script src="assets/card-marking.js?v=20261029-1"></script>
+<link rel="stylesheet" href="assets/tutorial.css?v=20261029-1">
+<script src="assets/tutorial.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
@@ -1817,6 +1819,7 @@ function newGame(stake, deckKey, opts) {
   HealingFX.cancel();
   Math.random = RNG0;
   const direct = typeof stake === 'number';
+  const firstTutorial=direct&&!!opts?.campaign&&!opts?.daily&&Tutorial.eligible();
   const daily = direct && opts && opts.daily ? (opts.campaign?dateKey()+'|dungeon-v1':dateKey()) : null;
   if (daily) { stake = 0; deckKey = 'classic'; }
   if(direct&&opts?.campaign)stake=0;
@@ -1879,6 +1882,7 @@ function newGame(stake, deckKey, opts) {
   if (daily) Math.random = mulberry32(hashStr(daily + '|start'));
   if (!daily && !G.fairStart) applyMetaBonuses();
   applyStartDeck(deckKey);
+  if(firstTutorial)Tutorial.begin();
   startBlind();
 }
 
@@ -2124,6 +2128,7 @@ function stopCurrentTable() {
   const t = s.tables[ti];
   if (!t.cards.length) { flashHint('Сначала положи хотя бы одну карту на стол'); return; }
   t.stood = true;
+  Tutorial.action('stop');
   log('Стол ' + (ti + 1) + ' остановлен на ' + evalPlay(t.cards, t.adj).sum, 'gold');
   render();
   autoFinish(s);
@@ -2249,6 +2254,7 @@ function hit() {
   s.sel = null;
   G.lastDrawn = c.id;
   refreshTables(s);
+  Tutorial.action('draw');
   renderDraw();
   flyIn(c.id);
   G.lastDrawn = null;
@@ -2270,6 +2276,7 @@ function stand() {
   if (G.phase !== 'play' || !s || s.locked) return;
   if (!s.tables.some((t) => t.cards.length)) { flashHint('Положи хотя бы одну карту'); return; }
   const res = evalSeat(s);
+  Tutorial.action('play');
   FastDraw.flush();
   s.locked = true;
   tgHaptic('medium');
@@ -3674,7 +3681,7 @@ function renderSide() {
 
 function renderDraw() {
   // A draw changes cards, forecast and controls, not the shop, journal or build.
-  const tableScores=renderTable(true);renderStats(tableScores);renderActions();FastDraw.save();
+  const tableScores=renderTable(true);renderStats(tableScores);renderActions();Tutorial.render();FastDraw.save();
 }
 
 function render() {
@@ -3687,6 +3694,7 @@ function render() {
   $('#damage-details').disabled = G.phase !== 'play' || !G.seat || G.seat.locked || !!G.battle?.resolving;
   renderJokers();
   renderSide();
+  Tutorial.render();
   saveRun();
 }
 

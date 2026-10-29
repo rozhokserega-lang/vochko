@@ -1,0 +1,3 @@
+#tutorial-coach{order:1;display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;padding:10px;border:1px solid #d2af6a;border-radius:7px;background:#263d29;color:#e1e6cf;min-width:0}
+#tutorial-coach small{display:block;font:500 12px/1.3 'Segoe UI',sans-serif;color:#d4c08d}#tutorial-coach b{display:block;font:700 15px/1.3 'Segoe UI',sans-serif;color:#f3dcaa;margin:3px 0}#tutorial-coach p{font:400 14px/1.4 'Segoe UI',sans-serif;margin:0}#tutorial-coach button{align-self:start;min-width:44px;min-height:44px;border:1px solid #b7a16a66;border-radius:5px;background:#1a3022;color:#dfceaa;font-size:24px;cursor:pointer}
+button.tutorial-target{outline:2px solid #ffe0a1;outline-offset:3px}
