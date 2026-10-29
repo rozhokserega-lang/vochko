@@ -7,4 +7,4 @@ const TALENTS={
  daring:{name:'Авантюрист',mark:'♦',desc:'Если перебрал ровно один стол, общий урон хода увеличивается на 30%. Штраф за перебор остаётся.',hint:'Рискни одним столом, сохрани остальные.'}
 };
 function activeTalent(){return TALENTS[G?.talent]||null;}
-function talentSummary(){const t=activeTalent();return t?'<details class="run-talent"><summary>'+t.mark+' Талант: '+t.name+'</summary><p>'+t.desc+'</p><small>'+t.hint+'</small></details>':'';}
+function talentSummary(){const t=activeTalent();return t?'<details class="run-talent" data-run-panel="talent"><summary>'+t.mark+' Талант: '+t.name+'</summary><p>'+t.desc+'</p><small>'+t.hint+'</small></details>':'';}

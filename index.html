@@ -1097,12 +1097,13 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/mobile-performance.css?v=20261029-1">
 <link rel="stylesheet" href="assets/shop-rarity.css?v=20261029-1">
 <link rel="stylesheet" href="assets/talents.css?v=20261029-2">
-<script src="assets/talents.js?v=20261029-2"></script>
+<script src="assets/talents.js?v=20261029-3"></script>
 <link rel="stylesheet" href="assets/routes.css?v=20261029-1">
-<script src="assets/routes.js?v=20261029-3"></script>
+<script src="assets/routes.js?v=20261029-4"></script>
 <link rel="stylesheet" href="assets/joker-growth.css?v=20261029-1">
-<script src="assets/joker-growth.js?v=20261029-2"></script>
+<script src="assets/joker-growth.js?v=20261029-3"></script>
 <link rel="stylesheet" href="assets/deckcraft.css?v=20261029-1">
+<link rel="stylesheet" href="assets/visual-polish.css?v=20261029-1">
 <script src="assets/deckcraft.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
@@ -1230,7 +1231,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261029-1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261029-10"></script>
+<script src="assets/game-menu.js?v=20261029-11"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -3593,7 +3594,9 @@ function renderJokers() {
   $('#jokers').innerHTML = html;
   let talentPanel=$('#run-talent-panel');
   if(!talentPanel){talentPanel=document.createElement('div');talentPanel.id='run-talent-panel';$('#jokers').parentElement.insertAdjacentElement('afterend',talentPanel);}
+  const opened=[...talentPanel.querySelectorAll('[data-run-panel][open]')].map(el=>el.dataset.runPanel);
   talentPanel.innerHTML=talentSummary()+bargainSummary()+growthSummary();
+  talentPanel.querySelectorAll('[data-run-panel]').forEach(el=>{if(opened.includes(el.dataset.runPanel))el.open=true;});
 }
 
 function renderSide() {

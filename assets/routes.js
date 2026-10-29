@@ -6,7 +6,7 @@ const BARGAINS={
  pockets:{name:'Бездонные карманы',gain:'+2 слота расходников.',cost:'Базовая награда за каждый выигранный бой −$1. Остальные награды не меняются.',can:()=>true,apply:()=>{G.slotC=(G.slotC||0)+2;}}
 };
 function hasBargain(id){return !!G?.bargains?.includes(id);}
-function bargainSummary(){return G?.bargains?.length?'<details class="run-talent"><summary>Сделки: '+G.bargains.length+'</summary>'+G.bargains.filter(k=>BARGAINS[k]).map(k=>'<p><b>'+BARGAINS[k].name+'</b><br>'+BARGAINS[k].gain+'<br><span class="bargain-cost">'+BARGAINS[k].cost+'</span></p>').join('')+'</details>':'';}
+function bargainSummary(){return G?.bargains?.length?'<details class="run-talent" data-run-panel="bargains"><summary>Сделки: '+G.bargains.length+'</summary>'+G.bargains.filter(k=>BARGAINS[k]).map(k=>'<p><b>'+BARGAINS[k].name+'</b><br>'+BARGAINS[k].gain+'<br><span class="bargain-cost">'+BARGAINS[k].cost+'</span></p>').join('')+'</details>':'';}
 function openBargains(){
  G.phase='path';G.pending='bargains';G.bargainSelection=null;render();
  showOverlay(GameMenu.sceneHeader('contract','Сделка · до конца забега','У каждой выгоды есть цена','Можно заключить одну сделку за визит. Каждая доступна один раз за забег.')+

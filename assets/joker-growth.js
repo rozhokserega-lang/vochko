@@ -17,10 +17,11 @@ function recordJokerGrowth(result,seat){
 }
 function growthSummary(shop=false){
  const owned=G.jokers.filter(j=>JOKER_GROWTH[j.id]);if(!owned.length)return '';
- return '<section class="growth-panel"><h3>Развитие джокеров</h3>'+owned.map(j=>{
+ const tag=shop?'section':'details';const ready=owned.filter(j=>!growthState(j.id).branch&&growthState(j.id).progress>=JOKER_GROWTH[j.id].goal).length;
+ return '<'+tag+' class="growth-panel" data-run-panel="growth">'+(shop?'<h3>Развитие джокеров</h3>':'<summary>Развитие джокеров<span>'+(ready?'Готово: '+ready:owned.map(j=>growthState(j.id).branch?'II':growthState(j.id).progress+'/'+JOKER_GROWTH[j.id].goal).join(' · '))+'</span></summary>')+owned.map(j=>{
   const def=JOKER_GROWTH[j.id],state=growthState(j.id),ready=state.progress>=def.goal;
   return '<div class="growth-row"><b>'+j.name+(state.branch?' · '+def.branches[state.branch].name:'')+'</b>'+(state.branch?'<span class="growth-branch">'+def.branches[state.branch].desc+'</span>':'<span>'+state.progress+' / '+def.goal+' · '+(ready?'Улучшение доступно':def.task)+'</span><progress value="'+state.progress+'" max="'+def.goal+'" aria-label="Прогресс развития '+j.name+'"></progress>'+(ready&&shop?'<button class="primary" data-growth="'+j.id+'">Выбрать улучшение</button>':ready?'<small>Выбери улучшение в следующем магазине.</small>':''))+'</div>';
- }).join('')+'</section>';
+ }).join('')+'</'+tag+'>';
 }
 function bindGrowthButtons(){document.querySelectorAll('[data-growth]').forEach(b=>b.onclick=()=>showGrowthChoice(b.dataset.growth));}
 function showGrowthChoice(id){

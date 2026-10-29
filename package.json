@@ -6,6 +6,7 @@
     "test:balance": "node tests/playtest/playtest-runs.cjs",
     "test:balance:lab": "node tests/playtest/balance-lab.cjs",
     "test:balance:progression": "node tests/playtest/balance-progression.cjs",
+    "test:visual": "node tests/playtest/visual-polish.cjs",
     "test:progression": "node tests/playtest/balance-patch.cjs && node tests/playtest/routes.cjs && node tests/playtest/deckcraft.cjs && node tests/playtest/joker-growth.cjs && node tests/playtest/talents.cjs && node tests/playtest/mobile-performance.cjs"
   },
   "devDependencies": {

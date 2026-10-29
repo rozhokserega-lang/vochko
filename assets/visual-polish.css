@@ -1,0 +1,63 @@
+/* One static felt, paper and brass treatment across game screens. */
+:root{--ui-paper:#efdfb6;--ui-brass:#cfad68;--ui-copy:#d5dcc8;--ui-muted:#afbea8}
+#run-talent-panel{order:8;min-width:0;width:100%}
+#dock{order:9}
+#table{background:radial-gradient(ellipse at 50% 0,#284a35aa,transparent 65%),repeating-linear-gradient(0deg,#ffffff01 0 1px,transparent 1px 4px),#102b1e}
+#battle-panel{background:linear-gradient(90deg,#0b1a13f5,#10271eeb),url('club-room.png') center 24%/cover}
+#enemy-name{color:#f1ddb3;text-shadow:0 1px 2px #000}
+.round-budget{border-color:#a58a4f;background:linear-gradient(115deg,#3a3d27,#2a3322)}
+.round-budget-copy b{font-size:15px}.round-budget-copy span{color:#d2c7a9}
+.tbl,.tables.four .tbl{border-color:#a08b545c;background:linear-gradient(#143b2aaa,#10291de6)}
+.tbl.active{border-color:#e0bd72;background:linear-gradient(#34492a99,#143525)}
+.tbl.ok{border-color:#b6c28a;background:linear-gradient(#34482a99,#162f21)}
+.tbl .t-sum{background:linear-gradient(#e8ce91,#c3a05e);box-shadow:inset 0 1px #fff0bf88;color:#241f13}
+.t-cards .card.mini{width:64px;height:89px;max-width:100%;border-color:#ad9159;box-shadow:inset 0 0 0 2px #f1dfb7,0 2px 4px #0005}
+.t-cards .card.mini+.card.mini{margin-top:-59px}
+.t-cards .card.mini .c-rank{font-size:21px;top:3px}.t-cards .card .c-pips{inset:25px 6px 6px;font-size:12px}.t-cards .card.face::before{inset:25px 4px 4px}
+.tables.four .t-cards .card.mini{width:51px;height:72px}.tables.four .t-cards .card.mini+.card.mini{margin-top:-48px}.tables.four .t-cards .card.mini .c-rank{font-size:17px}.tables.four .t-cards .card .c-pips{font-size:10px;inset:22px 4px 4px}.tables.four .t-cards .card.face::before{inset:22px 3px 3px}
+/* Keep cards out of the draw pile consistent with those on the felt. */
+.forge-preview .card.mini,.forge-grid .card.mini,.deck-book-card .card.mini,.remove-card .card.mini{
+ background:radial-gradient(ellipse at 40% 20%,#f7e9c8,#dbc395);border:1px solid #a68b54;border-radius:5px;box-shadow:inset 0 0 0 2px #efdeb5,0 3px 6px #0004;color:#202820;
+}
+.forge-preview .card.mini.red,.forge-grid .card.mini.red,.deck-book-card .card.mini.red,.remove-card .card.mini.red{color:#a53239}
+.forge-preview .card.mini{width:68px;height:96px}.forge-preview .card.mini .c-rank{font-size:21px}.forge-preview .card.mini .c-suit{font-size:32px}
+.modal:not(.game-home){background-color:#12271c;border-color:#a991555e;box-shadow:0 14px 40px #0007,inset 0 1px #d5bb7730}
+.modal h2{line-height:1.15;text-wrap:balance}.modal .kicker{letter-spacing:1px;line-height:1.4;color:#c5b17d}
+.modal p.sub,.scene-description{color:var(--ui-copy);line-height:1.5}
+.scene-header{border-bottom:1px solid #c9a65a55}.scene-heading{padding-bottom:12px}
+.route-card{border-color:#9c895358;background:#1b3325}.route-copy>small{color:#b7b28b}.route-copy>span{line-height:1.45;color:#d2dac5}
+.evt-btn{border-color:#9c89535c;background:linear-gradient(115deg,#263f2c,#1c3325);border-radius:7px}
+.evt-btn small{color:#bdcbb3;line-height:1.4}.evt-btn>.item-art{border-radius:5px;flex-shrink:0}
+.shop-section .compact-offer .rarity-type{display:none}
+.shop-section .compact-offer{border-radius:8px}
+.shop-section .compact-offer .si-name{line-height:1.3}.shop-section .compact-offer .si-desc{color:#d3dac5;line-height:1.45}
+.shop-section .compact-offer .si-emoji{padding-top:3px}
+.shop-section .compact-offer .reserve-btn{border-color:#9e94625c}
+.shop-foot{box-shadow:0 -8px 12px #14251ae6;gap:8px}.shop-foot .money-now{font-size:14px;color:#d4dcbf}
+.growth-panel{padding:8px 10px;margin:4px 0;background:#172e21;border-color:#a18d5655}
+.growth-panel>summary{display:flex;justify-content:space-between;gap:10px;align-items:center;min-height:32px;color:#e4d1a3;font:650 13px/1.4 'Segoe UI',sans-serif;cursor:pointer}
+.growth-panel>summary::after{content:'+';font-size:20px;color:#c2ac73}.growth-panel[open]>summary::after{content:'−'}
+.growth-panel>summary span{margin-left:auto;font:500 12px/1.3 'Segoe UI',sans-serif;color:#c2d0b7}
+.growth-row{border-color:#96a0733b;background:#1e3626}.growth-row progress{border:0;border-radius:4px;overflow:hidden;appearance:none;height:6px;background:#081b12}
+.growth-row progress::-webkit-progress-bar{background:#081b12}.growth-row progress::-webkit-progress-value{background:#c3a260;border-radius:4px}.growth-row progress::-moz-progress-bar{background:#c3a260}
+.talent-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.talent-option{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;gap:5px;min-height:98px;padding:9px 5px;position:relative}
+.talent-option .talent-mark{font-size:22px;line-height:1}.talent-option b{font-size:13px;line-height:1.25;overflow-wrap:anywhere}.talent-option small{font-size:12px;line-height:1.3;margin-top:4px}.talent-option .talent-check{position:absolute;right:5px;top:5px;font-size:13px}
+.talent-current{padding:10px 12px;background:#253925;border-left:3px solid #d9b975;border-radius:0 6px 6px 0;color:#e0e4cd;font:400 14px/1.45 'Segoe UI',sans-serif}.talent-current b{display:block;margin-bottom:4px;color:#efd6a5;font-size:15px}
+.talent-current small{display:block;margin-top:5px;font-size:12px;color:#b9c9ac}
+.talent-note{margin:3px 0 7px}.talent-heading{margin-top:8px}
+.talent-option:disabled{opacity:1;background:#14271d;border-color:#84927640}.talent-option:disabled b{color:#b5c0aa}.talent-option:disabled .talent-mark{color:#94a182}.talent-option:disabled small{color:#b5c3ac}
+.deck-option:disabled{opacity:1;filter:none;background:#12251a;border-color:#84927640}.deck-option:disabled .item-art{opacity:.45;filter:grayscale(.8)}.deck-option:disabled b,.deck-option:disabled small{color:#a8b79f}
+.home-links button .item-art{border-radius:5px;box-shadow:0 2px 4px #0004}.home-records{font-size:12px;gap:12px}
+button:focus-visible,summary:focus-visible{outline:2px solid #f1d08b;outline-offset:3px}
+@media(max-width:600px){
+ #hud{border-bottom:1px solid #b2965550;background:#102219}
+ #battle-panel .enemy-row{padding-top:8px;min-height:72px}
+ .enemy-info{padding-left:2px}#enemy-intent{font-size:13px;padding:4px 0 1px;margin-top:3px}
+ #cons{gap:7px}.cons-btn{font-size:13px;padding:6px 8px;border-color:#7d987d88}.cons-btn .item-art{width:25px;height:25px}
+ .t-state{font-size:12px}.t-footer .t-title{font-size:12px;text-transform:none}
+ .shop-section .offer-copy .si-kind{gap:4px}.shop-section .compact-offer .rarity-badge{font-size:13px;padding:4px 6px}
+ .modal.game-setup{padding:16px}.setup-screen{gap:8px}.deck-option{min-height:96px}.chosen-deck{padding:10px;gap:11px}.chosen-deck-art .item-art{width:47px;height:60px}
+ .setup-footer{padding:9px 0 2px;border-top:1px solid #a8904f40}
+ #dock{border-color:#bba15e88;background:#122b1ff5}.btn{font-size:13px}
+}
