@@ -62,7 +62,7 @@ const HealingFX={
     const sources=events.flatMap(event=>event.points);
     if(!sources.length)sources.push({x:point.x+42,y:point.y+24});
     sources.slice(0,4).forEach((source,index)=>{
-      for(let i=0;i<4;i++){
+      for(let i=0;i<(MOBILE_FX?2:4);i++){
         const mote=this.node(run,'heal-mote',source,i===0?'♥':'');run.motes.push(mote);
         this.animate(run,mote,[{transform:'translate(-50%,-50%) scale(.6)',opacity:0},{transform:'translate(-50%,-50%) scale(1)',opacity:1,offset:.15},{transform:'translate('+(point.x-source.x-5)+'px,'+(point.y-source.y-5)+'px) scale(.3)',opacity:0}],{duration:400,delay:index*35+i*28,easing:'cubic-bezier(.25,.7,.4,1)'});
       }

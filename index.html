@@ -1094,6 +1094,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/heal-fx.css?v=20261028-4">
 <link rel="stylesheet" href="assets/game-menu.css?v=20261028-5">
 <link rel="stylesheet" href="assets/ui-refinements.css?v=20261028-2">
+<link rel="stylesheet" href="assets/mobile-performance.css?v=20261029-1">
+<script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
 </head>
 <body>
@@ -1217,8 +1219,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <script src="assets/game-features.js?v=20261028-7"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
-<script src="assets/attack-fx.js"></script>
-<script src="assets/heal-fx.js?v=20261028-4"></script>
+<script src="assets/attack-fx.js?v=20261029-1"></script>
+<script src="assets/heal-fx.js?v=20261029-1"></script>
 <script src="assets/game-menu.js?v=20261028-6"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
@@ -2895,6 +2897,8 @@ function flyIn(id) {
 function burst(el, colors, n) {
   const fx = document.getElementById('fx');
   if (REDUCED || !fx || !el || !el.getBoundingClientRect) return;
+  if (document.hidden) return;
+  if (MOBILE_FX) n = Math.min(n, 8);
   const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
   for (let i = 0; i < n; i++) {
     const p = document.createElement('i'), sz = 4 + RNG0() * 6;

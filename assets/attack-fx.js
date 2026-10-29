@@ -63,13 +63,14 @@ const AttackFX = {
         const cards=[...lane.querySelectorAll('.t-cards .card')];
         if(table.bust){
           const p=this.center(lane);
-          for(let j=0;j<4;j++){
+          for(let j=0;j<(MOBILE_FX?2:4);j++){
             const spark=this.node(run,'attack-spark attack-spark-red',p);
             this.animate(run,spark,[{transform:'translate(-50%,-50%) scale(1)',opacity:.8},{transform:'translate('+((RNG0()-.5)*65)+'px,'+(20+RNG0()*35)+'px) scale(0)',opacity:0}],{duration:320,delay:j*25,easing:'ease-out'});
           }
           return;
         }
         cards.forEach((card,ci)=>{
+          if(MOBILE_FX&&ci>1)return;
           const p=this.center(card),delay=index*65+ci*22;
           const token=this.node(run,'attack-card-mote',p,card.dataset.s||'♠');
           token.classList.toggle('attack-exact-mote',!!table.exact);
@@ -79,9 +80,11 @@ const AttackFX = {
       });
       if(!result.total){orb.hidden=true;number.hidden=true;await pause(220);run.commit(false);return}
       const began=performance.now(),charge=forecast.hit.attack;
+      let lastNumberFrame=0;
       const tick=now=>{
         if(this.active!==run)return;
-        const progress=Math.min(1,(now-began)/480);number.textContent=fmt(charge*progress);
+        const progress=Math.min(1,(now-began)/480);
+        if(!MOBILE_FX||now-lastNumberFrame>=33||progress===1){number.textContent=fmt(charge*progress);lastNumberFrame=now;}
         if(progress<1)run.frame=requestAnimationFrame(tick);
       };run.frame=requestAnimationFrame(tick);
       this.animate(run,orb,[{transform:'translate(-50%,-50%) scale(.2)',opacity:0},{transform:'translate(-50%,-50%) scale(1)',opacity:.9}],{duration:470,easing:'ease-out'});
@@ -96,7 +99,7 @@ const AttackFX = {
       orb.style.visibility='hidden';caption.textContent=forecast.hit.hp?'ПОПАДАНИЕ':forecast.hit.absorbed?'В ЩИТ':'БЕЗ ПРОБИТИЯ';
       const ring=this.node(run,'attack-impact-ring'+(forecast.hit.absorbed?' shield-impact':''),target);
       this.animate(run,ring,[{transform:'translate(-50%,-50%) scale(.3)',opacity:1},{transform:'translate(-50%,-50%) scale(2.3)',opacity:0}],{duration:350,easing:'ease-out'});
-      for(let j=0;j<Math.min(14,6+shard);j++){
+      for(let j=0;j<Math.min(MOBILE_FX?5:14,6+shard);j++){
         const angle=RNG0()*Math.PI*2,distance=22+RNG0()*50;
         const spark=this.node(run,'attack-spark',target);
         this.animate(run,spark,[{transform:'translate(-50%,-50%) scale(1)',opacity:1},{transform:'translate('+(Math.cos(angle)*distance)+'px,'+(Math.sin(angle)*distance)+'px) scale(0)',opacity:0}],{duration:240+RNG0()*160,easing:'ease-out'});
