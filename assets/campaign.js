@@ -30,7 +30,7 @@ const Campaign={
  healOpen(){return this.active()?[4,8,9,10].includes(G.level)||G.elite:null;},
  relicOffer(){return this.active()?(G.level<10&&(!!this.level().relic||G.elite)):((G.blind===2&&(G.ante<CONFIG.maxAnte||G.endless))||G.elite);},
  target(){return this.active()?this.level().hp:null;},
- preloadPortraits(){if(!this.portraits){this.portraits=new Image();this.portraits.src='assets/dungeon-portraits.png';if(this.portraits.decode)this.portraits.decode().catch(()=>{});}},
+ preloadPortraits(){if(!this.portraits){this.portraits=new Image();this.portraits.src='assets/dungeon-opponents.webp';if(this.portraits.decode)this.portraits.decode().catch(()=>{});}},
  portraitStyle(){const i=Number.isInteger(G.enemy?.portraitIndex)?G.enemy.portraitIndex:(G.level||1)-1;return '--dungeon-x:'+((i%5)*25)+'%;--dungeon-y:'+Math.floor(i/5)*100+'%;';},
  next(){
   if(!this.active()||G.phase!=='shop')return;
