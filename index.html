@@ -1104,6 +1104,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/joker-growth.js?v=20261029-3"></script>
 <link rel="stylesheet" href="assets/deckcraft.css?v=20261029-1">
 <link rel="stylesheet" href="assets/visual-polish.css?v=20261029-1">
+<link rel="stylesheet" href="assets/table-features.css?v=20261029-1">
+<script src="assets/table-features.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
@@ -1231,7 +1233,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261029-2"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261029-11"></script>
+<script src="assets/game-menu.js?v=20261029-12"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -1900,6 +1902,7 @@ function startBlind() {
   if (G.elite) G.target = Math.round(G.target * 1.35);
   if (G.contract && G.contract.targetMul) G.target = Math.round(G.target * G.contract.targetMul);
   if (G.nextTargetMod) { G.target = Math.round(G.target * G.nextTargetMod); G.nextTargetMod = null; }
+  assignTableFeatures();
   Combat.start();
   if (hasRelic('kit') && G.cons.length < consSlots()) { G.cons.push(CONS.minus2); }
   if (G.ante >= 4) unlockAch('ante4');
@@ -2024,6 +2027,7 @@ function evalSeat(s) {
     });
     if (T.some((r, i) => i > 0 && !r.empty && !r.bust && T[i - 1].exact)) pre.push('эстафета +40');
   }
+  T.forEach((r,i)=>{if(!r.empty&&!r.bust&&featureActive(s.tables[i],i,r)){const def=tableFeature(i);r.score=Math.round(r.score*(1+def.bonus/100));r.tableFeature=G.tableFeatures[i];r.tags=(r.tags||[]).concat('Особенность: '+def.name+' +'+def.bonus+'%');pre.push('Стол '+(i+1)+': '+def.name+' +'+def.bonus+'%');}});
   if (G.talent === 'sharp') {
     T.forEach(r=>{if(r.exact)r.score=Math.round(r.score*1.15);});
     if(T.some(r=>r.exact))pre.push('Картёжник: точные столы +15%');
@@ -3482,10 +3486,10 @@ function renderHUD() {
   bar.parentElement.classList.toggle('hot', !!G.enemy && G.enemy.hp <= 0);
 }
 
-function tableHTML(s, t, ti) {
+function tableHTML(s, t, ti, scored=null) {
   const lim = limitNow();
   const cap = maxPlay();
-  const r = t.cards.length ? evalPlay(t.cards, t.adj) : null;
+  const r = t.cards.length ? (scored||evalPlay(t.cards, t.adj)) : null;
   const active = activeTableIndex(s);
   const can = (s.sel !== null && !t.dead && !t.locked && t.cards.length) || (G.phase === 'play' && s.sel === null && ti === active && tableOpen(t));
   const activeClass = G.phase === 'play' && s.sel === null && ti === active && tableOpen(t) ? ' active' : '';
@@ -3502,9 +3506,9 @@ function tableHTML(s, t, ti) {
     '<div class="t-state"><span>' + state + '</span><span class="t-cap' + capCls + '" title="' + capTitle + '">' + t.cards.length + '/' + cap + '</span></div>' +
     (r?.critical ? '<div class="combo-badge critical">Три туза · крит ×2</div>' : '') +
     (r?.royal ? '<div class="combo-badge royal">Три короля · без перебора</div>' : '') +
-    bonus + consumableTablePreview(s,ti) +
+    tableFeatureBadge(t,ti,r)+bonus + consumableTablePreview(s,ti) +
     '<div class="t-cards">' + t.cards.map((c) => cardElement(c, { mini: 1, scoring: s.locked && !t.dead })).join('') + '</div>' +
-    '<div class="t-footer"><span class="t-title">Стол ' + (ti + 1) + '</span><div class="t-score">' + (r && !r.bust ? '+' + fmt(r.score) : '') + '</div></div></div>';
+    '<div class="t-footer"><span class="t-title">Стол ' + (ti + 1) + '</span><div class="t-score" title="Очки стола до общих бонусов хода">' + (r && !r.bust ? '+' + fmt(scored?r.score:Math.round(r.score*featureMultiplier(t,ti,r))) : '') + '</div></div></div>';
 }
 
 function renderTable() {
@@ -3525,11 +3529,13 @@ function renderTable() {
     ? pile + (s ? nextCardsHTML(s) : '')
     : '';
   const previewSeat = s || { tables: Array.from({ length: tablesPerSeat() }, newTable), sel: null, locked: false };
-  $('#hand').innerHTML = '<div class="tables' + (tablesPerSeat() > 3 ? ' four' : '') + '">' + previewSeat.tables.map((t, i) => tableHTML(previewSeat, t, i)).join('') + '</div>';
+  const tableScores=evalSeat(previewSeat);
+  $('#hand').innerHTML = '<div class="tables' + (tablesPerSeat() > 3 ? ' four' : '') + '">' + previewSeat.tables.map((t, i) => tableHTML(previewSeat, t, i,tableScores.tables[i])).join('') + '</div>';
   tableFx(s);
+  return tableScores;
 }
 
-function renderStats() {
+function renderStats(tableScores) {
   const s = G.seat;
   if (!s) {
     $('#total-box').textContent = '—'; $('#total-box').className = 'total';
@@ -3537,7 +3543,7 @@ function renderStats() {
     $('#preview-note').textContent = ''; $('#tags').innerHTML = '';
     return;
   }
-  const res = evalSeat(s);
+  const res = tableScores||evalSeat(s);
   const forecast = combatForecast(res);
   $('#total-box').textContent = res.exact + '/' + tablesPerSeat(); $('#total-box').className = 'total' + (res.bust && !res.total ? ' bust' : '');
   const statValues = [fmt(res.chips), 'x' + fmtMult(res.chips ? res.total / res.chips : 0), fmt(forecast.hit.hp)];
@@ -3596,7 +3602,7 @@ function renderJokers() {
   let talentPanel=$('#run-talent-panel');
   if(!talentPanel){talentPanel=document.createElement('div');talentPanel.id='run-talent-panel';$('#jokers').parentElement.insertAdjacentElement('afterend',talentPanel);}
   const opened=[...talentPanel.querySelectorAll('[data-run-panel][open]')].map(el=>el.dataset.runPanel);
-  talentPanel.innerHTML=talentSummary()+bargainSummary()+growthSummary();
+  talentPanel.innerHTML=talentSummary()+bargainSummary()+growthSummary()+tableFeaturesSummary();
   talentPanel.querySelectorAll('[data-run-panel]').forEach(el=>{if(opened.includes(el.dataset.runPanel))el.open=true;});
 }
 
@@ -3636,15 +3642,15 @@ function renderSide() {
 
 function renderDraw() {
   // A draw changes cards, forecast and controls, not the shop, journal or build.
-  renderTable();renderStats();renderActions();saveRun();
+  const tableScores=renderTable();renderStats(tableScores);renderActions();saveRun();
 }
 
 function render() {
   if (!G) return;
   renderHUD();
   BattleUI.render();
-  renderTable();
-  renderStats();
+  const tableScores=renderTable();
+  renderStats(tableScores);
   renderActions();
   $('#damage-details').disabled = G.phase !== 'play' || !G.seat || G.seat.locked || !!G.battle?.resolving;
   renderJokers();
