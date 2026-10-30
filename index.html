@@ -1176,7 +1176,6 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
         <div class="round-budget-value"><strong id="rounds-left">4</strong><span id="rounds-total">из 4</span></div>
         <div id="round-budget-track" class="round-budget-track" aria-hidden="true"></div>
       </div>
-      <div id="battle-result" role="status" aria-live="polite"></div>
     </section>
     <div id="target-cycle" class="target-cycle" role="status" aria-live="polite" hidden></div>
     <div id="cons" aria-label="Расходники"></div>
@@ -1592,7 +1591,7 @@ const BattleUI = {
     const el = $('#battle-panel');
     if (!G.enemy || !G.player) { el.hidden = true; this.prev = null; return; }
     el.hidden = false;
-    const e = G.enemy, p = G.player, i = e.intent, h = G.battle && G.battle.lastHit;
+    const e = G.enemy, p = G.player, i = e.intent;
     const status = a => a.effects.map(x => x.id === 'rage' ? 'ярость ×1,5' : x.id === 'weak' ? 'слабость −20%' : x.id).join(', ');
     $('#enemy-portrait').textContent = e.glyph;
     $('#enemy-portrait').style.setProperty('--portrait-position', (({collector:0,brawler:1,sentinel:2,usurer:3})[e.id] ?? 4) * 25 + '%');
@@ -1626,9 +1625,7 @@ const BattleUI = {
     const pbar = $('#player-health');
     pbar.style.width = (100 * p.hp / p.maxHp) + '%';
     $('#player-health-ghost').style.width = (100 * p.hp / p.maxHp) + '%';
-    $('#battle-result').textContent = h
-      ? ('Удар ' + fmt(h.attack) + ' \u2192 щит \u2212' + fmt(h.absorbed) + ' · HP \u2212' + fmt(h.hp) + (G.battle.lastReceived ? ' · получено: ' + fmt(G.battle.lastReceived) : ''))
-      : '';
+
     /* анимации считаются по дельтам HP между рендерами */
     const cur = { ehp: e.hp, php: p.hp, esh: e.shield, psh: p.shield };
     if (this.game !== G || !this.prev) { this.game = G; this.prev = cur; return; }
