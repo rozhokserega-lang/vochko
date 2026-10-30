@@ -35,28 +35,23 @@ const GameMenu={
  },
  setup(){
   const previousScroll=document.querySelector('.deck-selector')?.scrollLeft||0;
+  const setupScroll=document.querySelector('.preparation-modal')?.scrollTop||0,optionsOpen=!!document.querySelector('.preparation-options')?.open;
   G.pending='setup';this.backTarget='setup';
   const unlocked=unlockedStake();
   if(SETUP.stake>unlocked)SETUP.stake=unlocked;
   if(!isUnlocked('deck',SETUP.deck))SETUP.deck='classic';
   const deck=DECKS[SETUP.deck];
   if(!TALENTS[SETUP.talent]||!isUnlocked('talent',SETUP.talent))SETUP.talent='sharp';
-  showOverlay('<div class="setup-screen"><button class="menu-back" id="setup-back">← К выбору главы</button><div class="kicker">Новый забег</div><h2>Твоя колода</h2><p class="sub">Выбери, с чем войдёшь в казино.</p>'+
-   '<div class="chosen-deck"><span class="chosen-deck-art">'+this.deckArt(SETUP.deck)+'</span><div><h3>'+deck.name+'</h3><p>'+deck.desc+'</p></div></div>'+
-   '<div class="deck-selector" aria-label="Выбор колоды">'+Object.entries(DECKS).sort(([a],[b])=>['classic','short','gold','glass','alchemy','scarlet','nocturne'].indexOf(a)-['classic','short','gold','glass','alchemy','scarlet','nocturne'].indexOf(b)).map(([key,value])=>{
-    const enabled=isUnlocked('deck',key),selected=key===SETUP.deck;
-    return '<button class="deck-option'+(selected?' selected':'')+'" data-deck="'+key+'" aria-pressed="'+selected+'" '+(!enabled?'disabled':'')+' title="'+(enabled?value.desc:lockHint('deck',key))+'">'+this.deckArt(key)+'<b>'+value.name+'</b><small>'+(enabled?(selected?'Выбрана':'Выбрать'):'Закрыта')+'</small></button>';
-   }).join('')+'</div>'+
-   '<h3 class="talent-heading">Стартовый талант</h3><div class="talent-options" aria-label="Выбор таланта">'+Object.entries(TALENTS).sort(([a],[b])=>['healer','sharp','daring','warden','scout'].indexOf(a)-['healer','sharp','daring','warden','scout'].indexOf(b)).map(([key,t])=>{const enabled=isUnlocked('talent',key);return '<button class="talent-option" data-talent="'+key+'" aria-pressed="'+(key===SETUP.talent)+'" '+(!enabled?'disabled':'')+'><span class="talent-mark" aria-hidden="true">'+t.mark+'</span><span><b>'+t.name+'</b><small>'+(enabled?(key===SETUP.talent?'Выбран':'Выбрать'):lockHint('talent',key))+'</small>'+'</span><span class="talent-check" aria-hidden="true">'+(key===SETUP.talent?'✓':!enabled?'·':'')+'</span></button>';}).join('')+'</div><div class="talent-current" aria-live="polite"><b>'+TALENTS[SETUP.talent].mark+' '+TALENTS[SETUP.talent].name+'</b>'+TALENTS[SETUP.talent].desc+'<small>'+TALENTS[SETUP.talent].hint+'</small></div><p class="talent-note">Один талант до конца забега. Не занимает слот джокера.</p>'+
-
-   '<label class="fair-start"><input type="checkbox" id="setup-fair" '+(SETUP.fairStart?'checked':'')+'><span><b>Честный старт</b>Без стартовых денег, печатей, джокера и слотов из лавки. Открытые колоды и таланты доступны; покупки сохраняются.</span></label><p class="setup-openings">Новые варианты открываются за достижения. Купленные бонусы лавки не удаляются.</p><div class="setup-footer"><button class="home-start" id="ov-go">Начать забег</button>'+(readSavedRun()?'<small>Новый забег заменит текущее сохранение.</small>':'<small>Прогресс сохраняется автоматически.</small>')+'</div></div>');
-  $('#overlay .modal').classList.add('game-setup');
+  showOverlay(Preparation.html());
+  $('#overlay .modal').classList.add('game-setup','preparation-modal');
   document.querySelector('.deck-selector').scrollLeft=previousScroll;
+  if(optionsOpen)document.querySelector('.preparation-options').open=true;
+  $('#overlay .modal').scrollTop=setupScroll;
   $('#setup-back').onclick=()=>Campaign.locations();
   document.querySelectorAll('[data-deck]').forEach(button=>button.onclick=()=>{SETUP.deck=button.dataset.deck;this.setup()});
 
 
-  $('#setup-fair').onchange=event=>{SETUP.fairStart=event.target.checked;};
+  $('#setup-fair').onchange=event=>{SETUP.fairStart=event.target.checked;document.querySelector('.preparation-mode').textContent=SETUP.fairStart?'Честный старт':'Бонусы лавки';};
   document.querySelectorAll('[data-talent]').forEach(button=>button.onclick=()=>{if(!isUnlocked('talent',button.dataset.talent))return;const modal=$('#overlay .modal'),scroll=modal.scrollTop;SETUP.talent=button.dataset.talent;this.setup();$('#overlay .modal').scrollTop=scroll;});
   $('#ov-go').onclick=()=>{this.backTarget=null;newGame(0,SETUP.deck,{campaign:true,talent:SETUP.talent,fairStart:!!SETUP.fairStart})};
   tgShowBack(true);
