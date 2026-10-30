@@ -24,7 +24,7 @@ const GameMenu={
   $('#menu-shop').onclick=()=>this.page(()=>showMetaShop('seals'));
   $('#menu-achievements').onclick=()=>this.page(showMeta);
   $('#menu-rules').onclick=()=>this.page(showRules);
-  Campaign.preloadPortraits();
+  Campaign.preloadPortraits();Passage.preload();
   tgShowBack(false);
  },
  page(open){
@@ -62,6 +62,7 @@ const GameMenu={
   tgShowBack(true);
  },
  pathHTML(picks){
+  if(Campaign.active())return Passage.path(picks);
   return '<div class="path-screen"><div class="kicker">'+Campaign.label()+' · между боями</div><h2>Выбери свой путь</h2><p class="sub">Впереди '+(Campaign.active()?Campaign.level().name:BLIND_NAMES[G.blind].toLowerCase())+'. Куда заглянем по дороге?</p><div class="route-options">'+picks.map((key,index)=>{
    const node=NODES[key];return '<button class="route-card route-'+key+'" data-node="'+key+'">'+this.routeArt(key)+'<span class="route-copy"><small>Путь '+(index+1)+'</small><b>'+node.name+'</b><span>'+(key==='elite'?eliteRouteText():node.desc)+'</span><em>Выбрать →</em></span></button>';
   }).join('')+'</div><p class="path-hint">Любой путь ведёт к следующему бою.</p></div>';
@@ -74,6 +75,7 @@ const GameMenu={
   return this.sceneHeader(type,title,'Путь продолжается')+'<div class="scene-result"><span aria-hidden="true">✦</span><p>'+message+'</p></div><div class="row-btns"><button class="primary" id="ov-onward">К следующему бою →</button></div>';
  },
  battleIntroHTML(){
+  if(Campaign.active())return Passage.intro();
   const enemy=G.enemy,boss=G.boss?BOSSES[G.boss]:null;
   const portrait=((({collector:0,brawler:1,sentinel:2,usurer:3})[enemy.id]??4)*25)+'%';
   const rule=key=>'<div class="brief-house-rule"><b>'+BOSSES[key].name+'</b><p>'+BOSSES[key].desc+'</p></div>';
@@ -89,6 +91,7 @@ const GameMenu={
   const modal=$('#overlay .modal');if(!modal)return;
   if(G.phase==='path'&&G.pending!=='setup')modal.classList.add('game-intermission');
   if(G.phase==='intro'&&G.enemy&&G.pending!=='setup')modal.classList.add('battle-intro-screen');
+  Passage.decorate();
  },
  back(){
   if(this.backTarget==='setup'){Campaign.locations();return;}

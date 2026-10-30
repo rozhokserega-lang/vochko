@@ -1114,6 +1114,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/tutorial.css?v=20261029-1">
 <link rel="stylesheet" href="assets/duel-field.css?v=20261029-1">
 <link rel="stylesheet" href="assets/duel-art.css?v=20261029-2">
+<link rel="stylesheet" href="assets/passage.css?v=20261030-1">
+<script src="assets/passage.js?v=20261030-1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
@@ -1243,7 +1245,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261029-2"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261030-1"></script>
+<script src="assets/game-menu.js?v=20261030-2"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
 /* ============================================================
@@ -3395,6 +3397,7 @@ function rerollShop() {
 function showOverlay(html, wide) {
   const ov = $('#overlay');
   ov.classList.toggle('home-overlay',html.includes('class="home-screen"'));
+  ov.classList.toggle('passage-overlay',html.includes('data-passage-screen='));
   const updatingShop=!ov.classList.contains('hidden')&&((!!ov.querySelector('.shop-health')&&html.includes('class="shop-health"'))||(!!ov.querySelector('.setup-screen')&&html.includes('class="setup-screen"')));
   const previousScroll = updatingShop ? ov.querySelector('.modal').scrollTop : 0;
   const offerHeights = updatingShop ? [...ov.querySelectorAll('[data-offer]')].map(el => [el.dataset.offer, el.getBoundingClientRect().height]) : [];
@@ -3416,6 +3419,7 @@ function hideOverlay() {
 // Закрывает оверлей и возвращает тот экран, который соответствует текущей фазе.
 function closeOverlay() {
   if(document.querySelector('.inventory-screen')){hideOverlay();return;}
+  if(G.phase==='path'&&G.pending==='path'){openPath(true);return;}
   if(G.pending==='setup'){GameMenu.main();return}
   if (G.phase === 'play' && G.seat && ['remove','move'].includes(G.cons[G.seat.sel]?.kind)) {
     G.seat.sel = null;
@@ -3431,6 +3435,7 @@ function closeOverlay() {
 function showBlindIntro() {
   showOverlay(GameMenu.battleIntroHTML());
   $('#ov-start').onclick = () => {
+    if(G.phase!=='intro')return;
     hideOverlay();
     startSeat();
   };
