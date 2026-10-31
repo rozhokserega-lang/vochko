@@ -1,0 +1,183 @@
+/* Графический проход: столы как сукно под лампой, объёмные латунные таблички,
+   бумажные карты с живой укладкой. Только оформление: размеры, отступы и
+   раскладка столов не меняются. Подключается последним. */
+
+#table .tables{
+  background:
+    radial-gradient(80% 55% at 50% -8%,rgba(255,206,130,.12),transparent 72%),
+    linear-gradient(90deg,rgba(0,0,0,.34),transparent 18%,transparent 82%,rgba(0,0,0,.34));
+}
+
+/* ---------- сукно ---------- */
+#table .tables .tbl{
+  border:1px solid rgba(201,165,92,.30);
+  border-radius:9px;
+  background:
+    url(felt-noise.svg) 0 0/160px 160px,
+    radial-gradient(130% 62% at 50% 0%,rgba(255,208,128,.10),transparent 68%),
+    linear-gradient(180deg,#143a29 0%,#0d2a1d 58%,#0a2016 100%);
+  background-blend-mode:soft-light,normal,normal;
+  box-shadow:
+    inset 0 1px 0 rgba(255,236,190,.07),
+    inset 0 -26px 30px rgba(0,0,0,.30),
+    inset 0 0 0 3px rgba(0,0,0,.10);
+}
+#table .tables .tbl.active{
+  border:1px solid #f0cf7e;
+  background:
+    url(felt-noise.svg) 0 0/160px 160px,
+    radial-gradient(105% 78% at 50% 4%,rgba(255,220,150,.40),transparent 74%),
+    linear-gradient(180deg,#235a3d 0%,#133827 62%,#0c2519 100%);
+  background-blend-mode:soft-light,normal,normal;
+  box-shadow:
+    0 0 0 1px rgba(240,207,126,.55),
+    inset 0 0 0 1px rgba(255,236,180,.30),
+    inset 0 -24px 30px rgba(0,0,0,.24),
+    0 0 26px rgba(240,190,100,.14);
+}
+/* сумма равна цели, стол ещё открыт: тёплый свет без анимации */
+#table .tables .tbl.hit,
+#table .tables .tbl.ok{
+  border-color:#b99444;
+  background:
+    url(felt-noise.svg) 0 0/160px 160px,
+    radial-gradient(115% 80% at 50% 10%,rgba(255,196,96,.30),transparent 74%),
+    linear-gradient(180deg,#35491f 0%,#1a301d 62%,#0f2316 100%);
+  background-blend-mode:soft-light,normal,normal;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,210,120,.26),
+    inset 0 -24px 30px rgba(0,0,0,.24),
+    0 0 18px rgba(255,190,90,.20);
+}
+#table .tables .tbl.active.hit,
+#table .tables .tbl.active.ok{
+  border-color:#f0cf7e;
+  box-shadow:
+    0 0 0 1px rgba(240,207,126,.55),
+    inset 0 0 0 1px rgba(255,226,150,.34),
+    inset 0 -24px 30px rgba(0,0,0,.22),
+    0 0 28px rgba(255,200,100,.16);
+}
+#table .tables .tbl.over,
+#table .tables .tbl.dead{
+  opacity:.9;
+  border-color:#a8444e;
+  background:
+    url(felt-noise.svg) 0 0/160px 160px,
+    radial-gradient(110% 70% at 50% 0%,rgba(190,60,70,.30),transparent 72%),
+    linear-gradient(180deg,#3a1219 0%,#240b10 62%,#190608 100%);
+  background-blend-mode:soft-light,normal,normal;
+  box-shadow:inset 0 -24px 30px rgba(0,0,0,.35);
+  filter:none;
+}
+#table .tables .tbl.dead .t-cards .card{filter:saturate(.55) brightness(.82)}
+#table .tables .tbl.over:not(.dead){opacity:1;border-color:#d0606a;box-shadow:inset 0 -24px 30px rgba(0,0,0,.30),0 0 18px rgba(210,70,80,.28)}
+#table .tables .tbl.over:not(.dead) .t-state>span:first-child{color:#ffb3b0;font-weight:700}
+#table .tables .tbl.blocked{
+  background:
+    url(felt-noise.svg) 0 0/160px 160px,
+    linear-gradient(180deg,#262b33,#12161c);
+  background-blend-mode:soft-light,normal;
+}
+
+/* ---------- латунные таблички с суммой ---------- */
+#table .tables .tbl .t-sum{
+  background:linear-gradient(180deg,#f6e6b6 0%,#ddc07f 46%,#b38c47 100%);
+  -webkit-background-clip:border-box;background-clip:border-box;
+  color:#2a1f0c;
+  filter:none;
+  text-shadow:0 1px 0 rgba(255,246,214,.75),0 -1px 0 rgba(60,40,10,.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -4px 6px rgba(90,60,15,.32),
+    0 3px 7px rgba(0,0,0,.5);
+}
+#table .tables .tbl.active .t-sum{color:#2a1f0c}
+#table .tables .tbl.hit .t-sum,
+#table .tables .tbl.ok .t-sum{
+  background:linear-gradient(180deg,#fff3c4 0%,#f0cf7a 46%,#c8982f 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.7),
+    inset 0 -4px 6px rgba(120,80,10,.30),
+    0 0 14px rgba(255,208,110,.25),
+    0 3px 7px rgba(0,0,0,.5);
+}
+#table .tables .tbl.over .t-sum,
+#table .tables .tbl.dead .t-sum{
+  background:linear-gradient(180deg,#8a3a40 0%,#5e1f27 100%);
+  color:#f3cfcb;
+  text-shadow:0 1px 0 rgba(0,0,0,.5);
+  box-shadow:inset 0 1px 0 rgba(255,190,190,.25),inset 0 -4px 6px rgba(0,0,0,.35),0 3px 7px rgba(0,0,0,.5);
+}
+#table .tables .tbl .t-state{color:#e8d3a0;text-shadow:0 1px 0 rgba(0,0,0,.45)}
+#table .tables .tbl.hit .t-state>span:first-child,
+#table .tables .tbl.ok .t-state>span:first-child{color:#ffe29a}
+#table .tables .tbl .t-score{text-shadow:0 1px 0 rgba(0,0,0,.5)}
+
+/* ---------- карты на столе ---------- */
+#table .tables .t-cards .card.mini{
+  border:1px solid #b3985f;
+  border-radius:6px;
+  background:
+    url(paper-grain.svg) 0 0/120px 120px,
+    linear-gradient(155deg,#fffaf0 0%,#f4eAD2 55%,#e1d1aa 100%);
+  background-blend-mode:soft-light,normal;
+  box-shadow:
+    inset 0 0 0 2px #f6ecd2,
+    inset 0 0 0 3px rgba(150,115,60,.32),
+    0 -3px 6px -2px rgba(0,0,0,.40),
+    0 3px 5px rgba(0,0,0,.45),
+    0 9px 14px rgba(0,0,0,.26);
+}
+#table .tables .t-cards .card.mini:nth-child(odd){rotate:-1.1deg;translate:-1px 0}
+#table .tables .t-cards .card.mini:nth-child(even){rotate:1.3deg;translate:1px 0}
+#table .tables .t-cards .card.red{color:#a3262f}
+#table .tables .t-cards .card.black{color:#1a1820}
+#table .tables .t-cards .card .c-rank{text-shadow:0 1px 0 rgba(255,255,255,.6)}
+#table .tables .t-cards .card.m-gold{
+  background:url(paper-grain.svg) 0 0/120px 120px,linear-gradient(145deg,#fff1b9,#d7b65d);
+  background-blend-mode:soft-light,normal;
+}
+#table .tables .t-cards .card.m-glass{
+  background:linear-gradient(115deg,rgba(255,255,255,.96),rgba(176,224,255,.78) 40%,rgba(255,255,255,.92) 55%,rgba(150,205,255,.8));
+  background-blend-mode:normal;
+}
+
+/* пустое место: карта «вдавлена» в сукно */
+#table .tables .t-cards:empty::before{
+  border:1px solid rgba(0,0,0,.45);
+  border-radius:5px;
+  color:rgba(0,0,0,.32);
+  text-shadow:0 1px 0 rgba(255,225,160,.10);
+  background:rgba(0,0,0,.14);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.55),0 1px 0 rgba(255,225,160,.10);
+}
+
+/* ---------- здоровье врага: стеклянный блеск ---------- */
+.battle-bar.enemy #enemy-health{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.28) 0,rgba(255,255,255,.06) 46%,rgba(0,0,0,.12) 52%,rgba(0,0,0,.22) 100%),
+    linear-gradient(90deg,#8f2a30,#d1545a);
+}
+
+@media (prefers-reduced-motion:reduce){
+  #table .tables .tbl{transition:none}
+}
+
+/* All seals remain recognisable on overlapping cards, without relying on colour alone. */
+#table .tables .t-cards .card.m-wild{background:linear-gradient(135deg,#ead6f3,#d9e9f4 45%,#dce9ce);border-color:#9c65bc}
+#table .tables .t-cards .card.m-heavy{background:linear-gradient(145deg,#e8ebee,#b7bfc8);border-color:#6d7988}
+#table .tables .t-cards .card .seal-mark{position:absolute;right:3px;top:3px;z-index:3;padding:1px 3px;border-radius:3px;background:#24362c;color:#fff0cb;font:700 9px/12px Arial,sans-serif;box-shadow:0 1px 2px #0005}
+/* Reserve the same footprint before the first card and after the fifth. */
+body #table .tbl>.t-cards{height:174px;min-height:174px;flex:0 0 174px}
+body.duel-roomy #table .tbl>.t-cards{height:202px;min-height:202px;flex-basis:202px}
+body #table .tbl>.t-feedback{order:2;height:64px;min-height:64px;flex:0 0 64px;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:3px}
+body #table .t-feedback>.t-bonus{position:static;inset:auto;flex:0 0 auto;min-height:24px;height:auto;white-space:normal;overflow:visible;font:600 10px/12px Arial,sans-serif}
+body #table .t-feedback>.t-bonus:empty{display:block;visibility:hidden}
+body #table .t-feedback>.combo-badge{flex:0 0 auto;font-size:10px;line-height:12px;padding:3px}
+body #table .t-feedback>.cons-preview{flex:0 0 auto;font-size:11px;line-height:14px;padding:4px}
+body #table .tbl>.t-footer{flex:0 0 18px;min-height:18px;margin-top:0}
+@media(min-width:601px){body.duel-roomy #table .tbl>.t-cards{height:218px;min-height:218px;flex-basis:218px}}
+body #table .tables .tbl{padding:5px 4px;gap:3px;min-height:0}
+body #table .tables .tbl>.t-head{height:40px;min-height:40px;flex:0 0 40px}
+body #table .tables .tbl>.t-state{height:16px;min-height:16px;flex:0 0 16px}

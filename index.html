@@ -1117,6 +1117,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/passage.css?v=20261030-1">
 <script src="assets/passage.js?v=20261030-1"></script>
 <link rel="stylesheet" href="assets/preparation.css?v=20261030-1">
+<link rel="stylesheet" href="assets/graphics-pass.css?v=20261031-2">
 <script src="assets/preparation.js?v=20261030-1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
@@ -3534,7 +3535,7 @@ function tableHTML(s, t, ti, scored=null) {
   const active = activeTableIndex(s);
   const can = (s.sel !== null && !t.dead && !t.locked && t.cards.length) || (G.phase === 'play' && s.sel === null && ti === active && tableOpen(t));
   const activeClass = G.phase === 'play' && s.sel === null && ti === active && tableOpen(t) ? ' active' : '';
-  const cls = 'tbl' + (t.blocked ? ' blocked' : '') + activeClass + (t.locked ? ' ok' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
+  const cls = 'tbl' + (t.blocked ? ' blocked' : '') + activeClass + (t.locked ? ' ok' : '') + (!t.locked && !t.dead && r && !r.bust && r.sum === lim ? ' hit' : '') + (!t.dead && r && r.bust ? ' over' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
   const full = t.cards.length >= cap;
   const closed = t.blocked || t.dead || t.stood || t.locked || full;
   const state = t.blocked ? 'ЗАМОК' : t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? 'ТОЧНО' : r && r.bust ? 'Спасти?' : full ? 'ПОЛОН' : ti === active ? 'НАБОР' : 'ЖДЁТ';
@@ -3545,10 +3546,11 @@ function tableHTML(s, t, ti, scored=null) {
     (pv ? (pv.kind === 'heal' ? '♥ +' + pv.value + ' HP' : '♠ +' + pv.value + '% урон') + (pv.n < 3 ? ' · ещё ' + (3 - pv.n) : '') : '') + '</div>';
   return '<div class="' + cls + '" data-t="' + ti + '" aria-label="Стол ' + (ti + 1) + '"><div class="t-head"><b class="t-sum" aria-label="Сумма карт">' + (r ? r.sum : '—') + '</b></div>' +
     '<div class="t-state"><span>' + state + '</span><span class="t-cap' + capCls + '" title="' + capTitle + '">' + t.cards.length + '/' + cap + '</span></div>' +
+    tableFeatureBadge(t,ti,r) + '<div class="t-feedback">' + bonus +
     (r?.critical ? '<div class="combo-badge critical">Три туза · крит ×2</div>' : '') +
     (r?.royal ? '<div class="combo-badge royal">Три короля · без перебора</div>' : '') +
-    tableFeatureBadge(t,ti,r)+bonus + consumableTablePreview(s,ti) +
-    '<div class="t-cards">' + t.cards.map((c) => cardElement(c, { mini: 1, scoring: s.locked && !t.dead })).join('') + '</div>' +
+    consumableTablePreview(s,ti) + '</div>' +
+    '<div class="t-cards">' + t.cards.map((c) => {const html=cardElement(c, { mini: 1, scoring: s.locked && !t.dead });const marks={gold:'$',glass:'×2',heavy:'Т',wild:'Д'};return marks[c.mod]?html.replace(/<\/div>$/, '<span class="seal-mark" title="'+MODS[c.mod].name+'" aria-label="Печать: '+MODS[c.mod].name+'">'+marks[c.mod]+'</span></div>'):html;}).join('') + '</div>' +
     '<div class="t-footer"><span class="t-title">Стол ' + (ti + 1) + '</span><div class="t-score" title="Очки стола до общих бонусов хода">' + (r && !r.bust ? '+' + fmt(scored?r.score:Math.round(r.score*featureMultiplier(t,ti,r))) : '') + '</div></div></div>';
 }
 
