@@ -33,7 +33,7 @@
     0 0 0 1px rgba(240,207,126,.55),
     inset 0 0 0 1px rgba(255,236,180,.30),
     inset 0 -24px 30px rgba(0,0,0,.24),
-    0 0 26px rgba(240,190,100,.14);
+    0 0 26px rgba(240,190,100,.34);
 }
 /* сумма равна цели, стол ещё открыт: тёплый свет без анимации */
 #table .tables .tbl.hit,
@@ -56,7 +56,7 @@
     0 0 0 1px rgba(240,207,126,.55),
     inset 0 0 0 1px rgba(255,226,150,.34),
     inset 0 -24px 30px rgba(0,0,0,.22),
-    0 0 28px rgba(255,200,100,.16);
+    0 0 28px rgba(255,200,100,.38);
 }
 #table .tables .tbl.over,
 #table .tables .tbl.dead{
@@ -99,7 +99,7 @@
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.7),
     inset 0 -4px 6px rgba(120,80,10,.30),
-    0 0 14px rgba(255,208,110,.25),
+    0 0 14px rgba(255,208,110,.60),
     0 3px 7px rgba(0,0,0,.5);
 }
 #table .tables .tbl.over .t-sum,
@@ -164,20 +164,60 @@
   #table .tables .tbl{transition:none}
 }
 
+/* ---------- устойчивая высота стола (iPhone) ----------
+   Блок отклика под столом компактный и фиксированной высоты: строка бонуса
+   («♥ +10 HP · ещё 1»), комбо и предпросмотр расходника больше не раздвигают
+   ряд столов. Пустое место под строку бонуса сохраняется всегда. */
+html body #table .tbl>.t-feedback{
+  order:2;height:36px;min-height:36px;flex:0 0 36px;
+  overflow-y:auto;overscroll-behavior:contain;
+  display:flex;flex-direction:column;gap:2px;
+}
+html body #table .tables.four .tbl>.t-feedback{height:42px;min-height:42px;flex-basis:42px}
+html body #table .t-feedback>.t-bonus{
+  display:block;position:static;inset:auto;flex:0 0 auto;
+  height:12px;min-height:12px;max-height:12px;margin:0;
+  line-height:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font:600 10px/12px Arial,sans-serif;
+}
+html body #table .t-feedback>.t-bonus:empty{display:block;visibility:hidden}
+html body #table .t-feedback>.combo-badge{flex:0 0 auto;font-size:10px;line-height:13px;padding:2px 3px}
+html body #table .t-feedback>.cons-preview{flex:0 0 auto;font-size:10px;line-height:13px;padding:2px 3px}
+/* блок карт: высота задана, карты внутри не вылезают наружу */
+html body #table .tables .t-cards{overflow:visible}
+
+/* строка «Далее: атака / Откуп»: высота кнопки зарезервирована, чтобы верх столов
+   не съезжал на ходах, где у врага есть «Откуп» */
+#table #enemy-intent{min-height:32px}
+/* подсказка обучения: текст всех четырёх шагов занимает одинаковое место (3 строки) */
+#tutorial-coach p{min-height:calc(14px * 1.4 * 3)}
+
+/* подсказка в нижней панели («стол закрыт» и т. п.) парит над панелью и не занимает места:
+   раньше после первого показа панель навсегда становилась на 15–20 px выше,
+   и всё поле над ней сжималось */
+html body #dock #hint{
+  position:absolute;left:8px;right:8px;bottom:calc(100% + 6px);
+  margin:0;min-height:0;max-height:none;overflow:visible;
+  padding:6px 10px;border-radius:8px;text-align:center;
+  background:rgba(14,32,23,.96);border:1px solid rgba(201,165,92,.55);
+  box-shadow:0 4px 14px rgba(0,0,0,.5);
+  pointer-events:none;z-index:3;
+}
+html body #dock #hint:empty{display:none}
+html body #dock #hint:not(.on){visibility:hidden}
+
+/* одинаковые отступы у всех состояний стола: активный стол был на 14 px выше остальных
+   (отступы 8/8 и зазор 5 вместо 5/5 и 3), из-за чего ряд столов прыгал при смене активного */
+#table .tables .tbl,
+#table .tables .tbl.active,
+#table .tables .tbl.ok,
+#table .tables .tbl.hit,
+#table .tables .tbl.over,
+#table .tables .tbl.dead,
+#table .tables.four .tbl{padding:5px 4px;gap:3px}
+#table .tables .tbl,#table .tables.four .tbl{min-height:249px}
+
 /* All seals remain recognisable on overlapping cards, without relying on colour alone. */
 #table .tables .t-cards .card.m-wild{background:linear-gradient(135deg,#ead6f3,#d9e9f4 45%,#dce9ce);border-color:#9c65bc}
 #table .tables .t-cards .card.m-heavy{background:linear-gradient(145deg,#e8ebee,#b7bfc8);border-color:#6d7988}
 #table .tables .t-cards .card .seal-mark{position:absolute;right:3px;top:3px;z-index:3;padding:1px 3px;border-radius:3px;background:#24362c;color:#fff0cb;font:700 9px/12px Arial,sans-serif;box-shadow:0 1px 2px #0005}
-/* Reserve the same footprint before the first card and after the fifth. */
-body #table .tbl>.t-cards{height:174px;min-height:174px;flex:0 0 174px}
-body.duel-roomy #table .tbl>.t-cards{height:202px;min-height:202px;flex-basis:202px}
-body #table .tbl>.t-feedback{order:2;height:64px;min-height:64px;flex:0 0 64px;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:3px}
-body #table .t-feedback>.t-bonus{position:static;inset:auto;flex:0 0 auto;min-height:24px;height:auto;white-space:normal;overflow:visible;font:600 10px/12px Arial,sans-serif}
-body #table .t-feedback>.t-bonus:empty{display:block;visibility:hidden}
-body #table .t-feedback>.combo-badge{flex:0 0 auto;font-size:10px;line-height:12px;padding:3px}
-body #table .t-feedback>.cons-preview{flex:0 0 auto;font-size:11px;line-height:14px;padding:4px}
-body #table .tbl>.t-footer{flex:0 0 18px;min-height:18px;margin-top:0}
-@media(min-width:601px){body.duel-roomy #table .tbl>.t-cards{height:218px;min-height:218px;flex-basis:218px}}
-body #table .tables .tbl{padding:5px 4px;gap:3px;min-height:0}
-body #table .tables .tbl>.t-head{height:40px;min-height:40px;flex:0 0 40px}
-body #table .tables .tbl>.t-state{height:16px;min-height:16px;flex:0 0 16px}
