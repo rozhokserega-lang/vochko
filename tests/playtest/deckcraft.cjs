@@ -18,5 +18,5 @@ const report=await p.evaluate(()=>{
  }
  META=old;metaSave();return {checks,combinedCombatCases:cases};
 });assert.deepEqual(errors,[]);writeReport('deckcraft.json',{...report,errors});console.log(JSON.stringify({...report,errors},null,2));
-await p.evaluate(()=>{showRunSetup();});for(const width of [320,390]){await p.setViewportSize({width,height:844});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}await p.locator('#setup-fair').check();await p.locator('#ov-go').click();assert.equal(await p.evaluate(()=>G.fairStart),true);console.log('Fair-start UI and mobile widths passed');
+await p.evaluate(()=>{showRunSetup();});for(const width of [320,390]){await p.setViewportSize({width,height:844});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}await p.locator('.preparation-options>summary').click();await p.locator('#setup-fair').check();await p.locator('#ov-go').click();assert.equal(await p.evaluate(()=>G.fairStart),true);console.log('Fair-start UI and mobile widths passed');
 }finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
