@@ -1,6 +1,37 @@
 /* Cosmetic-only choreography. All game mutations still go through finishSeat. */
 const AttackFX = {
-  active:null,receipt:null,receiptTimer:0,
+  active:null,receipt:null,receiptTimer:0,deals:new Set(),
+  styleProps:('display position inset top right bottom left box-sizing width height min-width min-height max-width max-height '+
+    'margin padding border border-radius outline outline-offset box-shadow background background-color background-image background-size '+
+    'background-position background-repeat background-clip background-origin background-blend-mode color opacity filter mix-blend-mode text-shadow '+
+    '-webkit-text-stroke -webkit-text-fill-color -webkit-background-clip font font-family font-size font-style font-weight '+
+    'font-variant font-stretch line-height letter-spacing word-spacing text-align text-transform white-space text-overflow '+
+    'text-decoration flex flex-direction flex-wrap flex-grow flex-shrink flex-basis align-items align-content align-self '+
+    'justify-content justify-items justify-self order gap row-gap column-gap grid-template-columns grid-template-rows '+
+    'grid-auto-flow grid-column grid-row place-items place-content transform transform-origin rotate translate scale '+
+    'visibility z-index overflow clip-path').split(' '),
+  cardCopy(card,root){
+    const clone=card.cloneNode(true),source=[card,...card.querySelectorAll('*')],copies=[clone,...clone.querySelectorAll('*')];
+    // Read everything first: one style recalculation instead of one per node.
+    const styles=source.map(el=>{const cs=getComputedStyle(el),map={};for(const key of this.styleProps)map[key]=cs.getPropertyValue(key);return map;});
+    copies.forEach((el,i)=>{const map=styles[i];for(const key in map)el.style.setProperty(key,map[key]);el.removeAttribute('id');});
+    const r=card.getBoundingClientRect(),w=card.offsetWidth||r.width,h=card.offsetHeight||r.height;
+    if(card.classList.contains('face')&&!card.classList.contains('m-curse')){
+      // Court artwork is painted by ::before, which is scoped to .t-cards; move its box onto the clone.
+      const art=getComputedStyle(card,'::before');
+      if(art.display!=='none'&&art.top!=='auto')['top','right','bottom','left'].forEach(side=>clone.style.setProperty('--fx-art-'+side,art[side]));
+    }
+    Object.assign(clone.style,{position:'absolute',left:(r.left+(r.width-w)/2)+'px',top:(r.top+(r.height-h)/2)+'px',width:w+'px',height:h+'px',margin:'0',transform:'none',rotate:'0deg',translate:'none',animation:'none',transition:'none',pointerEvents:'none'});
+    clone.setAttribute('aria-hidden','true');root.appendChild(clone);return clone;
+  },
+  deal(card,pile){
+    if(REDUCED||document.hidden||!card?.animate||!pile)return;
+    const root=document.createElement('div');root.className='attack-fx-layer';root.setAttribute('aria-hidden','true');document.body.appendChild(root);
+    const clone=this.cardCopy(card,root),a=this.center(pile),b=this.center(card),dx=a.x-b.x,dy=a.y-b.y;
+    const original=card.style.visibility;card.style.visibility='hidden';
+    const animation=clone.animate([{transform:'translate('+dx+'px,'+dy+'px) rotate(-16deg) scale(.65)',opacity:.8},{transform:'translate('+(dx*.35)+'px,'+(dy*.35-20)+'px) rotate(6deg) scale(1.03)',opacity:1,offset:.65},{transform:'none',opacity:1}],{duration:300,easing:'cubic-bezier(.2,.65,.3,1)'});
+    const clean=()=>{animation.cancel();root.remove();card.style.visibility=original;this.deals.delete(clean)};this.deals.add(clean);animation.finished.then(clean,clean);
+  },
   visiblePoint(point){
     const style=getComputedStyle(document.body),top=parseFloat(style.paddingTop)||0,bottom=parseFloat(style.paddingBottom)||0;
     return {x:Math.max(40,Math.min(innerWidth-40,point.x)),y:Math.max(top+55,Math.min(innerHeight-bottom-135,point.y))};
@@ -32,11 +63,12 @@ const AttackFX = {
     run.animations.forEach(animation=>animation.cancel());
     if(run.frame)cancelAnimationFrame(run.frame);
     run.root.remove();
+    (run.sources||[]).forEach(({card,visibility})=>{card.style.visibility=visibility});
     if(this.active===run){this.active=null;document.body.classList.remove('attack-busy');$('#btn-rules').disabled=false}
     run.tables.forEach(element=>element.classList.remove('attack-charging','attack-fizzle'));
     if(run.accumulator&&(!this.active||this.active===run))run.accumulator.classList.remove('attack-accumulator');
   },
-  cancel() {if(this.active)this.cleanup(this.active);this.clearReceipt()},
+  cancel() {this.deals.forEach(clean=>clean());if(this.active)this.cleanup(this.active);this.clearReceipt()},
   flush() {
     const run=this.active;if(!run)return;
     if(this.valid(run)){
@@ -54,7 +86,7 @@ const AttackFX = {
   async play(game,seat,result) {
     this.cancel();
     const root=document.createElement('div');root.className='attack-fx-layer';root.setAttribute('aria-hidden','true');document.body.appendChild(root);
-    const run={game,seat,root,animations:[],tables:[],committed:false,frame:0};this.active=run;
+    const run={game,seat,root,animations:[],tables:[],sources:[],committed:false,frame:0};this.active=run;
     run.commit=animated=>{if(this.valid(run)&&!run.committed){run.committed=true;const hit=attackPreview(result);finishSeat(result,animated);this.showReceipt(hit,result)}};
     const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     try{
@@ -84,11 +116,11 @@ const AttackFX = {
           return;
         }
         cards.forEach((card,ci)=>{
-          if(MOBILE_FX&&ci>1)return;
-          const p=this.center(card),delay=index*65+ci*22;
-          const token=this.node(run,'attack-card-mote',p,card.dataset.s||'♠');
-          token.classList.toggle('attack-exact-mote',!!table.exact);
-          this.animate(run,token,[{transform:'translate(-50%,-50%) rotate(-8deg) scale(.8)',opacity:0},{transform:'translate(-50%,-65%) rotate(5deg) scale(1)',opacity:1,offset:.2},{transform:'translate('+(origin.x-p.x-8)+'px,'+(origin.y-p.y-11)+'px) rotate(100deg) scale(.15)',opacity:0}],{duration:310,delay,easing:'cubic-bezier(.4,0,.3,1)'});
+          const p=this.center(card),delay=index*50+ci*18;
+          const token=this.cardCopy(card,run.root);
+          run.sources.push({card,visibility:card.style.visibility});card.style.visibility='hidden';
+          const dx=target.x-p.x,dy=target.y-p.y;
+          this.animate(run,token,[{transform:'translateY(0) rotate(0deg) scale(1)',opacity:1},{transform:'translate('+(dx*.2)+'px,'+(dy*.25-22)+'px) rotate(-12deg) scale(1.05)',opacity:1,offset:.3},{transform:'translate('+dx+'px,'+dy+'px) rotate(25deg) scale(.2)',opacity:0}],{duration:480,delay,easing:'cubic-bezier(.4,0,.8,.5)'});
           shard++;
         });
       });
@@ -127,4 +159,4 @@ const AttackFX = {
     }finally{this.cleanup(run)}
   }
 };
-document.addEventListener('visibilitychange',()=>{if(document.hidden){AttackFX.flush();AttackFX.clearReceipt()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){AttackFX.deals.forEach(clean=>clean());AttackFX.flush();AttackFX.clearReceipt()}});

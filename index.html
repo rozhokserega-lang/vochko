@@ -1057,6 +1057,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 .t-cards .card.mini .c-rank{font-family:Georgia,'Times New Roman',serif}
 .t-cards .card.face .c-suit{font-family:Georgia,'Times New Roman',serif;font-size:29px;text-shadow:1px 1px #bba36b}
 .t-cards .card.face:not(.m-curse)::before{content:'';display:block;position:absolute;inset:19px 4px 4px;background-image:url('assets/court-art.png');background-size:400% 100%;background-position:var(--court-position,0%) center;border-radius:2px;opacity:.95}
+.attack-fx-layer .card.face:not(.m-curse)::before{content:'';display:block;position:absolute;inset:var(--fx-art-top,19px) var(--fx-art-right,4px) var(--fx-art-bottom,4px) var(--fx-art-left,4px);background-image:url('assets/court-art.png');background-size:400% 100%;background-position:var(--court-position,0%) center;border-radius:2px;opacity:.95}
 .t-cards .card.face .c-suit{display:none}
 .card[data-r="K"]{--court-position:0%}.card[data-r="Q"]{--court-position:33.3333%}.card[data-r="J"]{--court-position:66.6667%}.card[data-r="A"]{--court-position:100%}
 .btn,.primary,.shop-item .buy{border-radius:6px;border:1px solid #cdb16a;box-shadow:inset 0 0 0 2px #1d1a1026,0 3px 0 #0005}
@@ -1245,7 +1246,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <script src="assets/game-features.js?v=20261029-12"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
-<script src="assets/attack-fx.js?v=20261029-2"></script>
+<script src="assets/attack-fx.js?v=20261031-4"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
 <script src="assets/game-menu.js?v=20261030-3"></script>
 <script src="assets/stable-tables.js?v=20261031-3"></script>
@@ -2957,19 +2958,10 @@ function pickSealCard(key) {
 }
 const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 function flyIn(id) {
-  if (REDUCED) return;
-  const el = document.querySelector('#hand .card[data-id="' + id + '"]');
-  if(MOBILE_FX){if(el)FastDraw.appear(el);return;}
-  const pile = document.querySelector('#dealer .pile');
-  if (!el || !pile || !el.animate) return;
-  const a = pile.getBoundingClientRect(), b = el.getBoundingClientRect();
-  const dx = a.left + a.width / 2 - (b.left + b.width / 2), dy = a.top + a.height / 2 - (b.top + b.height / 2);
-  el.animate([
-    { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(-18deg) scale(1.5)', opacity: 0.5, offset: 0 },
-    { transform: 'translate(' + dx * 0.3 + 'px,' + (dy * 0.3 - 34) + 'px) rotate(9deg) scale(1.12)', opacity: 1, offset: 0.6 },
-    { transform: 'none', opacity: 1, offset: 1 },
-  ], { duration: MOBILE_FX ? 210 : 300, easing: 'cubic-bezier(.15,.75,.25,1)' });
+  const card = document.querySelector('#hand .card[data-id="' + id + '"]');
+  AttackFX.deal(card, document.querySelector('#dealer .pile'));
 }
+
 function burst(el, colors, n) {
   const fx = document.getElementById('fx');
   if (REDUCED || !fx || !el || !el.getBoundingClientRect) return;
