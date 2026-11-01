@@ -13,13 +13,15 @@ const GameMenu={
    '<div class="home-card-fan" aria-hidden="true"><span class="home-playing-card card-left"><b>Q ♦</b><i style="--court:33.3333%"></i></span><span class="home-playing-card card-middle"><b>A ♠</b><i style="--court:100%"></i></span><span class="home-playing-card card-right"><b>K ♥</b><i style="--court:0%"></i></span></div>'+
    '<nav class="home-actions" aria-label="Главное меню">'+
    (saved?'<button class="home-start" id="ov-continue"><b>Продолжить</b><small>'+Campaign.savedLabel(saved.game)+'</small></button>':'')+
-   '<button class="'+(saved?'home-secondary':'home-start')+'" id="menu-new-game">Новая игра</button>'+
+   '<button class="'+(saved?'home-secondary':'home-start')+'" id="menu-new-game">Кампания</button>'+
+   '<button class="home-secondary daily-action" id="menu-endless"><span>Бесконечный забег</span><small>Без финала · личный рекорд: '+(META.endlessRecord?.battles||0)+' врагов</small></button>'+
    '<button class="home-secondary daily-action" id="menu-daily"><span>Ежедневный забег</span><small>Одна колода для всех</small></button>'+
    '<div class="home-links"><button id="menu-shop">'+itemArt('relic','coins')+'<span>Лавка</span></button><button id="menu-achievements">'+itemArt('relic','crown')+'<span>Достижения</span></button><button id="menu-rules">'+itemArt('joker','insurer')+'<span>Правила</span></button></div></nav>'+
    '<footer class="home-records"><span>Победы <b>'+stats.wins+'</b></span><span>Рекорд <b>'+(Campaign.progress().bestLevels[0]||0)+'/10'+'</b></span><span>Монеты <b>'+META.shop.coins+'</b></span></footer></div>',true);
   $('#overlay .modal').classList.add('game-home');
   if($('#ov-continue'))$('#ov-continue').onclick=()=>{this.backTarget=null;resumeRun()};
   $('#menu-new-game').onclick=()=>Campaign.locations();
+  $('#menu-endless').onclick=()=>Endless.setup();
   $('#menu-daily').onclick=()=>{this.backTarget=null;newGame(0,'classic',{daily:true,campaign:true})};
   $('#menu-shop').onclick=()=>this.page(()=>showMetaShop('seals'));
   $('#menu-achievements').onclick=()=>this.page(showMeta);
@@ -49,13 +51,14 @@ const GameMenu={
   $('#overlay .modal').scrollTop=setupScroll;
   if(tarotOpen)document.querySelector('.tarot-library').open=true;
   Tarot.bind();
-  $('#setup-back').onclick=()=>Campaign.locations();
+  $('#setup-back').onclick=()=>SETUP.mode==='endless'?this.main():Campaign.locations();
   document.querySelectorAll('[data-deck]').forEach(button=>button.onclick=()=>{SETUP.deck=button.dataset.deck;this.setup()});
 
 
+  if(SETUP.mode==='endless')$('#setup-fair').disabled=true;
   $('#setup-fair').onchange=event=>{SETUP.fairStart=event.target.checked;document.querySelector('.preparation-mode').textContent=SETUP.fairStart?'Честный старт':'Бонусы лавки';};
   document.querySelectorAll('[data-talent]').forEach(button=>button.onclick=()=>{if(!isUnlocked('talent',button.dataset.talent))return;const modal=$('#overlay .modal'),scroll=modal.scrollTop;SETUP.talent=button.dataset.talent;this.setup();$('#overlay .modal').scrollTop=scroll;});
-  $('#ov-go').onclick=()=>{this.backTarget=null;newGame(0,SETUP.deck,{campaign:true,chapter:SETUP.chapter||0,talent:SETUP.talent,fairStart:!!SETUP.fairStart})};
+  $('#ov-go').onclick=()=>{this.backTarget=null;newGame(0,SETUP.deck,{campaign:SETUP.mode!=='endless',endless:SETUP.mode==='endless',chapter:SETUP.chapter||0,talent:SETUP.talent,fairStart:!!SETUP.fairStart})};
   tgShowBack(true);
  },
  pathHTML(picks){
@@ -76,7 +79,7 @@ const GameMenu={
   const enemy=G.enemy,boss=G.boss?BOSSES[G.boss]:null;
   const portrait=((({collector:0,brawler:1,sentinel:2,usurer:3})[enemy.id]??4)*25)+'%';
   const rule=key=>'<div class="brief-house-rule"><b>'+BOSSES[key].name+'</b><p>'+BOSSES[key].desc+'</p></div>';
-  return '<div class="battle-brief"><header class="brief-header"><div class="brief-portrait" aria-hidden="true" style="--portrait-x:'+portrait+';'+(Campaign.active()?Campaign.portraitStyle():'')+'"></div><div><div class="kicker">'+(Campaign.active()?Campaign.label():('Этап '+G.ante+' · '+BLIND_NAMES[G.blind]))+'</div><h2>'+enemy.name+'</h2><p>'+(G.elite?'Элитный противник':enemy.type==='boss'?(Campaign.active()?'Начальник темницы':'Босс казино'):enemy.type==='mini'?'Мини-босс':'Следующий противник')+'</p></div></header>'+
+  return '<div class="battle-brief"><header class="brief-header"><div class="brief-portrait" aria-hidden="true" style="--portrait-x:'+portrait+';'+(Campaign.active()?Campaign.portraitStyle():'')+'"></div><div><div class="kicker">'+(Campaign.active()?Campaign.label():(G.endlessFromStart?Endless.label():('Этап '+G.ante+' · '+BLIND_NAMES[G.blind])))+'</div><h2>'+enemy.name+'</h2><p>'+(G.elite?'Элитный противник':enemy.type==='boss'?(Campaign.active()?'Начальник темницы':'Босс казино'):enemy.type==='mini'?'Мини-босс':'Следующий противник')+'</p></div></header>'+
    '<div class="brief-stats"><div><span>HP врага</span><strong>'+fmt(enemy.hp)+'</strong></div><div><span>Ходов на бой</span><strong>'+seatsCount()+'</strong></div><div><span>Цель карт</span><strong>'+limitNow()+'</strong></div></div>'+
    (G.fairStart?'<p class="talent-note">Честный старт: бонусы лавки отключены на этот забег.</p>':'')+talentSummary()+bargainSummary()+tableFeaturesSummary(true)+(enemyTrait()?'<p class="brief-trait">'+enemyTrait()+'</p>':'')+
    (boss?'<div class="brief-rules-title">Правило дома</div>'+rule(G.boss)+(G.boss2?rule(G.boss2):''):'')+
@@ -91,7 +94,7 @@ const GameMenu={
   Passage.decorate();
  },
  back(){
-  if(this.backTarget==='setup'){Campaign.locations();return;}
+  if(this.backTarget==='setup'){if(SETUP.mode==='endless')this.main();else Campaign.locations();return;}
   if(this.backTarget==='home'){this.main();return}
   if(G?.phase==='won')showVictory();else if(G?.phase==='over')showGameOver();else this.main();
  }

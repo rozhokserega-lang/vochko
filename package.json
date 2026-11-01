@@ -15,7 +15,8 @@
     "test:campaign": "node tests/playtest/campaign.cjs && node tests/playtest/campaign-layout.cjs",
     "test:campaign:runs": "node tests/playtest/campaign-runs.cjs",
     "test:card-marking": "node tests/playtest/card-marking.cjs",
-    "test:tarot": "node tests/playtest/tarot.cjs"
+    "test:tarot": "node tests/playtest/tarot.cjs",
+    "test:endless": "node tests/playtest/endless.cjs"
   },
   "devDependencies": {
     "playwright": "1.64.1"

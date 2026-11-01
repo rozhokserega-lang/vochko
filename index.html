@@ -1093,7 +1093,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/attack-fx.css?v=20261101-hits1">
 <link rel="stylesheet" href="assets/mobile-polish.css?v=20261101-1">
 <link rel="stylesheet" href="assets/heal-fx.css?v=20261028-4">
-<link rel="stylesheet" href="assets/game-menu.css?v=20261028-5">
+<link rel="stylesheet" href="assets/game-menu.css?v=20261101-modes1">
 <link rel="stylesheet" href="assets/ui-refinements.css?v=20261028-2">
 <link rel="stylesheet" href="assets/mobile-performance.css?v=20261029-1">
 <link rel="stylesheet" href="assets/shop-rarity.css?v=20261029-1">
@@ -1109,7 +1109,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/table-features.js?v=20261101-club1"></script>
 <script src="assets/fast-draw.js?v=20261029-1"></script>
 <link rel="stylesheet" href="assets/campaign.css?v=20261101-visible-club">
-<script src="assets/campaign.js?v=20261101-accordion1"></script>
+<script src="assets/campaign.js?v=20261101-modes1"></script>
 <script src="assets/club.js?v=20261101-fullclub1"></script>
 <link rel="stylesheet" href="assets/club.css?v=20261101-club1">
 <link rel="stylesheet" href="assets/card-marking.css?v=20261029-1">
@@ -1124,8 +1124,9 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/club-theme.css?v=20261101-fullclub1">
 <link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-fit3">
 <link rel="stylesheet" href="assets/tarot.css?v=20261101-step2">
-<script src="assets/tarot.js?v=20261101-step2"></script>
-<script src="assets/preparation.js?v=20261101-tarot-step2"></script>
+<script src="assets/tarot.js?v=20261101-endless1"></script>
+<script src="assets/endless.js?v=20261101-1"></script>
+<script src="assets/preparation.js?v=20261101-modes1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
@@ -1256,7 +1257,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261101-tarot1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261101-tarot-step2"></script>
+<script src="assets/game-menu.js?v=20261101-modes1"></script>
 <script src="assets/stable-tables.js?v=20261031-3"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
@@ -1829,6 +1830,7 @@ function maxPlay() { return bossIs('max3') ? 3 : 4 + (hasJoker('wide') ? 1 : 0);
    ============================================================ */
 
 function targetFor(ante, blind) {
+  if(G.endlessFromStart)return Endless.target();
   if(Campaign.active())return Campaign.target();
   const stakeMult = G.stake >= 4 ? 1.25 : G.stake >= 1 ? 1.1 : 1;
   return Math.round(CONFIG.baseTarget * Math.pow(CONFIG.growth, ante - 1) * CONFIG.blindMult[blind]) * stakeMult | 0;
@@ -1860,11 +1862,12 @@ function newGame(stake, deckKey, opts) {
     enemy:null, battle:null,
     deckKey,
     talent: !daily && direct && TALENTS[opts?.talent] && isUnlocked('talent',opts.talent) ? opts.talent : null,
-    fairStart:!daily&&!!opts?.fairStart,
+    fairStart:!daily&&(!!opts?.fairStart||!!opts?.endless),
     bargains: [],
     jokerGrowth: {},
     daily,
-    endless: false,
+    endless:direct&&!!opts?.endless,
+    endlessFromStart:direct&&!!opts?.endless,
     metaDone: false,
     relics: [],
     boss2: null,
@@ -2442,6 +2445,7 @@ function winBlind() {
   if(G.seatsLeft===0)unlockAch('tarotLast');
   if(G.sleeve?.length){G.discard.push(...G.sleeve);G.sleeve=[];}
   G.stats.blinds++;
+  Endless.record();
   G.lastReward = {
     base: baseReward(),
     unused,
@@ -2571,6 +2575,7 @@ function unlockAch(id) {
   if (typeof tgHaptic === 'function') tgHaptic('success');
 }
 function metaRunEnd(win) {
+  if(G?.endlessFromStart){if(G.metaDone)return;G.metaDone=true;META.stats.runs++;Endless.record();awardCoins(false);metaSave();return;}
   if(Campaign.active()){Campaign.recordEnd(win);return;}
   if (!G || G.metaDone) return;
   G.metaDone = true;
@@ -2851,7 +2856,7 @@ function applyMetaBonuses() {
 }
 function awardCoins(win) {
   const pts = Math.floor((G.runPoints || 0) / 1000);
-  const antes = G.endless ? Math.max(0, G.ante - 1 - CONFIG.maxAnte) * 10 : (win ? CONFIG.maxAnte : Math.max(0, G.ante - 1)) * 5;
+  const antes = G.endlessFromStart ? G.stats.blinds*2 : G.endless ? Math.max(0, G.ante - 1 - CONFIG.maxAnte) * 10 : (win ? CONFIG.maxAnte : Math.max(0, G.ante - 1)) * 5;
   const winB = win && !G.endless ? 25 : 0;
   const mult = 1 + 0.25 * (G.stake || 0);
   const total = Math.round((pts + antes + winB) * mult);
@@ -2862,7 +2867,7 @@ function coinSummaryHTML() {
   const c = G && G.coinInfo;
   if (!c) return '';
   return '<div class="coin-box"><div class="coin-head">🪙 +' + c.total + ' монет</div><div class="coin-lines">Очков за забег: ' + fmt(c.points) + ' → ' + c.pts +
-    '<br>'+(Campaign.active()?'Пройденные уровни':'Пройдено этапов')+': +' + c.antes + (c.winB ? '<br>Победа: +' + c.winB : '') + (c.mult > 1 ? '<br>Множитель уровня сложности: ×' + c.mult : '') +
+    '<br>'+(G.endlessFromStart?'Побеждённые враги':Campaign.active()?'Пройденные уровни':'Пройдено этапов')+': +' + c.antes + (c.winB ? '<br>Победа: +' + c.winB : '') + (c.mult > 1 ? '<br>Множитель уровня сложности: ×' + c.mult : '') +
     '</div><div class="coin-sub">Всего монет: ' + META.shop.coins + '. Трать их в «Лавке».</div></div>';
 }
 /* --- покупки --- */
@@ -3482,6 +3487,7 @@ function showBlindIntro() {
 }
 
 function showGameOver() {
+  if(G.endlessFromStart){Endless.loss();return;}
   if(Campaign.active()){Campaign.showLoss();return;}
   showOverlay(
     '<div class="kicker">Забег окончен · этап ' + G.ante + (G.endless ? ' · эндлесс' : '') + (G.daily ? ' · ежедневный' : '') + '</div>' +
@@ -3565,6 +3571,7 @@ function renderHUD() {
   bar.style.width = pct + '%';
   bar.parentElement.classList.toggle('hot', !!G.enemy && G.enemy.hp <= 0);
   Campaign.renderHUD();
+  Endless.renderHUD();
 }
 
 function tableHTML(s, t, ti, scored=null) {

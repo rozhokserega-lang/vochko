@@ -48,7 +48,7 @@ const Campaign={
  final(){return G.level===this.levels().length;},
  level(){const levels=this.levels();return levels[Math.max(0,Math.min(levels.length-1,(G.level||1)-1))];},
  label(game=G){return game?.campaign?this.name(game)+' · уровень '+game.level+' / '+this.levels(game).length:'Этап '+game.ante;},
- savedLabel(game){return game.campaign?this.label(game)+(this.prototype(game)?' · старая пробная глава':'')+' · '+game.player.hp+' HP':'Старый забег · этап '+game.ante+' · '+BLIND_SHORT[game.blind]+' · '+game.player.hp+' HP';},
+ savedLabel(game){if(game.endlessFromStart)return Endless.label(game)+' · '+game.player.hp+' HP';return game.campaign?this.label(game)+(this.prototype(game)?' · старая пробная глава':'')+' · '+game.player.hp+' HP':'Старый забег · этап '+game.ante+' · '+BLIND_SHORT[game.blind]+' · '+game.player.hp+' HP';},
  prepare(){if(!this.active())return;G.chapter=this.club()?1:0;G.level=Math.max(1,Math.min(this.levels().length,G.level||1));G.ante=1+Math.floor((G.level-1)/3);G.blind=this.level().blind;},
  elite(){return this.active()&&!!this.level().elite;},
  applyRule(){if(this.club()){G.boss=null;G.boss2=null;return;}if(this.active()&&this.level().rule){G.boss=this.level().rule;G.boss2=null;lastBoss=G.boss;}},
@@ -83,6 +83,7 @@ const Campaign={
   track.innerHTML=this.levels().map((l,i)=>'<span class="'+(i+1<G.level?'done':i+1===G.level?'current':'')+(l.rule?' special':'')+'" title="'+(i+1)+'. '+l.name+'">'+(i+1)+'</span>').join('');
  },
  locations(){
+  SETUP.mode='campaign';
   this.preloadPortraits();const progress=this.progress();GameMenu.backTarget='home';G.pending='setup';
   const selected=Number.isInteger(SETUP.chapter)&&SETUP.chapter<=progress.unlocked?SETUP.chapter:Math.min(progress.unlocked,1);
   showOverlay('<div class="location-screen"><button class="menu-back" id="locations-back">← Главное меню</button><header><div class="kicker">Пять ступеней к хозяину казино</div><h2>Путь к свободе</h2><p class="sub">Выбери локацию. Победа в десяти боях открывает следующую главу.</p></header><div class="location-chapters">'+CHAPTERS.map((c,i)=>{
@@ -119,7 +120,7 @@ const Campaign={
  },
  showLoss(){
   showOverlay('<div class="kicker">'+this.label()+'</div><h2>Попытка окончена</h2><p class="sub">'+(G.lossReason||'Начни новую попытку. Открытия и покупки сохранены.')+'</p><div class="stat-line"><span>Побеждено противников</span><b>'+G.stats.blinds+' / '+this.levels().length+'</b></div>'+lossReviewHTML()+coinSummaryHTML()+'<div class="row-btns"><button class="primary" id="campaign-retry">Новая попытка</button><button class="ghost" id="campaign-home">Главное меню</button></div>');
-  $('#campaign-retry').onclick=()=>{SETUP.chapter=G.chapter||0;GameMenu.setup();};$('#campaign-home').onclick=()=>newGame();
+  $('#campaign-retry').onclick=()=>{SETUP.mode='campaign';SETUP.chapter=G.chapter||0;GameMenu.setup();};$('#campaign-home').onclick=()=>newGame();
  },
  rules(){
   if(this.club()&&!this.prototype()){Club.showRules();return;}
