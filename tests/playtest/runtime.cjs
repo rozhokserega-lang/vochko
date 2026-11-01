@@ -18,6 +18,7 @@ async function load(page){
   Math.random=()=>{state=(state+0x6D2B79F5)|0;let t=Math.imul(state^(state>>>15),1|state);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296;};
  });
  await page.route('https://telegram.org/**',r=>r.abort());
+ if(process.env.LEADERBOARD_INTEGRATION!=='1')await page.route('https://ejjbkxtnjfpjbppcvijm.supabase.co/**',r=>r.abort());
  await page.goto(process.env.GAME_URL||require('node:url').pathToFileURL(path.resolve(__dirname,'../../index.html')).href);
 }
 function writeReport(name,data){fs.mkdirSync(outputDir,{recursive:true});fs.writeFileSync(path.join(outputDir,name),JSON.stringify(data,null,2)+'\n');}

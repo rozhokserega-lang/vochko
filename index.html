@@ -1125,7 +1125,9 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-endless-balance2">
 <link rel="stylesheet" href="assets/tarot.css?v=20261101-step2">
 <script src="assets/tarot.js?v=20261101-reuse1"></script>
-<script src="assets/endless.js?v=20261101-balance2"></script>
+<script src="assets/endless.js?v=20261101-leaderboard1"></script>
+<link rel="stylesheet" href="assets/leaderboard.css?v=20261101-1">
+<script src="assets/leaderboard.js?v=20261101-1"></script>
 <script src="assets/preparation.js?v=20261101-nickname1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
@@ -1257,7 +1259,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261101-tarot1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261101-endless-art1"></script>
+<script src="assets/game-menu.js?v=20261101-leaderboard1"></script>
 <script src="assets/stable-tables.js?v=20261031-3"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
@@ -1914,6 +1916,7 @@ function newGame(stake, deckKey, opts) {
   if (!daily && !G.fairStart) applyMetaBonuses();
   applyStartDeck(deckKey);
   Tarot.addToRun();
+  Leaderboard.start(G);
   if(firstTutorial)Tutorial.begin();
   startBlind();
 }
@@ -2578,7 +2581,7 @@ function unlockAch(id) {
   if (typeof tgHaptic === 'function') tgHaptic('success');
 }
 function metaRunEnd(win) {
-  if(G?.endlessFromStart){if(G.metaDone)return;G.metaDone=true;META.stats.runs++;Endless.record();awardCoins(false);metaSave();return;}
+  if(G?.endlessFromStart){if(G.metaDone)return;G.metaDone=true;META.stats.runs++;Endless.record();awardCoins(false);metaSave();Leaderboard.finish(G);return;}
   if(Campaign.active()){Campaign.recordEnd(win);return;}
   if (!G || G.metaDone) return;
   G.metaDone = true;
