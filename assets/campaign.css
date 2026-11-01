@@ -22,3 +22,19 @@
 .modal.game-setup{background:linear-gradient(#13251cf2,#102015f7),url('dungeon-room.png') center/cover}
 .campaign-run #enemy-portrait,.campaign-run #battle-panel.phase-two #enemy-portrait,.campaign-run .brief-portrait{background-image:url('dungeon-portraits.png');background-size:500% 200%;background-position:var(--dungeon-x,0%) var(--dungeon-y,0%)}
 .campaign-run #enemy-portrait,.campaign-run #battle-panel.phase-two #enemy-portrait{width:60px;height:60px;flex-basis:60px}.campaign-run .brief-portrait{width:76px;height:76px;flex-basis:76px}
+
+.location-chapters{display:grid;gap:12px}
+.location-chapter{border:1px solid #8e79514d;border-radius:9px;overflow:hidden;background:#142219}
+.location-chapter>summary{display:flex;align-items:center;gap:12px;padding:15px;cursor:pointer;list-style:none;color:#eed8ad}
+.location-chapter>summary::-webkit-details-marker{display:none}
+.location-chapter>summary b{font:700 22px/1.2 Georgia,serif}
+.location-chapter>summary small{display:block;font:12px/1.5 'Segoe UI',sans-serif;color:#bec9b0;margin-top:4px}
+.location-chevron{margin-left:auto;font-size:24px;transition:transform .15s}
+.location-chapter[open] .location-chevron{transform:rotate(180deg)}
+.location-chapter .location-hero{border:0;border-top:1px solid #8e79514d;border-radius:0}
+.location-chapter.club{background:#2e1719}
+.location-chapter.club .location-hero{background:linear-gradient(90deg,#2e1719f5,#2e1719a0),url('club-interior-v1.webp') center/cover}
+.location-chapter:not(.dungeon):not(.club) .location-hero{background:#17231c}
+.location-chapter .location-lock{padding:0;white-space:normal}
+.location-chapter>summary:focus-visible{outline:2px solid #e2c382;outline-offset:-4px}
+@media(prefers-reduced-motion:reduce){.location-chevron{transition:none}}

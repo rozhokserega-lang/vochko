@@ -16,7 +16,7 @@ await p.evaluate(()=>{
 });
 await p.locator('#btn-stand').tap();
 const points=await p.evaluate(()=>[...document.querySelectorAll('.attack-caption')].map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top)})));assert.ok(points.length>0&&points.every(pt=>pt.x>=0&&pt.x<=390&&pt.y>=0&&pt.y<=844));checks.push('Charge stays in visible viewport after scrolling');
-await p.waitForFunction(()=>document.querySelector('.combat-receipt')?.textContent.includes('ПОПАДАНИЕ'));const receipt=await p.locator('.combat-receipt').boundingBox();assert.ok(receipt.y>=0&&receipt.y+receipt.height<=844);checks.push('Damage receipt visible after impact');await p.waitForFunction(()=>!AttackFX.active);assert.equal(await p.evaluate(()=>G.seatsLeft),3);checks.push('One attack and one spent turn');
+await p.waitForFunction(()=>!AttackFX.active);assert.equal(await p.locator('.combat-receipt').count(),0);checks.push('Card hits do not duplicate damage in a summary banner');assert.equal(await p.evaluate(()=>G.seatsLeft),3);checks.push('One attack and one spent turn');
 const visuals=await p.evaluate(()=>{window.attackObserver.disconnect();return window.attackVisuals;});assert.equal(visuals.projectiles,0);assert.equal(visuals.cards,6);checks.push('All six cards fly from the tables without a score orb or beam');
 await p.evaluate(()=>{
  G.jokers=[JOKERS.find(j=>j.id==='pair'),JOKERS.find(j=>j.id==='suits')];
@@ -36,7 +36,7 @@ const tally=await p.evaluate(()=>new Promise(resolve=>{
   if(document.querySelector('#tags .tag.punch'))seen.punch=true;
   const number=document.querySelector('.attack-charge-number')?.textContent;
   if(number&&number!==last){seen.numbers.push(number);last=number;}
-  if(document.querySelector('.combat-receipt')){clearInterval(timer);resolve(seen);}
+  if(!AttackFX.active){clearInterval(timer);resolve(seen);}
  },40);
  setTimeout(()=>{clearInterval(timer);resolve(seen);},6000);
 }));

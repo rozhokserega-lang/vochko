@@ -38,7 +38,7 @@ const AttackFX = {
   },
   clearReceipt(){clearTimeout(this.receiptTimer);this.receipt?.getAnimations().forEach(a=>a.cancel());this.receipt?.remove();this.receipt=null},
   showReceipt(hit,result){
-    if(document.hidden)return;this.clearReceipt();
+    if(document.hidden||(!REDUCED&&(hit.hp||hit.absorbed)))return;this.clearReceipt();
     const el=document.createElement('div');el.className='combat-receipt';el.setAttribute('role','status');
     el.textContent=hit.hp?'ПОПАДАНИЕ −'+fmt(hit.hp)+' HP'+(hit.absorbed?' · ЩИТ −'+fmt(hit.absorbed):''):hit.absorbed?'ЩИТ −'+fmt(hit.absorbed):result.bust?'ПЕРЕБОР · БЕЗ УРОНА':'БЕЗ УРОНА';
     document.body.appendChild(el);this.receipt=el;
@@ -275,7 +275,7 @@ const AttackFX = {
       caption.textContent='КАРТЫ АТАКУЮТ';
       await this.strikeCards(run,attackingCards);
       if(!this.valid(run))return;
-      caption.textContent=forecast.hit.hp?'ПОПАДАНИЕ':forecast.hit.absorbed?'В ЩИТ':'БЕЗ ПРОБИТИЯ';
+      caption.textContent='';
       run.commit(true);
       await pause(430);
     }catch(_){
