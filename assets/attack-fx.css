@@ -26,3 +26,14 @@ body.attack-busy #btn-rules{opacity:.45;pointer-events:none}
 .combat-receipt{position:fixed;top:calc(var(--ui-top,0px) + 68px);left:50%;transform:translateX(-50%);z-index:145;max-width:calc(100vw - 28px);padding:10px 14px;border:1px solid #d2af65;border-radius:7px;background:#142b20f5;color:#ffe2a0;box-shadow:0 4px 12px #0006;font:700 15px/1.35 'Segoe UI',sans-serif;text-align:center;pointer-events:none}
 #tags .tag.punch{animation:tagPunch .3s ease-out}
 @keyframes tagPunch{0%{filter:brightness(1);transform:scale(1)}45%{filter:brightness(1.9);transform:scale(1.16)}100%{filter:brightness(1);transform:scale(1)}}
+
+/* A visible collision for every card, synchronised with the health/shield steps. */
+.attack-card-impact{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#fff6d4 0 12%,#ffc574aa 22%,transparent 68%);filter:drop-shadow(0 0 6px #ffbf5d)}
+.attack-card-impact::before,.attack-card-impact::after{content:'';position:absolute;left:-8px;right:-8px;top:16px;height:2px;background:linear-gradient(90deg,transparent,#fff4cc,transparent);rotate:35deg}
+.attack-card-impact::after{rotate:-35deg}
+.attack-card-impact.shield-impact{background:radial-gradient(circle,#e4ffff 0 12%,#84d8efbb 22%,transparent 68%);filter:drop-shadow(0 0 6px #78d9ee)}
+.attack-card-damage{font:800 21px/1 Georgia,serif;color:#fff0c7;text-shadow:0 2px 2px #241004,0 0 8px #ac351b;white-space:nowrap}
+.attack-card-damage.shield-damage{font-size:15px;color:#bcf1ff;text-shadow:0 2px 2px #061823}
+body.attack-busy #enemy-health{transition:width .08s linear}
+/* Keep the target under the flying cards throughout the short attack sequence. */
+html:has(body.attack-busy),body.attack-busy{overflow:hidden}

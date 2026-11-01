@@ -58,6 +58,51 @@ const AttackFX = {
   animate(run,element,frames,options) {
     const animation=element.animate(frames,{fill:'forwards',...options});run.animations.push(animation);return animation;
   },
+  previewHealth(run,hpDamage,shieldDamage){
+    run.healthPreview=true;
+    const enemy=run.game.enemy,hp=Math.max(0,run.startHp-hpDamage),shield=Math.max(0,run.startShield-shieldDamage);
+    $('#enemy-hp').textContent=fmt(hp)+' / '+fmt(enemy.maxHp);
+    $('#enemy-health').style.width=(100*hp/enemy.maxHp)+'%';
+    $('#enemy-health').parentElement.setAttribute('aria-valuenow',hp);
+    $('#enemy-defense').textContent='щит '+fmt(shield)+(enemy.armor?' · броня '+Math.round(enemy.armor*100)+'%':'');
+  },
+  cardImpact(run,point,progress){
+    if(!this.valid(run))return;
+    // Apportion the already-computed attack, shield first. Only finishSeat changes game state.
+    const work=Math.floor((run.hit.hp+run.hit.absorbed)*progress);
+    const shield=Math.min(run.hit.absorbed,work),hp=Math.min(run.hit.hp,Math.max(0,work-run.hit.absorbed));
+    const hpDelta=hp-run.shownHp,shieldDelta=shield-run.shownShield;
+    run.shownHp=hp;run.shownShield=shield;run.cardImpacts++;
+    this.previewHealth(run,hp,shield);
+    const flash=this.node(run,'attack-card-impact'+(shieldDelta&&!hpDelta?' shield-impact':''),point);
+    flash.dataset.hp=hpDelta;flash.dataset.shield=shieldDelta;
+    this.animate(run,flash,[{opacity:1,transform:'translate(-50%,-50%) scale(.4)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.15)',offset:.25},{opacity:0,transform:'translate(-50%,-50%) scale(1.7)'}],{duration:230,easing:'ease-out'});
+    const label=run.damageLabel||(run.damageLabel=this.node(run,'attack-card-damage',{x:Math.max(80,Math.min(innerWidth-80,point.x+24)),y:Math.max(32,point.y-24)}));
+    label.classList.toggle('shield-damage',!hp&&shield>0);
+    label.textContent=hp?'−'+fmt(hp)+' HP':shield?'ЩИТ −'+fmt(shield):'БЛОК';
+    run.damagePulse?.cancel();
+    run.damagePulse=this.animate(run,label,[{opacity:1,transform:'translate(-50%,0) scale(1.12)'},{opacity:1,transform:'translate(-50%,-8px) scale(1)',offset:.5},{opacity:0,transform:'translate(-50%,-24px) scale(.95)'}],{duration:400,easing:'ease-out'});
+    run.recoil?.cancel();
+    run.recoil=this.animate(run,run.portrait,[{translate:'0 0',filter:run.portraitFilter},{translate:'4px -2px',filter:run.portraitFilter+' brightness(1.8)',offset:.25},{translate:'-2px 1px',filter:run.portraitFilter,offset:.6},{translate:'0 0',filter:run.portraitFilter}],{duration:140,easing:'ease-out',fill:'none'});
+    if(typeof tgHaptic==='function')tgHaptic('light');
+  },
+  async strikeCards(run,cards){
+    const weight=cards.reduce((sum,card)=>sum+card.weight,0);let delivered=0;
+    const flights=cards.map((entry,index)=>{
+      const {card}=entry,p=this.center(card),token=this.cardCopy(card,run.root);
+      run.sources.push({card,visibility:card.style.visibility});card.style.visibility='hidden';
+      const point={x:run.target.x+(index%3-1)*8,y:run.target.y+(index%2?5:-5)};
+      const dx=point.x-p.x,dy=point.y-p.y,end='translate('+dx+'px,'+dy+'px) rotate(18deg)';
+      delivered+=entry.weight;const progress=index===cards.length-1?1:delivered/weight;
+      const flight=this.animate(run,token,[{transform:'translate(0,0) rotate(0deg) scale(1)',opacity:1},{transform:'translate('+(dx*.2)+'px,'+(dy*.2-20)+'px) rotate(-10deg) scale(1.04)',opacity:1,offset:.25},{transform:end+' scale(.5)',opacity:1}],{duration:MOBILE_FX?340:390,delay:index*95,easing:'cubic-bezier(.35,0,.8,.55)'});
+      return flight.finished.then(()=>{
+        if(!this.valid(run))return;
+        this.cardImpact(run,point,progress);
+        this.animate(run,token,[{transform:end+' scale(.5)',opacity:1},{transform:end+' scale(.15)',opacity:0}],{duration:120,easing:'ease-out'});
+      });
+    });
+    await Promise.all(flights);
+  },
   valid(run) {return this.active===run&&G===run.game&&G.seat===run.seat&&G.phase==='play'},
   cleanup(run) {
     run.animations.forEach(animation=>animation.cancel());
@@ -66,6 +111,7 @@ const AttackFX = {
     run.root.remove();
     (run.sources||[]).forEach(({card,visibility})=>{card.style.visibility=visibility});
     if(this.active===run){this.active=null;document.body.classList.remove('attack-busy');$('#btn-rules').disabled=false}
+    if(run.healthPreview&&!run.committed&&G===run.game&&!this.active){BattleUI.prev=null;BattleUI.render();}
     run.tables.forEach(element=>element.classList.remove('attack-charging','attack-fizzle','attack-tally'));
     if(run.previewNote&&run.previewNoteHome!=null&&run.previewNote.textContent==='Считаем очки…'){run.previewNote.textContent=run.previewNoteHome;run.previewNoteHome=null;}
     if(run.accumulator&&(!this.active||this.active===run))run.accumulator.classList.remove('attack-accumulator');
@@ -133,25 +179,30 @@ const AttackFX = {
   async play(game,seat,result) {
     this.cancel();
     const root=document.createElement('div');root.className='attack-fx-layer';root.setAttribute('aria-hidden','true');document.body.appendChild(root);
-    const run={game,seat,root,animations:[],tables:[],sources:[],committed:false,frame:0};this.active=run;
+    const run={game,seat,root,animations:[],tables:[],sources:[],committed:false,frame:0,cardImpacts:0,shownHp:0,shownShield:0};this.active=run;
     run.commit=animated=>{if(this.valid(run)&&!run.committed){run.committed=true;const hit=attackPreview(result);finishSeat(result,animated);this.showReceipt(hit,result)}};
     const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     try{
       if(REDUCED||document.hidden||typeof root.animate!=='function'){run.commit(false);return}
-      const began=performance.now();
       document.body.classList.add('attack-busy');$('#btn-rules').disabled=true;
       run.accumulator=$('.fbox.result');
-      const rawOrigin=this.center(run.accumulator),rawTarget=this.center($('#enemy-portrait'));
+      run.portrait=$('#enemy-portrait');
+      const portraitRect=run.portrait?.getBoundingClientRect();
+      const safeTop=parseFloat(getComputedStyle(document.body).paddingTop)||0;
+      if(portraitRect&&(portraitRect.top<safeTop||portraitRect.bottom>innerHeight))window.scrollBy({top:portraitRect.top-safeTop-8,behavior:'instant'});
+      const rawOrigin=this.center(run.accumulator),rawTarget=this.center(run.portrait);
       if(!rawOrigin||!rawTarget){run.commit(false);return}
-      const origin=this.visiblePoint(rawOrigin),target=this.visiblePoint(rawTarget);
+      const origin=this.visiblePoint(rawOrigin),target=rawTarget;
       const forecast=combatForecast(result);
+      run.hit=forecast.hit;run.target=target;run.startHp=game.enemy.hp;run.startShield=game.enemy.shield;
+      const filter=getComputedStyle(run.portrait).filter;run.portraitFilter=filter==='none'?'brightness(1)':filter;
       const caption=this.node(run,'attack-caption',{x:origin.x,y:origin.y+29},result.total?'ОЧКИ':'НЕТ УРОНА');
       const number=this.node(run,'attack-charge-number',{x:origin.x,y:origin.y},'0');
       run.accumulator.classList.add('attack-accumulator');
       run.previewNote=$('#preview-note');
       run.previewNoteHome=run.previewNote?.textContent;
       if(run.previewNote)run.previewNote.textContent='Считаем очки…';
-      let shard=0;
+      const attackingCards=[];
       result.tables.forEach((table,index)=>{
         if(table.empty)return;
         const lane=document.querySelector('#hand .tbl[data-t="'+index+'"]');if(!lane)return;
@@ -166,14 +217,7 @@ const AttackFX = {
           }
           return;
         }
-        cards.forEach((card,ci)=>{
-          const p=this.center(card),delay=index*50+ci*18;
-          const token=this.cardCopy(card,run.root);
-          run.sources.push({card,visibility:card.style.visibility});card.style.visibility='hidden';
-          const dx=target.x-p.x,dy=target.y-p.y;
-          this.animate(run,token,[{transform:'translateY(0) rotate(0deg) scale(1)',opacity:1},{transform:'translate('+(dx*.2)+'px,'+(dy*.25-22)+'px) rotate(-12deg) scale(1.05)',opacity:1,offset:.3},{transform:'translate('+dx+'px,'+dy+'px) rotate(25deg) scale(.2)',opacity:0}],{duration:480,delay,easing:'cubic-bezier(.4,0,.8,.5)'});
-          shard++;
-        });
+        if(table.score>0)cards.forEach(card=>attackingCards.push({card,weight:table.score/cards.length}));
       });
       if(!result.total){number.hidden=true;await pause(220);run.commit(false);return}
       // Score the tables one at a time so the number climbs instead of appearing at once.
@@ -226,22 +270,12 @@ const AttackFX = {
       this.pulseNumber(run,number,1.3);
       if(run.previewNote&&run.previewNoteHome!=null){run.previewNote.textContent=run.previewNoteHome;run.previewNoteHome=null;}
       caption.textContent=result.exact?'ТОЧНЫЙ УДАР':'УДАР';
-      const flightTime=MOBILE_FX?680:760;
-      const remaining=flightTime-(performance.now()-began);
-      if(remaining>0)await pause(remaining);
+      // The tally finishes before cards launch; each collision drains the displayed HP or shield.
+      this.animate(run,number,[{opacity:1},{opacity:0}],{duration:120});
+      caption.textContent='КАРТЫ АТАКУЮТ';
+      await this.strikeCards(run,attackingCards);
       if(!this.valid(run))return;
-      // Cards carry the attack; the score finishes locally without a second projectile.
-      this.animate(run,number,[{opacity:1},{opacity:0,transform:'translate(-50%,-20px)'}],{duration:160});
-      await pause(220);if(!this.valid(run))return;
       caption.textContent=forecast.hit.hp?'ПОПАДАНИЕ':forecast.hit.absorbed?'В ЩИТ':'БЕЗ ПРОБИТИЯ';
-      const ring=this.node(run,'attack-impact-ring'+(forecast.hit.absorbed?' shield-impact':''),target);
-      this.animate(run,ring,[{transform:'translate(-50%,-50%) scale(.3)',opacity:1},{transform:'translate(-50%,-50%) scale(2.3)',opacity:0}],{duration:350,easing:'ease-out'});
-      for(let j=0;j<Math.min(MOBILE_FX?5:14,6+shard);j++){
-        const angle=RNG0()*Math.PI*2,distance=22+RNG0()*50;
-        const spark=this.node(run,'attack-spark',target);
-        this.animate(run,spark,[{transform:'translate(-50%,-50%) scale(1)',opacity:1},{transform:'translate('+(Math.cos(angle)*distance)+'px,'+(Math.sin(angle)*distance)+'px) scale(0)',opacity:0}],{duration:240+RNG0()*160,easing:'ease-out'});
-      }
-      if(forecast.hit.absorbed)this.node(run,'attack-shield-label',{x:target.x,y:target.y+34},'ЩИТ −'+fmt(forecast.hit.absorbed));
       run.commit(true);
       await pause(430);
     }catch(_){

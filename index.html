@@ -1090,7 +1090,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 .remove-card:hover,.remove-card:focus-visible{outline:2px solid #ebca80;outline-offset:2px}
 </style>
 <link rel="stylesheet" href="assets/reference-theme.css">
-<link rel="stylesheet" href="assets/attack-fx.css?v=20261101-2">
+<link rel="stylesheet" href="assets/attack-fx.css?v=20261101-hits1">
 <link rel="stylesheet" href="assets/mobile-polish.css?v=20261101-1">
 <link rel="stylesheet" href="assets/heal-fx.css?v=20261028-4">
 <link rel="stylesheet" href="assets/game-menu.css?v=20261028-5">
@@ -1250,7 +1250,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <script src="assets/game-features.js?v=20261101-club1"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
-<script src="assets/attack-fx.js?v=20261101-2"></script>
+<script src="assets/attack-fx.js?v=20261101-hits1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
 <script src="assets/game-menu.js?v=20261101-club1"></script>
 <script src="assets/stable-tables.js?v=20261031-3"></script>
@@ -1641,7 +1641,7 @@ const BattleUI = {
     const cur = { ehp: e.hp, php: p.hp, esh: e.shield, psh: p.shield };
     if (this.game !== G || !this.prev) { this.game = G; this.prev = cur; return; }
     const de = cur.ehp - this.prev.ehp, dp = cur.php - this.prev.php;
-    if (de < 0) { this.float('\u2212' + fmt(-de), 'f-e dmg-e'); this.pulse('battle-impact'); }
+    if (de < 0 && !AttackFX.active?.cardImpacts) { this.float('\u2212' + fmt(-de), 'f-e dmg-e'); this.pulse('battle-impact'); }
     else if (de > 0) { this.float('+' + fmt(de), 'f-e heal-e'); }
     if (dp < 0) { this.float('\u2212' + fmt(-dp), 'f-p dmg-p'); this.pulse('battle-counter'); this.pulse('hurt', 520); }
     if (cur.esh > this.prev.esh && de <= 0) this.float('\ud83d\udee1 +' + fmt(cur.esh - this.prev.esh), 'f-e sh');
