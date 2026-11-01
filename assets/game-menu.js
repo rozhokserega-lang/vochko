@@ -53,7 +53,7 @@ const GameMenu={
 
   $('#setup-fair').onchange=event=>{SETUP.fairStart=event.target.checked;document.querySelector('.preparation-mode').textContent=SETUP.fairStart?'Честный старт':'Бонусы лавки';};
   document.querySelectorAll('[data-talent]').forEach(button=>button.onclick=()=>{if(!isUnlocked('talent',button.dataset.talent))return;const modal=$('#overlay .modal'),scroll=modal.scrollTop;SETUP.talent=button.dataset.talent;this.setup();$('#overlay .modal').scrollTop=scroll;});
-  $('#ov-go').onclick=()=>{this.backTarget=null;newGame(0,SETUP.deck,{campaign:true,talent:SETUP.talent,fairStart:!!SETUP.fairStart})};
+  $('#ov-go').onclick=()=>{this.backTarget=null;newGame(0,SETUP.deck,{campaign:true,chapter:SETUP.chapter||0,talent:SETUP.talent,fairStart:!!SETUP.fairStart})};
   tgShowBack(true);
  },
  pathHTML(picks){

@@ -1106,20 +1106,22 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/deckcraft.css?v=20261029-1">
 <link rel="stylesheet" href="assets/visual-polish.css?v=20261029-1">
 <link rel="stylesheet" href="assets/table-features.css?v=20261029-1">
-<script src="assets/table-features.js?v=20261029-3"></script>
+<script src="assets/table-features.js?v=20261101-club1"></script>
 <script src="assets/fast-draw.js?v=20261029-1"></script>
 <link rel="stylesheet" href="assets/campaign.css?v=20261029-3">
-<script src="assets/campaign.js?v=20261029-4"></script>
+<script src="assets/campaign.js?v=20261101-club1"></script>
+<script src="assets/club.js?v=20261101-club1"></script>
+<link rel="stylesheet" href="assets/club.css?v=20261101-club1">
 <link rel="stylesheet" href="assets/card-marking.css?v=20261029-1">
 <script src="assets/card-marking.js?v=20261029-1"></script>
 <link rel="stylesheet" href="assets/tutorial.css?v=20261029-1">
 <link rel="stylesheet" href="assets/duel-field.css?v=20261029-1">
 <link rel="stylesheet" href="assets/duel-art.css?v=20261029-2">
 <link rel="stylesheet" href="assets/passage.css?v=20261030-1">
-<script src="assets/passage.js?v=20261030-1"></script>
+<script src="assets/passage.js?v=20261101-club1"></script>
 <link rel="stylesheet" href="assets/preparation.css?v=20261030-1">
 <link rel="stylesheet" href="assets/graphics-pass.css?v=20261101-1">
-<script src="assets/preparation.js?v=20261030-1"></script>
+<script src="assets/preparation.js?v=20261101-club1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
@@ -1246,11 +1248,11 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261029-12"></script>
+<script src="assets/game-features.js?v=20261101-club1"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261101-2"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261030-3"></script>
+<script src="assets/game-menu.js?v=20261101-club1"></script>
 <script src="assets/stable-tables.js?v=20261031-3"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
@@ -1376,7 +1378,7 @@ function tablesPerSeat() { return 3 + ((G && G.extraTables) ? 1 : 0); }
 // Лечение и банки продаются только в магазине после босса (или элитного боя).
 function shopHealOpen() { return Campaign.active()?Campaign.healOpen():!!(G && (G.blind === 2 || G.elite)); }
 function baseReward() { return Math.max(0,CONFIG.baseReward - (G && G.stake >= 3 ? 1 : 0) - (hasBargain('pockets')?1:0)); }
-function seatsCount() { return CONFIG.seats + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
+function seatsCount() { return CONFIG.seats + (Campaign.club()&&G.battle?.clubBonusEarned?1:0) + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
 function unlockedStake() {
   try { return Math.min(STAKES.length - 1, Number(localStorage.getItem('vochko.stake') || 0)); } catch (e) { return 0; }
 }
@@ -1501,6 +1503,7 @@ const Enemy = {
       phase:1,effects:[],intent:null};
   },
   plan() {
+    if(Club.plan())return;
     const e=G.enemy;
     let kind=pick(e.moves);
     if(e.id==='brawler' && G.battle.turn%3===2)kind='heavy';
@@ -1528,6 +1531,7 @@ const Enemy = {
     if(busts&&G.player.hp>0)Combat.receive(busts*bustPenalty(),'Перебор');
   },
   phase() {
+    if(Club.active())return;
     const e=G.enemy;
     if(e.type==='boss'&&e.hp>0&&e.phase===1&&e.hp<=e.maxHp*COMBAT.phaseAt){
       e.phase=2;log('Вторая фаза! Следующие намерения сильнее; проклятие ослабляет атаку.','bad');
@@ -1622,6 +1626,7 @@ const BattleUI = {
       if(G.battle.bribed)intent.textContent='Откуп принят · атака отменена';
       const button=document.createElement('button');button.className='bribe-btn';button.textContent=G.battle.bribed?'Откуп принят':'Откуп · $3';button.disabled=G.battle.bribed||G.money<3||G.seat?.locked;button.onclick=payCollector;intent.append(' ',button);
     }
+    Club.renderIntent(intent);
     $('#enemy-portrait').title=enemyTrait(e);
     $('#player-hp').textContent = '\u2665 ' + p.hp + ' / ' + p.maxHp;
     $('#player-status').textContent = '\ud83d\udee1 ' + p.shield + (status(p) ? ' · ' + status(p) : '');
@@ -1833,7 +1838,7 @@ function newGame(stake, deckKey, opts) {
   HealingFX.cancel();
   Math.random = RNG0;
   const direct = typeof stake === 'number';
-  const firstTutorial=direct&&!!opts?.campaign&&!opts?.daily&&Tutorial.eligible();
+  const firstTutorial=direct&&!!opts?.campaign&&!opts?.daily&&opts?.chapter!==1&&Tutorial.eligible();
   const daily = direct && opts && opts.daily ? (opts.campaign?dateKey()+'|dungeon-v1':dateKey()) : null;
   if (daily) { stake = 0; deckKey = 'classic'; }
   if(direct&&opts?.campaign)stake=0;
@@ -1841,7 +1846,7 @@ function newGame(stake, deckKey, opts) {
   deckKey = DECKS[deckKey] ? deckKey : 'classic';
   G = {
     started:direct,
-    campaign:direct&&!!opts?.campaign,chapter:0,level:1,
+    campaign:direct&&!!opts?.campaign,chapter:direct&&!!opts?.campaign&&!daily&&opts?.chapter===1&&Campaign.progress().unlocked>=1?1:0,level:1,
     stake,
     player: {hp:COMBAT.playerHp,maxHp:COMBAT.playerHp,shield:0,effects:[],revived:false},
     enemy:null, battle:null,
@@ -1911,6 +1916,7 @@ function startBlind() {
   G.consUsed = 0;
   G.score = 0;
   G.battleSummary = {turns:0,busts:0,bustChips:0,damage:0}; G.lastTurn = null;
+  G.battle = null;
   G.seatsLeft = seatsCount();
   G.pushThisBlind = 0;
   G.seat = null;
@@ -2080,6 +2086,7 @@ function evalSeat(s) {
     const eq = (r, i) => !r.empty && !r.bust && T.some((o, j) => j !== i && !o.empty && !o.bust && o.sum === r.sum);
     if (T.some(eq)) { T.forEach((r, i) => { if (eq(r, i)) r.score = Math.round(r.score * 1.5); }); pre.push('тандем x1.5'); }
   }
+  Club.boostTables(T);
   const live = T.filter((r) => !r.empty && !r.bust);
   const exact = T.filter((r) => r.exact).length;
   const bust = T.filter((r) => !r.empty && r.bust).length;
@@ -2360,6 +2367,7 @@ function finishSeat(res, animated = false) {
   else if (res.exact > 0) tgHaptic('success');
   if (hasJoker('phoenix') && !G.phoenixUsed && res.total === 0 && res.bust) { G.phoenixUsed = true; log('Феникс: ход не потрачен', 'gold'); }
   else G.seatsLeft = Math.max(0, G.seatsLeft - 1);
+  Club.reward(res);
   let healed = 0;
   if (res.heal) {
     healed = Combat.heal(res.heal,'tables');
@@ -2426,7 +2434,7 @@ function winBlind() {
   const wonGame=G;
   setTimeout(() => {
     if (G !== wonGame || G.phase !== 'shop') return;
-    if(Campaign.active()&&G.level===10){Campaign.victory();return;}
+    if(Campaign.active()&&Campaign.final()){Campaign.victory();return;}
     if (Campaign.relicOffer()) openRelicChoice();
     else openShop();
   }, 420);
@@ -3537,7 +3545,7 @@ function tableHTML(s, t, ti, scored=null) {
   const active = activeTableIndex(s);
   const can = (s.sel !== null && !t.dead && !t.locked && t.cards.length) || (G.phase === 'play' && s.sel === null && ti === active && tableOpen(t));
   const activeClass = G.phase === 'play' && s.sel === null && ti === active && tableOpen(t) ? ' active' : '';
-  const cls = 'tbl' + (t.blocked ? ' blocked' : '') + activeClass + (t.locked ? ' ok' : '') + (!t.locked && !t.dead && r && !r.bust && r.sum === lim ? ' hit' : '') + (!t.dead && r && r.bust ? ' over' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
+  const cls = 'tbl' + (Club.active()&&G.enemy.intent?.clubOpen&&G.enemy.intent.clubLane===ti?' club-vulnerable':'') + (t.blocked ? ' blocked' : '') + activeClass + (t.locked ? ' ok' : '') + (!t.locked && !t.dead && r && !r.bust && r.sum === lim ? ' hit' : '') + (!t.dead && r && r.bust ? ' over' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
   const full = t.cards.length >= cap;
   const closed = t.blocked || t.dead || t.stood || t.locked || full;
   const state = t.blocked ? 'ЗАМОК' : t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? 'ТОЧНО' : r && r.bust ? 'Спасти?' : full ? 'ПОЛОН' : ti === active ? 'НАБОР' : 'ЖДЁТ';
@@ -3667,7 +3675,7 @@ function renderSide() {
   $('#side-deck').textContent = G.deck.length + ' / ' + G.runDeck.length;
   $('#side-best').textContent = fmt(G.stats.bestSeat);
   const rp = $('#relic-panel');
-  if (rp) rp.innerHTML = '<h4>Реликвии · ' + (Campaign.active()?'Темница':STAKES[G.stake || 0].name) + '</h4>' +
+  if (rp) rp.innerHTML = '<h4>Реликвии · ' + (Campaign.active()?Campaign.name():STAKES[G.stake || 0].name) + '</h4>' +
     (G.relics.length ? G.relics.map((k) => '<div class="kv" title="' + RELICS[k].desc + '"><span>' + itemArt('relic', k) + ' ' + RELICS[k].name + '</span><b></b></div>').join('')
       : '<div style="font-size:11px;color:#6d7f97;line-height:1.4">Дадут за победу над боссом.</div>') +
     (G.stake ? '<div style="font-size:11px;color:#9fd8bc;margin-top:6px">' + STAKES[G.stake].desc + '</div>' : '');

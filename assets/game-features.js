@@ -51,7 +51,7 @@ function resumeRun() {
     if (G.evolutionChoice) showGrowthChoice(G.evolutionChoice);
     else if (G.relicChoice?.length) showRelicChoice();
     else if (G.shop) renderShop();
-    else if(Campaign.active()&&G.level===10){Campaign.victory();}
+    else if(Campaign.active()&&Campaign.final()){Campaign.victory();}
     else if (Campaign.relicOffer()) openRelicChoice();
     else openShop();
   } else if (G.phase === 'path') {
@@ -67,6 +67,7 @@ function resumeRun() {
 }
 
 function enemyTrait(enemy = G.enemy) {
+  if(Club.active()&&enemy===G.enemy)return Club.trait();
   return ({
     collector:'Откуп: $3 отменяют следующую атаку. Штраф за перебор остаётся.',
     brawler:'Раз в 3 хода — тяжёлый удар. Стол из 4+ карт без перебора ослабляет его на 40%.',
@@ -112,7 +113,7 @@ function combatForecast(result) {
   } else if (hasRelic('mend')) hp = Math.min(player.maxHp,hp + COMBAT.items.mend);
   const healEnemy = !win && response.kind === 'heal' ? Math.min(response.amount,enemy.maxHp - (enemy.hp - hit.hp)) : 0;
   const extraLife = hasJoker('phoenix') && !G.phoenixUsed && result.total === 0 && result.bust;
-  const outOfSeats = !win && G.seatsLeft <= 1 && !extraLife;
+  const outOfSeats = !win && G.seatsLeft <= 1 && !extraLife && !Club.canEarn(result);
   return {hit,win,incoming,healed,playerHp:hp,playerShield:shield,revive,enemyHeal:healEnemy,response,outOfSeats};
 }
 function forecastText(forecast) {
