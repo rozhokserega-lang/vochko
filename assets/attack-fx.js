@@ -207,7 +207,7 @@ const AttackFX = {
         if(table.empty)return;
         const lane=document.querySelector('#hand .tbl[data-t="'+index+'"]');if(!lane)return;
         run.tables.push(lane);
-        const cards=[...lane.querySelectorAll('.t-cards .card')];
+        const cards=[...lane.querySelectorAll('.t-cards .card:not(.tarot-card)')];
         if(table.bust){
           lane.classList.add('attack-fizzle');
           const p=this.center(lane);

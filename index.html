@@ -1123,7 +1123,9 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/graphics-pass.css?v=20261101-1">
 <link rel="stylesheet" href="assets/club-theme.css?v=20261101-fullclub1">
 <link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-1">
-<script src="assets/preparation.js?v=20261101-fullclub1"></script>
+<link rel="stylesheet" href="assets/tarot.css?v=20261101-1">
+<script src="assets/tarot.js?v=20261101-1"></script>
+<script src="assets/preparation.js?v=20261101-tarot1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
@@ -1250,11 +1252,11 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261101-fullclub1"></script>
+<script src="assets/game-features.js?v=tarot1-20261101-fullclub1"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
-<script src="assets/attack-fx.js?v=20261101-clean-hit1"></script>
+<script src="assets/attack-fx.js?v=20261101-tarot1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
-<script src="assets/game-menu.js?v=20261101-club1"></script>
+<script src="assets/game-menu.js?v=20261101-tarot1"></script>
 <script src="assets/stable-tables.js?v=20261031-3"></script>
 <script>
 const RNG0 = Math.random.bind(Math);
@@ -1525,7 +1527,7 @@ const Enemy = {
       Effects.take(e,'rage');
       if(response.paid)log('Сборщик принял откуп — атака отменена','good');
       else Combat.receive(response.raw);
-      if(i.kind==='hex'&&!response.paid&&G.player.hp>0){Effects.add(G.player,'weak',COMBAT.weak);log('Проклятие: следующая атака −20%','bad');}
+      if(i.kind==='hex'&&!response.paid&&!response.tarotCancelled&&G.player.hp>0){Effects.add(G.player,'weak',COMBAT.weak);log('Проклятие: следующая атака −20%','bad');}
     } else if(i.kind==='guard'){e.shield+=i.amount;log('Враг: щит +'+fmt(i.amount),'bad');}
     else if(i.kind==='heal'){const n=Math.min(response.amount,e.maxHp-e.hp);e.hp+=n;log(n?'Враг лечится: +'+fmt(n):'Два точных стола отменили лечение','bad');}
     else if(i.kind==='rage'){Effects.add(e,'rage',COMBAT.rage);log('Враг усилил следующую атаку ×1,5','bad');}
@@ -1727,8 +1729,9 @@ function multBaseFor(d) {
   if (d <= 5) return 1.25;
   return 0.6;
 }
-function cv(c) { return c.val + (c.up || 0) + (c.dv || 0); }
+function cv(c) { if(c.tarot)return 0;return c.val + (c.up || 0) + (c.dv || 0); }
 function cardChips(c, wildVal) {
+  if(c.tarot)return 0;
   if (c.mod === 'curse') return 0;
   if (bossIs('odd') && ['3', '5', '7', '9'].includes(c.rank)) return 0;
   const shown = wildVal != null ? wildVal : c.val + (c.up || 0) + (c.dc || 0);
@@ -1801,7 +1804,8 @@ function evalPlay(cards, adj) {
   const sc = adj.fz ? cards.slice(0, adj.fz) : cards;
   const wildCards = sc.filter((c) => c.mod === 'wild');
   const wilds = wildCards.length;
-  const norm = sc.filter((c) => c.mod !== 'wild');
+  const norm = sc.filter((c) => c.mod !== 'wild'&&!c.tarot);
+  const tarotExact=Tarot.has(cards,'hourglass');
   const aces = norm.filter((c) => c.rank === 'A').length;
   const kmax = bossIs('ace11') ? 0 : aces;
   const raw = norm.reduce((a, c) => a + cv(c), 0) + adj.dv;
@@ -1810,10 +1814,11 @@ function evalPlay(cards, adj) {
     for (let t = wilds; t <= 11 * wilds; t++) {
       const vals = wildValues(wilds, t);
       const wildMap = wilds ? new Map(wildCards.map((c, i) => [c.id, vals[i]])) : null;
-      const r = scorePlay(cards, raw - 10 * k + t, lim, adj.dc * 10, wildMap);
+      const r = scorePlay(cards, tarotExact?lim:raw - 10 * k + t, lim, adj.dc * 10, wildMap);
       if (!best || r.score > best.score || (r.score === best.score && (r.bust === best.bust ? (r.bust ? r.sum < best.sum : r.sum > best.sum) : !r.bust))) best = r;
     }
   }
+  if(tarotExact){best.tarotExact=true;best.tags.push('Песочные часы: точно');}
   if (adj.fz) best.tags = best.tags.concat('❄ сумма заморожена');
   return best;
 }
@@ -1904,6 +1909,7 @@ function newGame(stake, deckKey, opts) {
   if (daily) Math.random = mulberry32(hashStr(daily + '|start'));
   if (!daily && !G.fairStart) applyMetaBonuses();
   applyStartDeck(deckKey);
+  Tarot.addToRun();
   if(firstTutorial)Tutorial.begin();
   startBlind();
 }
@@ -1923,7 +1929,8 @@ function startBlind() {
   G.seatsLeft = seatsCount();
   G.pushThisBlind = 0;
   G.seat = null;
-  G.deck = shuffle(G.runDeck.map((c) => ({ ...c })));
+  G.deck = shuffle(G.runDeck.filter(c=>!(G.tarotSpent||[]).includes(c.id)).map((c) => ({ ...c })));
+  G.sleeve=[];G.sleeveUsed=0;G.tarotCandle=false;
   G.discard = [];
   G.boss = G.elite && G.pathEliteBoss ? G.pathEliteBoss : (G.blind === 2 || G.elite) ? pickBoss() : ((G.contract && G.contract.boss) || null);
   if(G.elite)lastBoss=G.boss;
@@ -1967,7 +1974,8 @@ function startSeat() {
   const pendulum = bossRuleActive('pendulum');
   const goal = limitForTurn();
   if (pendulum) G.battle.pendulumGoal = rollPendulumGoal();
-  G.seat = { goal, pendulum, tables: makeTables(), sel: null, used: false, peek: G.talent==='scout'&&G.battle.turn===0, locked: false };
+  G.seat = { goal, pendulum, tables: makeTables(), sel: null, used: false, peek: G.talent==='scout'&&G.battle.turn===0, peek3:!!G.tarotCandle, locked: false };
+  G.tarotCandle=false;
   G.phase = 'play';
   render();
 }
@@ -2029,17 +2037,19 @@ function refreshTables(s) {
   s.tables.forEach((t) => {
     if (!t.cards.length) { t.locked = false; return; }
     const r = evalPlay(t.cards, t.adj);
-    t.locked = !t.stood && !r.bust && r.sum === lim;
+    if(Tarot.has(t.cards,'hourglass'))t.dead=false;
+    t.locked = !t.stood && !r.bust && r.sum === lim && !(Tarot.has(t.cards,'hourglass')&&t.cards.length<maxPlay());
     if (r.bust && !t.dead && !canSaveTable(s, t)) t.dead = true;
   });
 }
 
 function paintOf(t, preview) {
   if (!t || t.blocked || t.dead) return null;
-  const n = t.cards.length;
+  const ordinary=t.cards.filter(c=>!c.tarot);
+  const n = ordinary.length;
   if (n < (preview ? 2 : 3)) return null;
-  const red = t.cards.every((c) => c.color === 'red');
-  const black = !red && t.cards.every((c) => c.color === 'black');
+  const red = ordinary.every((c) => c.color === 'red');
+  const black = !red && ordinary.every((c) => c.color === 'black');
   if (!red && !black) return null;
   const value0 = n >= 4 ? CONFIG.redHeal4 : CONFIG.redHeal3;
   const dmg0 = n >= 4 ? CONFIG.blackBonus4 : CONFIG.blackBonus3;
@@ -2090,6 +2100,7 @@ function evalSeat(s) {
     if (T.some(eq)) { T.forEach((r, i) => { if (eq(r, i)) r.score = Math.round(r.score * 1.5); }); pre.push('тандем x1.5'); }
   }
   Club.boostTables(T);
+  Tarot.boost(s,T);
   const live = T.filter((r) => !r.empty && !r.bust);
   const exact = T.filter((r) => r.exact).length;
   const bust = T.filter((r) => !r.empty && r.bust).length;
@@ -2125,7 +2136,9 @@ function evalSeat(s) {
   if (G.talent === 'daring' && bust === 1 && total > 0) { total=Math.round(total*1.3);tags.push('Авантюрист: один перебор +30%'); }
   if(hasBargain('fury')&&total>0){total=Math.round(total*1.2);tags.push('Ярость должника +20%');}
   if (bust) tags.push('перебор столов: ' + bust);
-  return { tables: T, total, exact, bust, chips, tags, closed, heal, growthShield };
+  const tarot=Tarot.effects(s,T);heal+=tarot.heal;
+  tarot.ids.forEach(id=>tags.push('Таро: '+Tarot.def(id).name));
+  return { tables: T, total, exact, bust, chips, tags, closed, heal, growthShield:growthShield+tarot.shield, tarot };
 }
 
 function autoFinish(s) {
@@ -2182,6 +2195,7 @@ function applyCons(ti) {
     if (!c) { flashHint('Колода пуста'); return; }
     G.discard.push(t.cards.pop());
     t.cards.push(c);
+    Tarot.onDraw(t,c);
     G.lastDrawn = c.id;
   }
   s.used = true;
@@ -2216,6 +2230,7 @@ function pickCons(i) {
     if (bossIs('thin') && s.used) { flashHint('Один расходник на ход'); return; }
     if (!ensureDrawPile()) { flashHint('Колода пуста'); return; }
     if (s.peek || s.peek3) { flashHint('Следующая карта уже открыта'); return; }
+    unlockAch('tarotScout');
     s.peek = true; s.used = true; G.consUsed = (G.consUsed || 0) + 1; G.cons.splice(i, 1); s.sel = null; render(); return;
   }
   if (k.kind === 'shuffle' || k.kind === 'peek3' || k.kind === 'burn') {
@@ -2224,7 +2239,7 @@ function pickCons(i) {
     if (!ensureDrawPile()) { flashHint('Колода пуста'); return; }
     if (k.kind === 'peek3' && s.peek3) { flashHint('Следующие карты уже открыты'); return; }
     if (k.kind === 'shuffle') G.deck = shuffle(G.deck.concat(G.discard.splice(0)));
-    else if (k.kind === 'peek3') s.peek3 = true;
+    else if (k.kind === 'peek3') {s.peek3 = true;unlockAch('tarotScout');}
     else { const c = G.deck.pop(); if (c) { G.discard.push(c); flashHint('Сожжена: ' + c.rank + c.suit); } }
     s.used = true; G.consUsed = (G.consUsed || 0) + 1; G.cons.splice(i, 1); s.sel = null; render(); return;
   }
@@ -2277,6 +2292,7 @@ function hit() {
   if (!c) { flashHint('Колода пуста'); return; }
   // Карта автоматически отправляется на текущий открытый стол.
   s.tables[ti].cards.push(c);
+  Tarot.onDraw(s.tables[ti],c);
   s.sel = null;
   G.lastDrawn = c.id;
   refreshTables(s);
@@ -2307,7 +2323,7 @@ function stand() {
   s.locked = true;
   tgHaptic('medium');
   document.querySelectorAll('#hand .card').forEach(card=>card.getAnimations().forEach(a=>a.cancel()));
-  ['#btn-draw','#btn-stand','#btn-stop-table','#damage-details'].forEach(id=>$(id).disabled=true);
+  ['#btn-draw','#btn-stand','#btn-stop-table','#damage-details','#sleeve-open'].forEach(id=>{if($(id))$(id).disabled=true;});
   AttackFX.play(G,s,res);
 }
 
@@ -2331,6 +2347,7 @@ function finishSeat(res, animated = false) {
   const s = G.seat;
   if (G.phase !== 'play' || !s || G.battle.resolving) return;
   recordTurnStart(res);
+  Tarot.commit(res);
   G.battle.resolving = true;
   recordJokerGrowth(res,s);
   G.battle.lastReceived = 0;
@@ -2359,7 +2376,7 @@ function finishSeat(res, animated = false) {
   }
   const sums = res.tables.map((r) => (r.empty ? '—' : r.bust ? r.sum + '✗' : r.sum)).join(' · ');
   log((res.exact ? '<b>Точных столов: ' + res.exact + '</b> · ' : '') + 'столы ' + sums + ' (цель ' + limitNow() + ') — ' + fmt(res.total), res.exact ? 'gold' : (res.total ? '' : 'bad'));
-  s.tables.forEach((t) => G.discard.push(...t.cards.filter((c) => !broken.includes(c))));
+  s.tables.forEach((t) => G.discard.push(...t.cards.filter((c) => !broken.includes(c)&&!c.tarot)));
   const xj = G.jokers.find((j) => j.id === 'xray');
   if (xj) {
     xj.charges = (xj.charges || 5) - 1;
@@ -2422,6 +2439,8 @@ function winBlind() {
   if ((G.blind === 2 || (G.campaign&&G.elite)) && (G.boss === 'lock' || G.boss2 === 'lock')) unlockAch('lock');
   if (G.elite) unlockAch('elite');
   if (G.money >= 50) unlockAch('rich');
+  if(G.seatsLeft===0)unlockAch('tarotLast');
+  if(G.sleeve?.length){G.discard.push(...G.sleeve);G.sleeve=[];}
   G.stats.blinds++;
   G.lastReward = {
     base: baseReward(),
@@ -2499,6 +2518,9 @@ function metaSave() {
   try { const c = { ...META }; delete c.unlockAll; localStorage.setItem(META_KEY, JSON.stringify(c)); } catch (e) {}
 }
 const ACHS = {
+  tarotScout:{name:'Заглянуть вперёд',desc:'Использовать разведку колоды',reward:{tarot:'candle'}},
+  tarotSleeve:{name:'Ловкость рук',desc:'Спрятать три карты в рукав за любые походы',reward:{tarot:'thread'}},
+  tarotLast:{name:'В последний миг',desc:'Выиграть бой последним ходом',reward:{tarot:'hourglass'}},
   repaint:{name:'Первый штрих',desc:'Изменить масть карты в кузнице',reward:{talent:'scout'}},
   palette:{name:'Своя палитра',desc:'Трижды изменить масть в кузнице за один забег',reward:{deck:'scarlet'}},
   nightdeck:{name:'Ночной клуб',desc:'Сыграть 10 чёрных столов за забег',reward:{deck:'nocturne'}},
@@ -2522,6 +2544,7 @@ function isUnlocked(kind, id) {
   return !gated || !!META.unlocked[kind + ':' + id];
 }
 function rewardName(r) {
+  if(r.tarot)return 'таро «'+Tarot.def(r.tarot).name+'»';
   if(r.talent)return 'талант «'+TALENTS[r.talent].name+'»';
   if (r.joker) return 'джокер «' + JOKERS.find((j) => j.id === r.joker).name + '»';
   return 'колода «' + DECKS[r.deck].name + '»';
@@ -2732,7 +2755,7 @@ function forgeAction(mode) {
   G.forgeMode = mode;G.forgeSelection=null;G.forgeSuit=null;render();
   const titles = { remove: 'Удалить карту', upgrade: 'Улучшить карту', copy: 'Скопировать карту', suit:'Изменить масть' };
   const order = RANKS.map((r) => r[0]);
-  const cards = G.runDeck.slice().sort((a, b) => (b.mod === 'curse') - (a.mod === 'curse') || order.indexOf(a.rank) - order.indexOf(b.rank));
+  const cards = G.runDeck.filter(c=>!c.tarot).sort((a, b) => (b.mod === 'curse') - (a.mod === 'curse') || order.indexOf(a.rank) - order.indexOf(b.rank));
   showOverlay(
     '<div class="kicker">Кузница</div><h2>' + titles[mode] + '</h2><p class="sub">Нажми на карту.</p>' +
     '<div class="forge-grid">' + cards.map((c) => cardElement(c, { mini: 1 })).join('') + '</div>' +
@@ -2811,8 +2834,8 @@ const COSMETICS = {
   },
 };
 function pickFree(n) {
-  const free = G.runDeck.filter((c) => !c.mod);
-  return shuffle((free.length >= n ? free : G.runDeck).slice()).slice(0, n);
+  const free = G.runDeck.filter((c) => !c.mod&&!c.tarot);
+  return shuffle((free.length >= n ? free : G.runDeck.filter(c=>!c.tarot)).slice()).slice(0, n);
 }
 function applyMetaBonuses() {
   const sh = META.shop;
@@ -3073,7 +3096,7 @@ function pickUpRank() {
 }
 
 function pickModCard() {
-  const free = G.runDeck.filter((c) => !c.mod);
+  const free = G.runDeck.filter((c) => !c.mod&&!c.tarot);
   return free.length ? { card: pick(free), mod: pick(MOD_KEYS()) } : null;
 }
 
@@ -3274,6 +3297,7 @@ function renderShop() {
     (shopHealOpen()
       ? '<button class="ghost" id="btn-heal" ' + ((G.shop.heals || 0) >= CONFIG.healsPerShop || G.money < COMBAT.healPrice || G.player.hp >= G.player.maxHp ? 'disabled' : '') + '>Лечение +' + COMBAT.healAmount + ' HP · $' + COMBAT.healPrice + ' · ' + Math.max(0, CONFIG.healsPerShop - (G.shop.heals || 0)) + ' из ' + CONFIG.healsPerShop + '</button>'
       : '<div class="heal-locked">'+(Campaign.active()?'♥ Лечение — после уровней 4, 8 и 9 или элитного боя.':'♥ Лечение и банки — только в магазине после босса. Пока держись.')+'</div>') +
+    (G.tarotVersion&&!(G.sleeveCapacity>=2)?'<div class="sleeve-shop"><b>Двойной рукав</b><p>Два места и два использования за бой. До конца похода.</p><button id="buy-sleeve" '+(G.money<8?'disabled':'')+'>Улучшить · $8</button></div>':'')+
     shelvesHTML +
     growthSummary(true)+'<h4 style="margin:18px 0 8px;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:#8ea0b8">Твои джокеры' +
       ' <span style="opacity:.6">(' + G.jokers.length + '/' + maxJokers() + ')</span> <span style="opacity:.55;letter-spacing:.6px;text-transform:none">· наведи или нажми — увидишь описание</span></h4>' +
@@ -3297,6 +3321,7 @@ function renderShop() {
   ov.querySelectorAll('[data-sell]').forEach((btn) => {
     btn.onclick = () => sellJoker(btn.dataset.sell);
   });
+  const sleeveBuy=ov.querySelector('#buy-sleeve');if(sleeveBuy)sleeveBuy.onclick=()=>{if(G.phase!=='shop'||G.money<8||G.sleeveCapacity>=2)return;G.money-=8;G.sleeveCapacity=2;render();renderShop();};
   ov.querySelectorAll('[data-reserve]').forEach(btn=>{btn.onclick=()=>reserveItem(Number(btn.dataset.reserve))});
   if ($('#btn-heal')) $('#btn-heal').onclick = () => Combat.buyHeal();
   $('#btn-shop-rules').onclick = showRules;
@@ -3519,6 +3544,7 @@ function showRules() {
    ============================================================ */
 
 function cardElement(c, o) {
+  if(c.tarot)return Tarot.card(c,o);
   o = o || {};
   const pipCount = /^([2-9]|10)$/.test(c.rank) ? Number(c.rank) : 0;
   const pips = pipCount ? '<span class="c-pips" data-count="' + pipCount + '" aria-hidden="true">' + Array.from({length:pipCount}, () => '<i>' + c.suit + '</i>').join('') + '</span>' : '';
@@ -3559,7 +3585,7 @@ function tableHTML(s, t, ti, scored=null) {
     (pv ? (pv.n < 3 ? (pv.kind === 'heal' ? '♥' : '♠') + ' Ещё ' + (3 - pv.n) : pv.kind === 'heal' ? '♥ +' + pv.value + ' HP' : '♠ +' + pv.value + '%') : '') + '</div>';
   return '<div class="' + cls + '" data-t="' + ti + '" aria-label="Стол ' + (ti + 1) + '"><div class="t-head"><b class="t-sum" aria-label="Сумма карт">' + (r ? r.sum : '—') + '</b></div>' +
     '<div class="t-state"><span>' + state + '</span><span class="t-cap' + capCls + '" title="' + capTitle + '">' + t.cards.length + '/' + cap + '</span></div>' +
-    tableFeatureBadge(t,ti,r) + '<div class="t-feedback">' + bonus +
+    tableFeatureBadge(t,ti,r) + '<div class="t-feedback">' + (Tarot.feedback(t,r)||bonus) +
     (r?.critical ? '<div class="combo-badge critical">Три туза · крит ×2</div>' : '') +
     (r?.royal ? '<div class="combo-badge royal">Три короля · без перебора</div>' : '') +
     consumableTablePreview(s,ti) + '</div>' +
@@ -3722,6 +3748,7 @@ function render() {
   renderJokers();
   renderSide();
   Tutorial.render();
+  Tarot.renderSleeve();
   saveRun();
 }
 

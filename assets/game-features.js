@@ -91,8 +91,10 @@ function enemyResponse(result, intent = G.enemy.intent) {
   if (G.enemy.id === 'usurer' && intent.kind === 'heal' && result.exact >= 2) amount = 0;
   amount=Club.counter(result,intent,amount);
   if(hasBargain('fury')&&['attack','heavy','hex'].includes(intent.kind))amount+=2;
+  const tarotCancelled=!!result.tarot?.seal&&['attack','heavy','hex'].includes(intent.kind);
+  if(['attack','heavy','hex'].includes(intent.kind)){if(tarotCancelled)amount=0;else if(result.tarot?.moon)amount=Math.floor(amount*.7);}
   const paid = G.enemy.id === 'collector' && G.battle.bribed;
-  return {raw:['attack','heavy','hex'].includes(intent.kind) && !paid ? amount : 0, kind:intent.kind, amount, paid};
+  return {raw:['attack','heavy','hex'].includes(intent.kind) && !paid ? amount : 0, kind:intent.kind, amount, paid,tarotCancelled};
 }
 function combatForecast(result) {
   const hit = attackPreview(result), enemy = G.enemy, player = G.player;
