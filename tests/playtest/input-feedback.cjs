@@ -8,6 +8,29 @@ await p.evaluate(()=>{G.enemy.hp=G.enemy.maxHp=100000;G.enemy.intent={kind:'atta
 await p.locator('#btn-stand').tap();
 const points=await p.evaluate(()=>[...document.querySelectorAll('.attack-orb,.attack-caption')].map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top)})));assert.ok(points.length>0&&points.every(pt=>pt.x>=0&&pt.x<=390&&pt.y>=0&&pt.y<=844));checks.push('Charge stays in visible viewport after scrolling');
 await p.waitForFunction(()=>document.querySelector('.combat-receipt')?.textContent.includes('ПОПАДАНИЕ'));const receipt=await p.locator('.combat-receipt').boundingBox();assert.ok(receipt.y>=0&&receipt.y+receipt.height<=844);checks.push('Damage receipt visible after impact');await p.waitForFunction(()=>!AttackFX.active);assert.equal(await p.evaluate(()=>G.seatsLeft),3);checks.push('One attack and one spent turn');
+await p.evaluate(()=>{
+ G.jokers=[JOKERS.find(j=>j.id==='pair'),JOKERS.find(j=>j.id==='suits')];
+ const c=(rank,suit)=>G.runDeck.find(card=>card.rank===rank&&card.suit===suit);
+ G.seat.tables[0].cards=[c('K','♠'),c('K','♥')];
+ G.seat.tables[1].cards=[c('9','♥'),c('9','♦')];
+ G.enemy.intent={kind:'guard',amount:0};render();
+});
+await p.locator('#btn-stand').tap();
+const tally=await p.evaluate(()=>new Promise(resolve=>{
+ const seen={caption:false,mult:null,punch:false,numbers:[]};let last='';
+ const timer=setInterval(()=>{
+  const caption=document.querySelector('.attack-caption')?.textContent;
+  if(caption==='ОЧКИ'||/^СТОЛ /.test(caption))seen.caption=true;
+  const badge=document.querySelector('.attack-mult-badge')?.textContent;
+  if(badge&&/[x×]/.test(badge))seen.mult=badge;
+  if(document.querySelector('#tags .tag.punch'))seen.punch=true;
+  const number=document.querySelector('.attack-charge-number')?.textContent;
+  if(number&&number!==last){seen.numbers.push(number);last=number;}
+  if(document.querySelector('.combat-receipt')){clearInterval(timer);resolve(seen);}
+ },40);
+ setTimeout(()=>{clearInterval(timer);resolve(seen);},6000);
+}));
+assert.equal(tally.caption,true);assert.ok(tally.mult);assert.ok(tally.punch);assert.ok(tally.numbers.length>=3);checks.push('Score climbs table by table with separate multiplier punches');
 const reduced=await b.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});await load(reduced);await reduced.evaluate(()=>{newGame(0,'classic');hideOverlay();startSeat();G.seat.tables[0].cards=G.runDeck.filter(c=>['A','K'].includes(c.rank)&&c.suit==='♠');G.enemy.hp=G.enemy.maxHp=100000;render();stand();});assert.equal(await reduced.locator('.attack-fx-layer').count(),0);assert.ok(await reduced.locator('.combat-receipt').textContent().then(t=>t.includes('ПОПАДАНИЕ')));checks.push('Reduced motion retains static damage feedback');await reduced.evaluate(()=>newGame(0,'classic'));assert.equal(await reduced.locator('.combat-receipt').count(),0);checks.push('Restart removes stale receipt');
 writeReport('input-feedback.json',{checks});console.log(checks.join('\n'));
 }finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

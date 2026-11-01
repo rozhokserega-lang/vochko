@@ -5,6 +5,8 @@
 .attack-orb{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#fff2c9 0,#e1bb6baa 26%,#d4a64e55 50%,transparent 72%);filter:drop-shadow(0 0 7px #ffd18b77);will-change:transform,opacity}
 .attack-caption{transform:translate(-50%,-50%);padding:4px 10px;background:#142217ee;border:1px solid #d3b16a;color:#f6dfab;font:700 11px Georgia,serif;letter-spacing:1px;white-space:nowrap;box-shadow:0 3px 8px #0008}
 .attack-charge-number{transform:translate(-50%,-50%);font:700 24px Georgia,serif;color:#fff0c7;text-shadow:0 2px 6px #000,0 0 7px #c79540;white-space:nowrap}
+.attack-lane-score{transform:translate(-50%,-50%);font:800 17px Georgia,serif;color:#ffe7a1;text-shadow:0 2px 5px #000,0 0 10px #e1b35199;white-space:nowrap}
+.attack-mult-badge{transform:translate(-50%,-50%);max-width:calc(100vw - 48px);overflow:hidden;text-overflow:ellipsis;padding:2px 8px;border:1px solid #d9b56d;border-radius:99px;background:#231b0fee;color:#ffe7a1;font:700 10px/1.3 Georgia,serif;letter-spacing:.4px;white-space:nowrap;box-shadow:0 0 10px #e1b35177}
 .attack-beam{height:3px;transform-origin:0 50%;background:linear-gradient(90deg,#c79a3a00,#f4da9a,#ffefcb);box-shadow:0 0 6px #e4b86666}
 .attack-impact-ring{width:46px;height:46px;border:2px solid #ffe9b5;border-radius:50%;box-shadow:0 0 16px #edbb5655,inset 0 0 10px #e9bb5b55}
 .attack-impact-ring.shield-impact{border-color:#a1d9df;box-shadow:0 0 16px #9ad5df66}
@@ -12,12 +14,17 @@
 .attack-shield-label{transform:translate(-50%,-50%);color:#bfedf0;font:700 12px Georgia,serif;text-shadow:0 2px 5px #000;white-space:nowrap}
 .tbl.attack-charging{box-shadow:inset 0 0 18px #d8b4613b,0 0 9px #d8b46133;border-color:#f0cc81}
 .tbl.attack-charging .t-cards .card{filter:brightness(1.12);transition:filter .15s}
+.tbl.attack-tally{border-color:#ffe7a1;box-shadow:inset 0 0 22px #d8b46155,0 0 13px #d8b46155}
 .tbl.attack-fizzle{box-shadow:inset 0 0 15px #a842303b}
 .attack-accumulator{box-shadow:0 0 14px #dfb45f55!important}
-.attack-accumulator #score-box{opacity:.15}
+body .formula .fbox.result.attack-accumulator .f-label{font-size:0}
+body .formula .fbox.result.attack-accumulator .f-label::after{content:'СЧЁТ';font:700 13px Georgia,serif;color:#cbbb96}
+.attack-accumulator #score-box{opacity:0}
 body.attack-busy #battle-result{display:none}
 body.attack-busy #btn-rules{opacity:.45;pointer-events:none}
 #battle-panel.battle-impact #enemy-portrait{animation:portraitStrike .32s ease-out}
 @keyframes portraitStrike{0%,100%{translate:0 0}30%{translate:4px -2px}65%{translate:-2px 1px}}
 @media(prefers-reduced-motion:reduce){.attack-fx-layer{display:none}.tbl.attack-charging,.attack-accumulator{box-shadow:none!important}#battle-panel.battle-impact #enemy-portrait{animation:none}}
 .combat-receipt{position:fixed;top:calc(var(--ui-top,0px) + 68px);left:50%;transform:translateX(-50%);z-index:145;max-width:calc(100vw - 28px);padding:10px 14px;border:1px solid #d2af65;border-radius:7px;background:#142b20f5;color:#ffe2a0;box-shadow:0 4px 12px #0006;font:700 15px/1.35 'Segoe UI',sans-serif;text-align:center;pointer-events:none}
+#tags .tag.punch{animation:tagPunch .3s ease-out}
+@keyframes tagPunch{0%{filter:brightness(1);transform:scale(1)}45%{filter:brightness(1.9);transform:scale(1.16)}100%{filter:brightness(1);transform:scale(1)}}

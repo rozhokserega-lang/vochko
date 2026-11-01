@@ -28,28 +28,34 @@ const {launch,load,writeReport}=require('./runtime.cjs');
    preview=previewConsumable(G.seat,0,1,0,0);movePlayedCard(G.seat,1,0,0);check('Transfer rescues target-18 table with kings',preview.after.total===evalSeat(G.seat).total&&!G.seat.tables[0].dead&&evalPlay(G.seat.tables[0].cards).royal);
    reset();G.seat.tables[0].cards=aces();G.enemy.shield=100;G.enemy.armor=.2;const forecast=combatForecast(evalSeat(G.seat));finishSeat(evalSeat(G.seat));check('Critical forecast matches shield and armor resolution',forecast.hit.hp===G.lastTurn.damage&&G.lastTurn.damage<396);
    reset();G.blind=2;G.boss='pendulum';G.boss2=null;G.seat=null;G.battle.turn=0;G.seatsLeft=8;startSeat();
-   for(const expected of [21,18,25,21]){
-    check('Pendulum turn '+G.battle.turn+' target '+expected,limitNow()===expected);
-    const s=G.seat;s.tables[0].cards=[card('2','♠')];G.cons=[CONS.plus2];s.sel=0;applyCons(0);check('Consumable keeps target '+expected,limitNow()===expected);G.enemy.intent={kind:'guard',amount:0};render();saveRun();check('Render/save preserves target '+expected,limitNow()===expected);
-    finishSeat(evalSeat(s));check('Recorded outgoing target '+expected,G.lastTurn.goal===expected);
+   const pendulumTargets=[];
+   for(let i=0;i<6;i++){
+    const current=limitNow(),promised=G.battle.pendulumGoal;pendulumTargets.push(current);
+    check('Pendulum target '+current+' is random 18..27',Number.isInteger(current)&&current>=18&&current<=27);
+    const s=G.seat;s.tables[0].cards=[card('2','♠')];G.cons=[CONS.plus2];s.sel=0;applyCons(0);check('Consumable keeps target '+current,limitNow()===current);G.enemy.intent={kind:'guard',amount:0};render();saveRun();check('Render/save preserves target '+current,limitNow()===current);
+    finishSeat(evalSeat(s));check('Recorded outgoing target '+current,G.lastTurn.goal===current);check('Next hand uses promised target '+promised,limitNow()===promised);
    }
+   check('Pendulum targets vary between turns',new Set(pendulumTargets).size>1);
    G.jokers=[JOKERS.find(j=>j.id==='diplomat')];G.seatsLeft=2;G.seat=null;startSeat();check('Diplomat restores normal target',limitNow()===G.limit);
    check('Pendulum conflicts are symmetric',['hot','lowLimit'].every(k=>BOSS_CLASH.pendulum.includes(k)&&BOSS_CLASH[k].includes('pendulum')));
-   reset();G.blind=2;G.boss='pendulum';G.battle.turn=1;G.seatsLeft=3;G.jokers=['diplomat','phoenix'].map(id=>JOKERS.find(j=>j.id===id));G.seat=null;startSeat();G.seat.tables[0].cards=[card('10','♠'),card('10','♥')];render();
-   check('Phoenix preview uses real next target despite unspent turn',document.querySelector('#target-cycle').textContent.includes('следующая цель: 25'));
-   G.enemy.intent={kind:'guard',amount:0};finishSeat(evalSeat(G.seat));check('Phoenix advances target cycle without spending turn',G.seatsLeft===3&&limitNow()===25);
+   reset();G.blind=2;G.boss='pendulum';G.battle.turn=1;G.seatsLeft=3;G.jokers=['diplomat','phoenix'].map(id=>JOKERS.find(j=>j.id===id));G.seat=null;startSeat();
+   const phoenixNext=G.battle.pendulumGoal;G.seat.tables[0].cards=[card('10','♠'),card('10','♥'),card('10','♦')];render();
+   check('Phoenix preview uses real next target despite unspent turn',document.querySelector('#target-cycle').textContent.includes('следующая цель: '+phoenixNext));
+   G.enemy.intent={kind:'guard',amount:0};finishSeat(evalSeat(G.seat));check('Phoenix advances target without spending turn',G.seatsLeft===3&&limitNow()===phoenixNext);
    G.seat.tables[0].cards=[card('2','♠')];G.enemy.intent={kind:'guard',amount:0};finishSeat(evalSeat(G.seat));check('Diplomat disables cycle after second spent turn',G.seatsLeft===2&&limitNow()===G.limit);
    reset();G.blind=2;G.boss='pendulum';G.battle.turn=1;G.seat=null;G.enemy=Enemy.create();G.enemy.hp=G.enemy.maxHp=100000;startSeat();check('Pendulum is a selectable named boss',BOSS_KEYS.includes('pendulum')&&G.enemy.name==='Маятник');G.seat.tables[0].cards=kings();G.seat.tables[1].cards=aces();refreshTables(G.seat);render();saveRun();
    return checks;
   });
-  assert.match(await page.locator('#target-cycle').textContent(),/сейчас 18.*следующая цель: 25/);
+  assert.match(await page.locator('#target-cycle').textContent(),/сейчас (1[89]|2[0-7]).*следующая цель: (1[89]|2[0-7])/);
   assert.equal(await page.locator('.combo-badge').count(),2);checks.push('Current/next targets and combo badges visible');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  const savedTargets=await page.evaluate(()=>({current:G.seat.goal,next:G.battle.pendulumGoal}));
   writeReport('combinations.json',{checks,errors});await page.evaluate(()=>{document.querySelectorAll('.score-float,.toast').forEach(el=>el.remove());document.querySelector('#table').classList.remove('score-burst');});await page.screenshot({path:path.resolve(__dirname,'../../test-results/combinations.png')});
-  await page.reload();await page.evaluate(()=>resumeRun());assert.equal(await page.evaluate(()=>limitNow()),18);assert.match(await page.locator('#target-cycle').textContent(),/следующая цель: 25/);checks.push('Reload preserves current and next target');
+  await page.reload();await page.evaluate(()=>resumeRun());assert.equal(await page.evaluate(()=>limitNow()),savedTargets.current);assert.match(await page.locator('#target-cycle').textContent(),new RegExp('следующая цель: '+savedTargets.next));checks.push('Reload preserves current and next target');
   // Delay the response explicitly so the outgoing animated state can be inspected.
+  const before=await page.evaluate(()=>limitNow());
   const resolving=await page.evaluate(()=>{AttackFX.deferResponse=()=>{};G.seat.locked=true;finishSeat(evalSeat(G.seat),true);return {target:limitNow(),saved:readSavedRun().game.seat.goal,turn:G.battle.turn};});
-  assert.deepEqual(resolving,{target:18,saved:18,turn:2});checks.push('Animated resolution keeps outgoing and saved target');
+  assert.deepEqual(resolving,{target:before,saved:before,turn:2});checks.push('Animated resolution keeps outgoing and saved target');
   assert.deepEqual(errors,[]);writeReport('combinations.json',{checks,errors});console.log(checks.length+' combination/target checks passed');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

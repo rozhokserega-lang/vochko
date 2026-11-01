@@ -1090,7 +1090,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 .remove-card:hover,.remove-card:focus-visible{outline:2px solid #ebca80;outline-offset:2px}
 </style>
 <link rel="stylesheet" href="assets/reference-theme.css">
-<link rel="stylesheet" href="assets/attack-fx.css?v=20261029-2">
+<link rel="stylesheet" href="assets/attack-fx.css?v=20261101-1">
 <link rel="stylesheet" href="assets/mobile-polish.css?v=20261028-3">
 <link rel="stylesheet" href="assets/heal-fx.css?v=20261028-4">
 <link rel="stylesheet" href="assets/game-menu.css?v=20261028-5">
@@ -1246,7 +1246,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <script src="assets/game-features.js?v=20261029-12"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
-<script src="assets/attack-fx.js?v=20261031-4"></script>
+<script src="assets/attack-fx.js?v=20261101-1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
 <script src="assets/game-menu.js?v=20261030-3"></script>
 <script src="assets/stable-tables.js?v=20261031-3"></script>
@@ -1360,7 +1360,8 @@ const STAKES = [
   { name: 'Алмаз', desc: 'Цели +25%, второе правило босса, награда на $1 меньше и всё в магазине дороже на $1.' },
 ];
 const BOSS_CLASH = { hot: ['lowLimit','pendulum'], lowLimit: ['hot','pendulum'], pendulum: ['hot','lowLimit'], nocons: ['thin'], thin: ['nocons'] };
-const PENDULUM_TARGETS = [21,18,25];
+const PENDULUM_MIN = 18, PENDULUM_MAX = 27;
+function rollPendulumGoal() { return PENDULUM_MIN + Math.floor(Math.random() * (PENDULUM_MAX - PENDULUM_MIN + 1)); }
 function bossRuleActive(k, spent = seatsCount() - G.seatsLeft) {
   if (!G || (G.boss !== k && G.boss2 !== k)) return false;
   return !(hasJoker('diplomat') && spent >= 2);
@@ -1412,7 +1413,7 @@ function rollJokerOffers(n) {
 }
 function consPower(k) { return k.n + (hasJoker('surgeon') && (k.kind === 'minus' || k.kind === 'plus') ? 1 : 0); }
 const BOSSES = {
-  pendulum: { name: 'Маятник', desc: 'Цель карт меняется в начале каждого хода: 21 → 18 → 25, затем повторяется. Во время добора цель не меняется.' },
+  pendulum: { name: 'Маятник', desc: 'Цель карт каждый ход — случайное число от 18 до 27. Во время добора цель не меняется.' },
   odd: { name: 'Чётный дом', desc: 'Нечётные карты (3, 5, 7, 9) дают 0 чипов, но считаются в сумму.' },
   ace11: { name: 'Тузобой', desc: 'Тузы всегда 11 — единицей их не сыграть.' },
   nocons: { name: 'Печать', desc: 'Расходники на этом бою не работают.' },
@@ -1696,8 +1697,12 @@ function flashHint(text) {
 }
 
 /* ---------------- правила ---------------- */
+function pendulumNextGoal() {
+  if (G?.battle && !Number.isFinite(G.battle.pendulumGoal)) G.battle.pendulumGoal = rollPendulumGoal();
+  return G?.battle?.pendulumGoal ?? rollPendulumGoal();
+}
 function limitForTurn(turn = G.battle?.turn || 0, spent = seatsCount() - G.seatsLeft) {
-  if (bossRuleActive('pendulum', spent)) return PENDULUM_TARGETS[turn % PENDULUM_TARGETS.length];
+  if (bossRuleActive('pendulum', spent)) return pendulumNextGoal();
   return bossRuleActive('lowLimit', spent) ? G.limit - 3 : bossRuleActive('hot', spent) ? G.limit + 2 : G.limit;
 }
 function limitNow() {
@@ -1948,8 +1953,10 @@ function startSeat() {
     const k = G.cons.splice(Math.floor(Math.random() * G.cons.length), 1)[0];
     log('Вор украл «' + k.name + '»', 'bad');
   }
+  const pendulum = bossRuleActive('pendulum');
   const goal = limitForTurn();
-  G.seat = { goal, pendulum:bossIs('pendulum'), tables: makeTables(), sel: null, used: false, peek: G.talent==='scout'&&G.battle.turn===0, locked: false };
+  if (pendulum) G.battle.pendulumGoal = rollPendulumGoal();
+  G.seat = { goal, pendulum, tables: makeTables(), sel: null, used: false, peek: G.talent==='scout'&&G.battle.turn===0, locked: false };
   G.phase = 'play';
   render();
 }

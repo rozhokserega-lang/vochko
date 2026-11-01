@@ -236,6 +236,6 @@ function renderTargetCycle() {
   const phoenix = result && hasJoker('phoenix') && !G.phoenixUsed && result.total === 0 && result.bust;
   const spent = seatsCount() - G.seatsLeft + (G.battle?.resolving || phoenix ? 0 : 1);
   const next = limitForTurn(nextTurn, spent);
-  el.innerHTML = '<b>Маятник · цель сейчас '+limitNow()+'</b><span>21 → 18 → 25 → 21 · следующая цель: '+next+'</span>'+
+  el.innerHTML = '<b>Маятник · цель сейчас '+limitNow()+'</b><span>каждый ход 18–27 · следующая цель: '+next+'</span>'+
     (!(G.seat?.pendulum ?? bossIs('pendulum')) ? '<small>Дипломат отключил правило: действует обычная цель.</small>' : '');
 }
