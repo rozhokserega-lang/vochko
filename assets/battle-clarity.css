@@ -1,0 +1,60 @@
+/* Selective visual hierarchy pass: keep the game world and every layout dimension. */
+body{--battle-muted:#bbc6b8;--battle-line:#8c9c863d;--battle-ink:#e8dfc8}
+body.battle-clarity.club-run{--battle-muted:#cbbcaf;--battle-line:#ba9c7838;--battle-ink:#eddfc9}
+body.battle-clarity #hud{box-shadow:none;border-bottom-color:var(--battle-line)}
+body.battle-clarity #hud .pill .label{color:var(--battle-muted);letter-spacing:.2px}
+body.battle-clarity #hud .hud-btn{border-color:var(--battle-line);box-shadow:none}
+body.battle-clarity #table .tables{border-image:none;border-color:transparent;background:transparent;box-shadow:none}
+body.battle-clarity #table .tables .tbl{
+ border-color:var(--battle-line);box-shadow:inset 0 -16px 24px #0003;
+}
+body.battle-clarity #table .tables .tbl::before{display:none}
+body.battle-clarity #table .tables .tbl.active{
+ border-color:#dfb96a;box-shadow:inset 0 0 0 1px #dfb96a55;
+}
+body.battle-clarity #table .tables .tbl.hit,body.battle-clarity #table .tables .tbl.ok{border-color:#bda36c;box-shadow:inset 0 1px 0 #fff1}
+body.battle-clarity #table .tables .tbl.active.hit{border-color:#edca7f;box-shadow:inset 0 0 0 1px #edca7f66}
+body.battle-clarity #table .tables .tbl.over,body.battle-clarity #table .tables .tbl.dead{border-color:#dc7e86;box-shadow:inset 0 0 0 1px #dc7e8633}
+body.battle-clarity #table .tables .tbl.club-vulnerable:not(.dead):not(.over){border-color:#8adcc2;box-shadow:inset 0 0 0 1px #8adcc266}
+body.battle-clarity #table .tables .tbl.club-challenge:not(.dead):not(.over){border-color:#c6a7df;box-shadow:inset 0 0 0 1px #c6a7df44}
+body.battle-clarity #table .tables .tbl.club-marked:not(.dead):not(.over){border-color:#cdac86;box-shadow:inset 0 0 0 1px #cdac8633}
+body.battle-clarity #table .tables .tbl .t-sum{
+ border-image:none;border-color:transparent;
+ background:linear-gradient(#e0cfa7,#c8b183);color:#30251b;
+ box-shadow:inset 0 0 0 1px #9c805b88;text-shadow:none;
+}
+body.battle-clarity #table .tables .tbl.active .t-sum{background:linear-gradient(#f0ddad,#d5b77a)}
+body.battle-clarity #table .tables .tbl.hit .t-sum,body.battle-clarity #table .tables .tbl.ok .t-sum{background:linear-gradient(#ecddba,#ccb483)}
+body.battle-clarity #table .tables .tbl.over .t-sum,body.battle-clarity #table .tables .tbl.dead .t-sum{background:#5c2930;color:#ffe1dd;box-shadow:inset 0 0 0 1px #dc7e8644}
+body.battle-clarity #table .tbl>.t-state{font:600 11px/14px 'Segoe UI',Arial,sans-serif;color:var(--battle-muted);letter-spacing:0;text-shadow:none}
+body.battle-clarity #table .tbl .t-cap{font:500 10px/12px 'Segoe UI',Arial,sans-serif;color:var(--battle-muted);letter-spacing:0}
+body.battle-clarity #table .tables.four .t-state{font-size:10px;gap:2px}
+body.battle-clarity #table .tbl.active .t-state>span:first-child{color:#f0d293}
+body.battle-clarity #table .tbl.over .t-state>span:first-child,body.battle-clarity #table .tbl.dead .t-state>span:first-child{color:#ffb7b9}
+html body.battle-clarity #table .t-feedback>.t-bonus{font:600 11px/12px 'Segoe UI',Arial,sans-serif;color:var(--battle-ink);text-shadow:none}
+html body.battle-clarity #table .t-feedback>.t-bonus.heal:not(.pending){color:#a0e5b4}
+html body.battle-clarity #table .t-feedback>.t-bonus.pending{color:var(--battle-muted);font-weight:400}
+body.battle-clarity #table .tbl .t-title{color:var(--battle-muted);letter-spacing:.15px;font-weight:400}
+body.battle-clarity #table .formula{border-image:none;border-color:transparent;box-shadow:inset 0 1px 0 var(--battle-line);background:#101b14}
+body.battle-clarity.club-run #table .formula{background:#281b17}
+body.battle-clarity #table .fbox.result .f-val{color:#f6e4bd;text-shadow:none}
+body.battle-clarity #table .damage-details-btn{color:var(--battle-muted)}
+body.battle-clarity #table .table-upgrade{border-color:var(--battle-line);box-shadow:none}
+body.battle-clarity #table #jokers-bar{border-top-color:var(--battle-line)}
+body.battle-clarity #table .joker-inventory-toggle{color:var(--battle-muted)}
+body.battle-clarity #table-supplies #cons .cons-btn{box-shadow:none;border-color:var(--battle-line)}
+body.battle-clarity #table-supplies #cons .cons-btn.on{border-color:#edca7f;box-shadow:inset 0 0 0 1px #edca7f44}
+body.battle-clarity #table-supplies #cons .cons-btn{font-size:11px;line-height:12px}
+body.battle-clarity #table-supplies #cons .cons-btn .item-art{width:21px;height:21px}
+body.battle-clarity #dock{box-shadow:none;border-top-color:var(--battle-line)}
+body.battle-clarity #dock .btn{border-image:none;border-color:transparent;box-shadow:inset 0 0 0 1px #b59a6d55;font-weight:600;text-shadow:none}
+body.battle-clarity #dock .btn.draw{background:linear-gradient(#e2c78e,#c5a064);color:#2b2014}
+body.battle-clarity #dock .btn.stop-table{background:#27392e;color:#e3ddca}
+body.battle-clarity.club-run #dock .btn.stop-table{background:#3b2b23}
+body.battle-clarity #dock .btn.stand{background:#61352f;color:#f1ddc1}
+body.battle-clarity.club-run #dock .btn.stand{background:#64303e}
+body.battle-clarity #dock .btn:disabled{filter:none;opacity:.42}
+body.battle-clarity .run-details{border-color:var(--battle-line);box-shadow:none}
+body.battle-clarity .run-details>summary{color:var(--battle-muted)}
+#enemy-hp,#player-hp,#hud-money,#hud-ante,#rounds-left,.t-sum,.t-cap,.pcount,#score-box{font-variant-numeric:tabular-nums}
+body.battle-clarity.club-run .club-tactic{color:#f0d8ac}

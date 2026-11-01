@@ -1122,6 +1122,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/preparation.css?v=20261030-1">
 <link rel="stylesheet" href="assets/graphics-pass.css?v=20261101-1">
 <link rel="stylesheet" href="assets/club-theme.css?v=20261101-fullclub1">
+<link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-1">
 <script src="assets/preparation.js?v=20261101-fullclub1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
@@ -1129,7 +1130,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/mobile-performance.js?v=20261029-1"></script>
 <script src="assets/ui-refinements.js?v=20261028-1" defer></script>
 </head>
-<body>
+<body class="battle-clarity">
 
 <h1 class="sr-only">ВОЧКО — двадцать одно</h1>
 
@@ -3550,12 +3551,12 @@ function tableHTML(s, t, ti, scored=null) {
   const cls = 'tbl' + (Club.active()&&G.enemy.intent?.clubOpen&&G.enemy.intent.clubLane===ti?' club-vulnerable':Club.active()&&G.enemy.intent?.clubChallenge==='exact'&&G.enemy.intent.clubLane===ti?' club-challenge':Club.active()&&G.enemy.intent?.clubChallenge==='pocket'&&G.enemy.intent.clubLane===ti?' club-marked':'') + (t.blocked ? ' blocked' : '') + activeClass + (t.locked ? ' ok' : '') + (!t.locked && !t.dead && r && !r.bust && r.sum === lim ? ' hit' : '') + (!t.dead && r && r.bust ? ' over' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
   const full = t.cards.length >= cap;
   const closed = t.blocked || t.dead || t.stood || t.locked || full;
-  const state = t.blocked ? 'ЗАМОК' : t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? 'ТОЧНО' : r && r.bust ? 'Спасти?' : full ? 'ПОЛОН' : ti === active ? 'НАБОР' : 'ЖДЁТ';
+  const state = t.blocked ? 'Замок' : t.dead ? 'Перебор' : t.stood ? 'Стоп' : t.locked ? 'Точно' : r && r.bust ? 'Спасти?' : full ? 'Полон' : ti === active ? 'Набор' : 'Ждёт';
   const capCls = closed ? ' closed' : ' open';
   const capTitle = closed ? 'Стол закрыт — карты больше не добавляются' : 'Можно добавить ещё ' + (cap - t.cards.length);
   const pv = paintOf(t, true);
-  const bonus = '<div class="t-bonus' + (pv ? ' ' + pv.kind : '') + '">' +
-    (pv ? (pv.kind === 'heal' ? '♥ +' + pv.value + ' HP' : '♠ +' + pv.value + '% урон') + (pv.n < 3 ? ' · ещё ' + (3 - pv.n) : '') : '') + '</div>';
+  const bonus = '<div class="t-bonus' + (pv ? ' ' + pv.kind + (pv.n < 3 ? ' pending' : '') : '') + '">' +
+    (pv ? (pv.n < 3 ? (pv.kind === 'heal' ? '♥' : '♠') + ' Ещё ' + (3 - pv.n) : pv.kind === 'heal' ? '♥ +' + pv.value + ' HP' : '♠ +' + pv.value + '%') : '') + '</div>';
   return '<div class="' + cls + '" data-t="' + ti + '" aria-label="Стол ' + (ti + 1) + '"><div class="t-head"><b class="t-sum" aria-label="Сумма карт">' + (r ? r.sum : '—') + '</b></div>' +
     '<div class="t-state"><span>' + state + '</span><span class="t-cap' + capCls + '" title="' + capTitle + '">' + t.cards.length + '/' + cap + '</span></div>' +
     tableFeatureBadge(t,ti,r) + '<div class="t-feedback">' + bonus +
