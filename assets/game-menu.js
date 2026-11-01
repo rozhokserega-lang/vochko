@@ -35,7 +35,7 @@ const GameMenu={
  },
  setup(){
   const previousScroll=document.querySelector('.deck-selector')?.scrollLeft||0;
-  const setupScroll=document.querySelector('.preparation-modal')?.scrollTop||0,optionsOpen=!!document.querySelector('.preparation-options')?.open;
+  const setupScroll=document.querySelector('.preparation-modal')?.scrollTop||0,optionsOpen=!!document.querySelector('.preparation-options')?.open,tarotOpen=!!document.querySelector('.tarot-library')?.open;
   G.pending='setup';this.backTarget='setup';
   const unlocked=unlockedStake();
   if(SETUP.stake>unlocked)SETUP.stake=unlocked;
@@ -47,7 +47,8 @@ const GameMenu={
   document.querySelector('.deck-selector').scrollLeft=previousScroll;
   if(optionsOpen)document.querySelector('.preparation-options').open=true;
   $('#overlay .modal').scrollTop=setupScroll;
-  document.querySelectorAll('[data-prep-tab]').forEach(b=>b.onclick=()=>{SETUP.prepTab=b.dataset.prepTab;this.setup();$('#overlay .modal').scrollTop=0;});Tarot.bind();
+  if(tarotOpen)document.querySelector('.tarot-library').open=true;
+  Tarot.bind();
   $('#setup-back').onclick=()=>Campaign.locations();
   document.querySelectorAll('[data-deck]').forEach(button=>button.onclick=()=>{SETUP.deck=button.dataset.deck;this.setup()});
 
