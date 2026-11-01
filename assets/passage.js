@@ -15,12 +15,12 @@ const Passage={
    '<p class="passage-footnote">'+this.icon('clock')+'<span>Следующий бой начнётся после выбора пути.</span></p></div></div>';
  },
  intro(){
-  const enemy=G.enemy,level=G.level||1,index=Number.isInteger(enemy.portraitIndex)?enemy.portraitIndex:level-1;
+  const enemy=G.enemy,level=G.level||1,index=G.endlessFromStart?Endless.portraitIndex():Number.isInteger(enemy.portraitIndex)?enemy.portraitIndex:level-1;
   const rules=[G.boss,G.boss2].filter(Boolean),relic=Campaign.relicOffer();
   const ruleHTML=rules.length?rules.map(key=>'<section class="passage-rule">'+this.icon('cards')+'<div><h3>'+BOSSES[key].name+'</h3><p>'+BOSSES[key].desc+'</p></div></section>').join(''):'<section class="passage-rule">'+this.icon('cards')+'<div><h3>Особенность противника</h3><p>'+(enemyTrait()||'Собирай очки на столах и победи противника до конца ходов.')+'</p></div></section>';
-  const reward=Campaign.final()?(Campaign.club()?'Победа в пробной главе':'Выход из Темницы'):relic?'Реликвия'+(G.elite?' и +$5':''):'Деньги и магазин';
-  return '<div class="passage-screen passage-intro battle-brief" data-passage-screen="intro">'+this.nav(Campaign.label())+'<header class="passage-heading"><h2>За следующей дверью</h2></header>'+
-   '<div class="passage-enemy-scene"><span class="passage-enemy-portrait" style="'+this.face(index)+'" aria-hidden="true"></span><div class="passage-enemy-caption"><span>'+(G.elite?'Элитный противник':enemy.type==='boss'?'Последний страж':enemy.type==='mini'?'Опасный противник':'Следующий противник')+'</span><h3>'+enemy.name+'</h3></div></div>'+
+  const reward=Campaign.active()&&Campaign.final()?(Campaign.club()?'Победа в пробной главе':'Выход из Темницы'):relic?'Реликвия'+(G.elite?' и +$5':''):'Деньги и магазин';
+  return '<div class="passage-screen passage-intro battle-brief" data-passage-screen="intro">'+this.nav(G.endlessFromStart?Endless.label():Campaign.label())+'<header class="passage-heading"><h2>За следующей дверью</h2></header>'+
+   '<div class="passage-enemy-scene"><span class="passage-enemy-portrait" style="'+this.face(index)+'" aria-hidden="true"></span><div class="passage-enemy-caption"><span>'+(G.elite?'Элитный противник':enemy.type==='boss'?(G.endlessFromStart?'Босс':'Последний страж'):enemy.type==='mini'?'Опасный противник':'Следующий противник')+'</span><h3>'+enemy.name+'</h3></div></div>'+
    '<div class="passage-intro-body"><div class="passage-stats brief-stats"><div>'+this.icon('heart')+'<span><small>Здоровье</small><b>'+fmt(enemy.hp)+'</b></span></div><div>'+this.icon('target')+'<span><small>Цель</small><b>'+limitNow()+'</b></span></div><div>'+this.icon('shield')+'<span><small>Броня</small><b>'+(enemy.armor?Math.round(enemy.armor*100)+'%':'—')+'</b></span></div></div><p class="passage-turn-limit">На бой: <b>'+seatsCount()+' хода</b></p>'+ruleHTML+
    Club.introExtra()+
    (G.contract?'<section class="passage-rule"><div><h3>Контракт: '+G.contract.name+'</h3><p>'+G.contract.desc+' Награда: +$'+G.contract.reward+'.</p></div></section>':'')+

@@ -72,7 +72,7 @@ const Campaign={
   };
  },
  renderHUD(){
-  const active=this.active();document.body.classList.toggle('campaign-run',active);document.body.classList.toggle('club-run',this.club());document.body.classList.toggle('club-full',this.club()&&!this.prototype());
+  const active=this.active();document.body.classList.toggle('campaign-run',active);document.body.classList.toggle('endless-run',!!G?.endlessFromStart);document.body.classList.toggle('club-run',this.club());document.body.classList.toggle('club-full',this.club()&&!this.prototype());
   $('#hud-ante').closest('.pill').querySelector('.label').textContent=active?'Уровень':'Этап';
   $('#hud-blind').closest('.pill').querySelector('.label').textContent=active?'Локация':'Бой';
   if(active){$('#hud-ante').textContent=G.level+'/'+this.levels().length;$('#hud-blind').textContent=this.name();}

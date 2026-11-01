@@ -75,7 +75,7 @@ const GameMenu={
   return this.sceneHeader(type,title,'Путь продолжается')+'<div class="scene-result"><span aria-hidden="true">✦</span><p>'+message+'</p></div><div class="row-btns"><button class="primary" id="ov-onward">К следующему бою →</button></div>';
  },
  battleIntroHTML(){
-  if(Campaign.active())return Passage.intro();
+  if(Campaign.active()||G.endlessFromStart)return Passage.intro();
   const enemy=G.enemy,boss=G.boss?BOSSES[G.boss]:null;
   const portrait=((({collector:0,brawler:1,sentinel:2,usurer:3})[enemy.id]??4)*25)+'%';
   const rule=key=>'<div class="brief-house-rule"><b>'+BOSSES[key].name+'</b><p>'+BOSSES[key].desc+'</p></div>';
