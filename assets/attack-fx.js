@@ -62,10 +62,12 @@ const AttackFX = {
   cleanup(run) {
     run.animations.forEach(animation=>animation.cancel());
     if(run.frame)cancelAnimationFrame(run.frame);
+    if(run.countResolve){const resolve=run.countResolve;run.countResolve=null;resolve()}
     run.root.remove();
     (run.sources||[]).forEach(({card,visibility})=>{card.style.visibility=visibility});
     if(this.active===run){this.active=null;document.body.classList.remove('attack-busy');$('#btn-rules').disabled=false}
-    run.tables.forEach(element=>element.classList.remove('attack-charging','attack-fizzle'));
+    run.tables.forEach(element=>element.classList.remove('attack-charging','attack-fizzle','attack-tally'));
+    if(run.previewNote&&run.previewNoteHome!=null&&run.previewNote.textContent==='Считаем очки…'){run.previewNote.textContent=run.previewNoteHome;run.previewNoteHome=null;}
     if(run.accumulator&&(!this.active||this.active===run))run.accumulator.classList.remove('attack-accumulator');
   },
   cancel() {this.deals.forEach(clean=>clean());if(this.active)this.cleanup(this.active);this.clearReceipt()},
@@ -83,6 +85,51 @@ const AttackFX = {
     run.response=respond;
     setTimeout(()=>{if(G===game&&G.seat===seat&&G.battle.resolving)respond()},270);
   },
+  isMult(text){return /(?:[x×]\s*\d|\+\s*\d)/.test(text)},
+  isGlobalMult(text){return /^(?:точность|масти|риск|синхронизация|равновесие|лесенка|всё или ничего|Авантюрист|Ярость должника)/.test(text)||/^возврат \+/.test(text)},
+  pulseNumber(run,element,scale=1.16){
+    if(!element?.animate)return;
+    this.animate(run,element,[
+      {transform:'translate(-50%,-50%) scale(1)'},
+      {transform:'translate(-50%,-50%) scale('+scale+')',offset:.4},
+      {transform:'translate(-50%,-50%) scale(1)'}
+    ],{duration:200,easing:'ease-out',fill:'none'});
+  },
+  pulseTag(text){
+    const chip=[...document.querySelectorAll('#tags .tag')].find(el=>el.textContent.trim()===String(text).trim());
+    if(!chip)return;
+    chip.classList.remove('punch');void chip.offsetWidth;chip.classList.add('punch');
+    setTimeout(()=>chip.classList.remove('punch'),330);
+  },
+  multBadge(run,point,text){
+    if(run.multBadge)run.multBadge.remove();
+    const badgePoint={x:Math.max(24,Math.min(innerWidth-24,point.x)),y:Math.max(28,point.y-40)};
+    const badge=this.node(run,'attack-mult-badge',badgePoint,text);
+    run.multBadge=badge;
+    const animation=this.animate(run,badge,[
+      {opacity:0,transform:'translate(-50%,-50%) scale(.6)'},
+      {opacity:1,transform:'translate(-50%,-50%) scale(1.06)',offset:.25},
+      {opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.62},
+      {opacity:0,transform:'translate(-50%,-62%) scale(.95)'}
+    ],{duration:420,easing:'ease-out',fill:'none'});
+    animation.finished.then(()=>{if(run.multBadge===badge){badge.remove();run.multBadge=null}},()=>{});
+  },
+  countTo(run,element,from,to,duration){
+    return new Promise(resolve=>{
+      if(!element){resolve();return}
+      if(this.active!==run||!element.animate){element.textContent=fmt(to);resolve();return}
+      const finish=()=>{run.countResolve=null;resolve()};
+      run.countResolve=finish;
+      const start=performance.now();let lastText=0;
+      const step=now=>{
+        if(this.active!==run){finish();return}
+        const progress=Math.min(1,(now-start)/Math.max(1,duration));
+        if(!MOBILE_FX||now-lastText>=33||progress===1){element.textContent=fmt(Math.round(from+(to-from)*progress));lastText=now;}
+        if(progress<1)run.frame=requestAnimationFrame(step);else finish();
+      };
+      run.frame=requestAnimationFrame(step);
+    });
+  },
   async play(game,seat,result) {
     this.cancel();
     const root=document.createElement('div');root.className='attack-fx-layer';root.setAttribute('aria-hidden','true');document.body.appendChild(root);
@@ -91,23 +138,28 @@ const AttackFX = {
     const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     try{
       if(REDUCED||document.hidden||typeof root.animate!=='function'){run.commit(false);return}
+      const began=performance.now();
       document.body.classList.add('attack-busy');$('#btn-rules').disabled=true;
       run.accumulator=$('.fbox.result');
       const rawOrigin=this.center(run.accumulator),rawTarget=this.center($('#enemy-portrait'));
       if(!rawOrigin||!rawTarget){run.commit(false);return}
       const origin=this.visiblePoint(rawOrigin),target=this.visiblePoint(rawTarget);
       const forecast=combatForecast(result);
-      const caption=this.node(run,'attack-caption',{x:origin.x,y:origin.y+29},result.total?'ЗАРЯД':'НЕТ УРОНА');
+      const caption=this.node(run,'attack-caption',{x:origin.x,y:origin.y+29},result.total?'ОЧКИ':'НЕТ УРОНА');
       const orb=this.node(run,'attack-orb',origin);
-      const number=this.node(run,'attack-charge-number',{x:origin.x,y:origin.y-5},'0');
+      const number=this.node(run,'attack-charge-number',{x:origin.x,y:origin.y},'0');
       run.accumulator.classList.add('attack-accumulator');
+      run.previewNote=$('#preview-note');
+      run.previewNoteHome=run.previewNote?.textContent;
+      if(run.previewNote)run.previewNote.textContent='Считаем очки…';
       let shard=0;
       result.tables.forEach((table,index)=>{
         if(table.empty)return;
         const lane=document.querySelector('#hand .tbl[data-t="'+index+'"]');if(!lane)return;
-        run.tables.push(lane);lane.classList.add(table.bust?'attack-fizzle':'attack-charging');
+        run.tables.push(lane);
         const cards=[...lane.querySelectorAll('.t-cards .card')];
         if(table.bust){
+          lane.classList.add('attack-fizzle');
           const p=this.center(lane);
           for(let j=0;j<(MOBILE_FX?2:4);j++){
             const spark=this.node(run,'attack-spark attack-spark-red',p);
@@ -125,17 +177,61 @@ const AttackFX = {
         });
       });
       if(!result.total){orb.hidden=true;number.hidden=true;await pause(220);run.commit(false);return}
-      const began=performance.now(),charge=forecast.hit.attack;
-      let lastNumberFrame=0;
-      const tick=now=>{
-        if(this.active!==run)return;
-        const progress=Math.min(1,(now-began)/480);
-        if(!MOBILE_FX||now-lastNumberFrame>=33||progress===1){number.textContent=fmt(charge*progress);lastNumberFrame=now;}
-        if(progress<1)run.frame=requestAnimationFrame(tick);
-      };run.frame=requestAnimationFrame(tick);
       this.animate(run,orb,[{transform:'translate(-50%,-50%) scale(.2)',opacity:0},{transform:'translate(-50%,-50%) scale(1)',opacity:.9}],{duration:470,easing:'ease-out'});
-      await pause(490);if(!this.valid(run))return;
-      number.textContent=fmt(charge);caption.textContent=result.exact?'ТОЧНЫЙ УДАР':'УДАР';
+      // Score the tables one at a time so the number climbs instead of appearing at once.
+      let shown=0;
+      for(let index=0;index<result.tables.length;index++){
+        const table=result.tables[index];
+        if(table.empty||table.bust)continue;
+        const lane=run.tables.find(element=>element.dataset.t===String(index));
+        if(lane)lane.classList.add('attack-charging');
+        caption.textContent='СТОЛ '+(index+1);
+        await this.countTo(run,number,shown,shown+table.score,MOBILE_FX?150:190);
+        if(!this.valid(run))return;
+        shown+=table.score;
+        if(lane){
+          const point=this.center(lane);
+          if(point){
+            const pop=this.node(run,'attack-lane-score',point,'+'+fmt(table.score));
+            this.animate(run,pop,[{opacity:0,transform:'translate(-50%,-50%) scale(.7)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.08)',offset:.3},{opacity:0,transform:'translate(-50%,-72%) scale(.95)'}],{duration:560,easing:'ease-out',fill:'none'});
+          }
+        }
+        this.pulseNumber(run,number);
+        const mults=(table.tags||[]).filter(text=>this.isMult(text)).slice(0,MOBILE_FX?2:4);
+        for(const text of mults){
+          this.multBadge(run,origin,text);
+          this.pulseTag(text);
+          this.pulseNumber(run,number,1.22);
+          if(typeof tgHaptic==='function')tgHaptic('light');
+          await pause(MOBILE_FX?70:95);
+          if(!this.valid(run))return;
+        }
+        if(lane){lane.classList.remove('attack-charging');lane.classList.add('attack-tally');}
+        await pause(60);
+        if(!this.valid(run))return;
+      }
+      // Global bonuses land as separate hits while the total finishes climbing.
+      const globals=result.tags.filter(text=>this.isGlobalMult(text));
+      if(globals.length)caption.textContent='БОНУСЫ';
+      const tally=this.countTo(run,number,shown,result.total,Math.max(MOBILE_FX?180:240,globals.length*(MOBILE_FX?110:135)));
+      for(const text of globals){
+        this.multBadge(run,origin,text);
+        this.pulseTag(text);
+        this.pulseNumber(run,number,1.24);
+        if(typeof tgHaptic==='function')tgHaptic('light');
+        await pause(MOBILE_FX?85:110);
+        if(!this.valid(run))return;
+      }
+      await tally;
+      if(!this.valid(run))return;
+      number.textContent=fmt(result.total);
+      this.pulseNumber(run,number,1.3);
+      if(run.previewNote&&run.previewNoteHome!=null){run.previewNote.textContent=run.previewNoteHome;run.previewNoteHome=null;}
+      caption.textContent=result.exact?'ТОЧНЫЙ УДАР':'УДАР';
+      const flightTime=MOBILE_FX?680:760;
+      const remaining=flightTime-(performance.now()-began);
+      if(remaining>0)await pause(remaining);
+      if(!this.valid(run))return;
       const dx=target.x-origin.x,dy=target.y-origin.y;
       const beam=this.node(run,'attack-beam',origin);beam.style.width=Math.hypot(dx,dy)+'px';beam.style.rotate=Math.atan2(dy,dx)+'rad';
       this.animate(run,beam,[{transform:'scaleX(0)',opacity:0},{transform:'scaleX(1)',opacity:.85,offset:.6},{transform:'scaleX(1)',opacity:0}],{duration:260,easing:'ease-out'});
