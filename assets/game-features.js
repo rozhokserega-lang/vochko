@@ -31,6 +31,7 @@ function resumeRun() {
   restoringRun = true;
   G = saved.game;
   Tarot.restoreReusable(G);
+  Leaderboard.start(G);
   G.cons = saved.consKeys.map(key => CONS[key]);
   G.jokers = G.jokers.map(j => ({...j, ...JOKERS.find(def => def.id === j.id), ...(j.charges !== undefined ? {charges:j.charges} : {})}));
   const bindOffer = item => {
