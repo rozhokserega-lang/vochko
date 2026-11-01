@@ -22,6 +22,7 @@ const Passage={
   return '<div class="passage-screen passage-intro battle-brief" data-passage-screen="intro">'+this.nav(Campaign.label())+'<header class="passage-heading"><h2>За следующей дверью</h2></header>'+
    '<div class="passage-enemy-scene"><span class="passage-enemy-portrait" style="'+this.face(index)+'" aria-hidden="true"></span><div class="passage-enemy-caption"><span>'+(G.elite?'Элитный противник':enemy.type==='boss'?'Последний страж':enemy.type==='mini'?'Опасный противник':'Следующий противник')+'</span><h3>'+enemy.name+'</h3></div></div>'+
    '<div class="passage-intro-body"><div class="passage-stats brief-stats"><div>'+this.icon('heart')+'<span><small>Здоровье</small><b>'+fmt(enemy.hp)+'</b></span></div><div>'+this.icon('target')+'<span><small>Цель</small><b>'+limitNow()+'</b></span></div><div>'+this.icon('shield')+'<span><small>Броня</small><b>'+(enemy.armor?Math.round(enemy.armor*100)+'%':'—')+'</b></span></div></div><p class="passage-turn-limit">На бой: <b>'+seatsCount()+' хода</b></p>'+ruleHTML+
+   Club.introExtra()+
    (G.contract?'<section class="passage-rule"><div><h3>Контракт: '+G.contract.name+'</h3><p>'+G.contract.desc+' Награда: +$'+G.contract.reward+'.</p></div></section>':'')+
    '<section class="passage-reward">'+itemArt('relic',relic?'revive':'coins')+'<div><small>Награда за победу</small><b>'+reward+'</b></div></section>'+
    '<div class="passage-cta"><button type="button" class="primary" id="ov-start">Войти в бой</button></div><details class="passage-preparation"><summary>Подготовиться '+this.icon('next')+'</summary><div class="passage-preparation-content">'+(G.fairStart?'<p>Честный старт: бонусы лавки отключены.</p>':'')+talentSummary()+bargainSummary()+tableFeaturesSummary(true)+(rules.length&&enemyTrait()?'<p>'+enemyTrait()+'</p>':'')+'<p>'+tablesPerSeat()+' стола за ход. Добор и остановка стола не тратят ход.</p><button type="button" class="ghost" id="ov-rules">Правила боя</button></div></details></div></div>';
@@ -29,6 +30,7 @@ const Passage={
  decorate(){
   const root=document.querySelector('#overlay [data-passage-screen]');if(!root)return;
   root.closest('.modal').classList.add('passage-modal');
+  Club.bindIntro(root);
   root.querySelector('.passage-menu').onclick=()=>{FastDraw.flush();saveRun();newGame();};
  },
  preload(){if(this.images)return;this.images=['passage-corridor.webp','passage-stops.webp'].map(file=>{const image=new Image();image.src='assets/'+file;return image;});}

@@ -1,7 +1,7 @@
 /* Chapter progression is separate from legacy ante/stake runs. */
 const CHAPTERS=[
  {id:'dungeon',name:'Темница',ready:true,desc:'Десять уровней до свободы. Выбери колоду и победи начальника темницы.'},
- {id:'club',name:'Подпольный клуб',ready:true,prototype:true,desc:'Пробная глава · 3 боя. Выигрывай дополнительные ходы и используй уязвимости.'},
+ {id:'club',name:'Подпольный клуб',ready:true,desc:'Десять боёв против шулеров. Выигрывай ходы, раскрывай уязвимости и победи хозяина.'},
  {id:'house',name:'Игорный дом',ready:false,desc:'Профессиональные игроки и сочетания особенностей столов.'},
  {id:'salon',name:'Закрытый салон',ready:false,desc:'Дорогие возможности, сильные сборки и опасные сделки.'},
  {id:'owner',name:'Казино хозяина',ready:false,desc:'Последняя глава: испытание освоенных механик.'}
@@ -18,21 +18,37 @@ const DUNGEON_LEVELS=[
  {name:'Страж ворот',enemy:'sentinel',hp:9800,blind:0},
  {name:'Начальник темницы',enemy:'jailer',hp:13000,blind:2,rule:'pendulum'}
 ];
+// Keep ongoing three-fight saves playable under their original rules.
+const CLUB_PREVIEW_LEVELS=[
+ {name:'Уличный зазывала',enemy:'club_host',mechanic:'host',hp:2940,blind:0,portrait:0,attack:23},
+ {name:'Ловкач',enemy:'club_cheat',mechanic:'near',hp:5760,blind:1,portrait:2,attack:30,relic:true},
+ {name:'Хозяин клуба',enemy:'club_boss',mechanic:'previewBoss',hp:9200,blind:2,portrait:4,attack:38,shield:260}
+];
 const CLUB_LEVELS=[
- {name:'Уличный зазывала',enemy:'club_host',hp:2940,blind:0,portrait:0,attack:23},
- {name:'Ловкач',enemy:'club_cheat',hp:5760,blind:1,portrait:2,attack:30,relic:true},
- {name:'Хозяин клуба',enemy:'club_boss',hp:9200,blind:2,portrait:4,attack:38}
+ {name:'Уличный зазывала',enemy:'club_host',mechanic:'host',hp:2100,blind:0,portrait:0,attack:16},
+ {name:'Карманник',enemy:'club_pickpocket',mechanic:'pocket',hp:2750,blind:0,portrait:1,attack:14},
+ {name:'Ловкач',enemy:'club_cheat',mechanic:'near',hp:4000,blind:0,portrait:2,attack:17},
+ {name:'Старшая шулерка',enemy:'club_sharp',mechanic:'exact',hp:5200,blind:1,portrait:3,attack:22,relic:true},
+ {name:'Скупщик фишек',enemy:'club_broker',mechanic:'deal',hp:6000,blind:0,portrait:4,attack:18},
+ {name:'Костяшник',enemy:'club_dice',mechanic:'long',hp:7250,blind:0,portrait:5,attack:18,heavy:27},
+ {name:'Шулерка с печаткой',enemy:'club_signet',mechanic:'red',hp:8800,blind:0,portrait:6,attack:21},
+ {name:'Клубный вышибала',enemy:'club_bouncer',mechanic:'armor',hp:11000,blind:1,portrait:7,attack:22,armor:.1,relic:true},
+ {name:'Сборщик долгов',enemy:'club_debt',mechanic:'debt',hp:12800,blind:0,portrait:8,attack:24},
+ {name:'Хозяин клуба',enemy:'club_boss',mechanic:'boss',hp:17000,blind:2,portrait:9,attack:27,heavy:34,shield:900}
 ];
 const Campaign={
  active(){return !!G?.campaign;},
- progress(){if(!META.campaign)META.campaign={unlocked:0,completed:[],bestLevels:{}};META.campaign.completed= META.campaign.completed||[];META.campaign.bestLevels=META.campaign.bestLevels||{};return META.campaign;},
+ progress(){if(!META.campaign)META.campaign={unlocked:0,completed:[],bestLevels:{}};META.campaign.completed= META.campaign.completed||[];META.campaign.bestLevels=META.campaign.bestLevels||{};const p=META.campaign;
+  if(!p.clubFullProgressVersion){if(p.clubPrototypeCleared||((p.bestLevels[1]||0)>0&&!p.completed.includes(1))){p.clubPrototypeBest=p.bestLevels[1]||(p.clubPrototypeCleared?3:0);p.bestLevels[1]=0;}p.clubFullProgressVersion=2;}
+  return p;},
  club(game=G){return !!game?.campaign&&game.chapter===1;},
- levels(game=G){return this.club(game)?CLUB_LEVELS:DUNGEON_LEVELS;},
+ prototype(game=G){return this.club(game)&&game.clubVersion!==2;},
+ levels(game=G){return this.club(game)?(this.prototype(game)?CLUB_PREVIEW_LEVELS:CLUB_LEVELS):DUNGEON_LEVELS;},
  name(game=G){return this.club(game)?'Подпольный клуб':'Темница';},
  final(){return G.level===this.levels().length;},
  level(){const levels=this.levels();return levels[Math.max(0,Math.min(levels.length-1,(G.level||1)-1))];},
  label(game=G){return game?.campaign?this.name(game)+' · уровень '+game.level+' / '+this.levels(game).length:'Этап '+game.ante;},
- savedLabel(game){return game.campaign?this.label(game)+' · '+game.player.hp+' HP':'Старый забег · этап '+game.ante+' · '+BLIND_SHORT[game.blind]+' · '+game.player.hp+' HP';},
+ savedLabel(game){return game.campaign?this.label(game)+(this.prototype(game)?' · старая пробная глава':'')+' · '+game.player.hp+' HP':'Старый забег · этап '+game.ante+' · '+BLIND_SHORT[game.blind]+' · '+game.player.hp+' HP';},
  prepare(){if(!this.active())return;G.chapter=this.club()?1:0;G.level=Math.max(1,Math.min(this.levels().length,G.level||1));G.ante=1+Math.floor((G.level-1)/3);G.blind=this.level().blind;},
  elite(){return this.active()&&!!this.level().elite;},
  applyRule(){if(this.club()){G.boss=null;G.boss2=null;return;}if(this.active()&&this.level().rule){G.boss=this.level().rule;G.boss2=null;lastBoss=G.boss;}},
@@ -52,11 +68,11 @@ const Campaign={
   const create=Enemy.create;Enemy.create=function(){
    if(!Campaign.active())return create.call(this);
    const level=Campaign.level(),def=ENEMIES.find(e=>e.id===level.enemy)||{id:'jailer',moves:['attack','guard','heavy','rage']};
-   return {...def,name:level.name,id:level.enemy,glyph:def.glyph||'♚',portraitIndex:level.portrait??G.level-1,type:Campaign.final()?'boss':(level.blind===1||G.elite?'mini':'normal'),hp:G.target,maxHp:G.target,shield:0,armor:level.enemy==='sentinel'?COMBAT.armor:0,phase:1,effects:[],intent:null};
+   return {...def,name:level.name,id:level.enemy,glyph:def.glyph||'♚',portraitIndex:level.portrait??G.level-1,type:Campaign.final()?'boss':(level.blind===1||G.elite?'mini':'normal'),hp:G.target,maxHp:G.target,shield:0,armor:level.armor??(level.enemy==='sentinel'?COMBAT.armor:0),phase:1,effects:[],intent:null};
   };
  },
  renderHUD(){
-  const active=this.active();document.body.classList.toggle('campaign-run',active);document.body.classList.toggle('club-run',this.club());
+  const active=this.active();document.body.classList.toggle('campaign-run',active);document.body.classList.toggle('club-run',this.club());document.body.classList.toggle('club-full',this.club()&&!this.prototype());
   $('#hud-ante').closest('.pill').querySelector('.label').textContent=active?'Уровень':'Этап';
   $('#hud-blind').closest('.pill').querySelector('.label').textContent=active?'Локация':'Бой';
   if(active){$('#hud-ante').textContent=G.level+'/'+this.levels().length;$('#hud-blind').textContent=this.name();}
@@ -69,28 +85,32 @@ const Campaign={
  locations(){
   this.preloadPortraits();const progress=this.progress();GameMenu.backTarget='home';G.pending='setup';
   const best=Math.min(10,progress.bestLevels[0]||0);
-  showOverlay('<div class="location-screen"><button class="menu-back" id="locations-back">← Главное меню</button><header><div class="kicker">Пять ступеней к хозяину казино</div><h2>Путь к свободе</h2><p class="sub">Начни в Темнице. Пройди 10 боёв, чтобы открыть следующую главу.</p></header><section class="location-hero"><div class="location-hero-copy"><span class="location-label">Глава I · доступна</span><h3>Темница</h3><p>Десять противников. Одна дверь на свободу.</p><div class="location-progress"><span>Лучший результат</span><b>'+best+' / 10</b></div><div class="location-steps" aria-label="Рекорд '+best+' из 10">'+Array.from({length:10},(_,i)=>'<i class="'+(i<best?'done':'')+'"></i>').join('')+'</div><button class="home-start" data-chapter="0">Выбрать колоду <span aria-hidden="true">→</span></button></div></section><div class="location-next-label">Дальше по пути</div><div class="location-path">'+CHAPTERS.slice(1).map((c,index)=>{const i=index+1,unlocked=i<=progress.unlocked;if(unlocked&&c.ready)return '<section class="location-locked location-playable"><span class="location-node">II</span><div><h3>'+c.name+'</h3><p>'+c.desc+'</p><small>Лучший результат: '+Math.min(3,progress.bestLevels[1]||0)+' / 3 · пробная глава</small><button class="home-start" data-chapter="1">Войти в клуб →</button></div></section>';return '<section class="location-locked"><span class="location-node" aria-hidden="true">'+['II','III','IV','V'][index]+'</span><div><h3>'+c.name+'</h3><p>'+c.desc+'</p><small>'+(unlocked?'Открыто · содержимое готовится':'После главы «'+CHAPTERS[i-1].name+'»')+'</small></div><span class="location-lock">'+(unlocked?'Скоро':'Закрыто')+'</span></section>';}).join('')+'</div></div>',true);
+  showOverlay('<div class="location-screen"><button class="menu-back" id="locations-back">← Главное меню</button><header><div class="kicker">Пять ступеней к хозяину казино</div><h2>Путь к свободе</h2><p class="sub">Начни в Темнице. Пройди 10 боёв, чтобы открыть следующую главу.</p></header><section class="location-hero"><div class="location-hero-copy"><span class="location-label">Глава I · доступна</span><h3>Темница</h3><p>Десять противников. Одна дверь на свободу.</p><div class="location-progress"><span>Лучший результат</span><b>'+best+' / 10</b></div><div class="location-steps" aria-label="Рекорд '+best+' из 10">'+Array.from({length:10},(_,i)=>'<i class="'+(i<best?'done':'')+'"></i>').join('')+'</div><button class="home-start" data-chapter="0">Выбрать колоду <span aria-hidden="true">→</span></button></div></section><div class="location-next-label">Дальше по пути</div><div class="location-path">'+CHAPTERS.slice(1).map((c,index)=>{const i=index+1,unlocked=i<=progress.unlocked;if(unlocked&&c.ready)return '<section class="location-locked location-playable"><span class="location-node">II</span><div><h3>'+c.name+'</h3><p>'+c.desc+'</p><small>Лучший результат: '+Math.min(10,progress.bestLevels[1]||0)+' / 10</small><button class="home-start" data-chapter="1">Войти в клуб →</button></div></section>';return '<section class="location-locked"><span class="location-node" aria-hidden="true">'+['II','III','IV','V'][index]+'</span><div><h3>'+c.name+'</h3><p>'+c.desc+'</p><small>'+(unlocked?'Открыто · содержимое готовится':'После главы «'+CHAPTERS[i-1].name+'»')+'</small></div><span class="location-lock">'+(unlocked?'Скоро':'Закрыто')+'</span></section>';}).join('')+'</div></div>',true);
   $('#overlay .modal').classList.add('location-menu');
   document.querySelectorAll('[data-chapter]').forEach(button=>button.onclick=()=>{const chapter=Number(button.dataset.chapter);if(chapter>progress.unlocked||!CHAPTERS[chapter]?.ready)return;SETUP.chapter=chapter;GameMenu.setup();});$('#locations-back').onclick=()=>GameMenu.main();tgShowBack(true);
  },
  setupHTML(){return '<div class="campaign-choice"><div><small>Локация 1 из 5</small><b>Темница · 10 уровней</b></div><button class="ghost" id="setup-location">Карта локаций</button></div>';},
  recordEnd(win){
   if(G.metaDone)return;G.metaDone=true;const p=this.progress(),key=G.chapter||0;
-  META.stats.runs++;if(win)META.stats.wins++;META.stats.bestScore=Math.max(META.stats.bestScore,G.stats.bestSeat);p.bestLevels[key]=Math.max(p.bestLevels[key]||0,G.level);
+  META.stats.runs++;if(win)META.stats.wins++;META.stats.bestScore=Math.max(META.stats.bestScore,G.stats.bestSeat);if(this.prototype())p.clubPrototypeBest=Math.max(p.clubPrototypeBest||0,G.level);else p.bestLevels[key]=Math.max(p.bestLevels[key]||0,G.level);
   const pts=Math.floor((G.runPoints||0)/1000),levels=G.stats.blinds*2,winB=win?15:0,total=pts+levels+winB;META.shop.coins+=total;G.coinInfo={points:G.runPoints||0,pts,antes:levels,winB,mult:1,total};
   if(G.daily){const r=META.daily[G.daily],prog=G.stats.blinds;if(!r||prog>r.prog)META.daily[G.daily]={prog,level:G.level,chapter:G.chapter||0,win,best:G.stats.bestSeat};}
   metaSave();
  },
  victory(){
-  if(!this.active()||G.phase!=='shop'||!this.final()||G.enemy?.hp>0)return;G.phase='won';if(this.club()){const p=this.progress();p.clubPrototypeCleared=true;p.bestLevels[1]=3;this.recordEnd(true);metaSave();tgClosingConfirmation(false);render();const game=G;setTimeout(()=>{if(G===game&&G.phase==='won')this.showVictory();},350);return;}const p=this.progress();if(!p.completed.includes(0))p.completed.push(0);p.unlocked=Math.max(1,p.unlocked||0);p.bestLevels[0]=10;G.unlockedChapter=1;unlockAch('win');this.recordEnd(true);metaSave();tgClosingConfirmation(false);render();const game=G;
+  if(!this.active()||G.phase!=='shop'||!this.final()||G.enemy?.hp>0)return;G.phase='won';if(this.prototype()){const p=this.progress();p.clubPrototypeCleared=true;p.clubPrototypeBest=3;this.recordEnd(true);metaSave();tgClosingConfirmation(false);render();const game=G;setTimeout(()=>{if(G===game&&G.phase==='won')this.showVictory();},350);return;}const p=this.progress(),chapter=G.chapter||0;if(!p.completed.includes(chapter))p.completed.push(chapter);p.unlocked=Math.max(chapter+1,p.unlocked||0);p.bestLevels[chapter]=10;G.unlockedChapter=chapter+1;unlockAch('win');this.recordEnd(true);metaSave();tgClosingConfirmation(false);render();const game=G;
   setTimeout(()=>{if(G===game&&G.phase==='won')this.showVictory();},350);
  },
  showVictory(){
-  if(this.club()){
-   showOverlay('<div class="campaign-exit"><div class="kicker">Подпольный клуб · 3 из 3</div><h2>Клуб пройден</h2><p class="sub">Три пробных боя завершены. Полная глава будет состоять из десяти боёв; Игорный дом пока закрыт.</p><div class="stat-line"><span>Лучший ход</span><b>'+fmt(G.stats.bestSeat)+'</b></div>'+coinSummaryHTML()+'<div class="row-btns"><button class="primary" id="campaign-map">Карта локаций</button><button class="ghost" id="campaign-home">Главное меню</button></div></div>');
+  if(this.club()&&!this.prototype()){
+   showOverlay('<div class="campaign-exit"><div class="kicker">Подпольный клуб · 10 из 10</div><h2>Хозяин остался без выигрыша</h2><p class="sub">Все десять противников побеждены. Пройденная глава сохранена.</p><div class="chapter-unlocked"><b>Открыт Игорный дом</b><p>Право входа сохранено. Следующая глава пока готовится; Подпольный клуб можно пройти другой сборкой.</p></div><div class="stat-line"><span>Боёв пройдено</span><b>'+G.stats.blinds+' / 10</b></div><div class="stat-line"><span>Лучший ход</span><b>'+fmt(G.stats.bestSeat)+'</b></div>'+coinSummaryHTML()+'<div class="row-btns"><button class="primary" id="campaign-map">Карта локаций</button><button class="ghost" id="campaign-home">Главное меню</button></div></div>');
    $('#campaign-map').onclick=()=>this.locations();$('#campaign-home').onclick=()=>newGame();return;
   }
-  showOverlay('<div class="campaign-exit"><div class="kicker">Темница · 10 из 10</div><h2>Дверь открыта</h2><p class="sub">Начальник темницы повержен. Ты выбрался из подземелья.</p><div class="chapter-unlocked"><b>Открыт Подпольный клуб</b><p>Следующая глава сохранена в прогрессе. Доступна пробная версия: три боя с новыми приёмами и дополнительным ходом за условие.</p></div><div class="stat-line"><span>Боёв пройдено</span><b>'+G.stats.blinds+' / 10</b></div><div class="stat-line"><span>Лучший ход</span><b>'+fmt(G.stats.bestSeat)+'</b></div>'+coinSummaryHTML()+'<div class="row-btns"><button class="primary" id="campaign-map">Карта локаций</button><button class="ghost" id="campaign-home">Главное меню</button></div></div>');
+  if(this.prototype()){
+   showOverlay('<div class="campaign-exit"><div class="kicker">Подпольный клуб · 3 из 3</div><h2>Клуб пройден</h2><p class="sub">Старая пробная глава завершена по прежним правилам. На карте уже доступен полный клуб из десяти боёв. Эта попытка не открывает Игорный дом.</p><div class="stat-line"><span>Лучший ход</span><b>'+fmt(G.stats.bestSeat)+'</b></div>'+coinSummaryHTML()+'<div class="row-btns"><button class="primary" id="campaign-map">Карта локаций</button><button class="ghost" id="campaign-home">Главное меню</button></div></div>');
+   $('#campaign-map').onclick=()=>this.locations();$('#campaign-home').onclick=()=>newGame();return;
+  }
+  showOverlay('<div class="campaign-exit"><div class="kicker">Темница · 10 из 10</div><h2>Дверь открыта</h2><p class="sub">Начальник темницы повержен. Ты выбрался из подземелья.</p><div class="chapter-unlocked"><b>Открыт Подпольный клуб</b><p>Следующая глава сохранена в прогрессе. Доступна полная глава: десять противников, дополнительные ходы, сделки и уязвимости.</p></div><div class="stat-line"><span>Боёв пройдено</span><b>'+G.stats.blinds+' / 10</b></div><div class="stat-line"><span>Лучший ход</span><b>'+fmt(G.stats.bestSeat)+'</b></div>'+coinSummaryHTML()+'<div class="row-btns"><button class="primary" id="campaign-map">Карта локаций</button><button class="ghost" id="campaign-home">Главное меню</button></div></div>');
   $('#campaign-map').onclick=()=>this.locations();$('#campaign-home').onclick=()=>newGame();
  },
  showLoss(){
@@ -98,9 +118,10 @@ const Campaign={
   $('#campaign-retry').onclick=()=>{SETUP.chapter=G.chapter||0;GameMenu.setup();};$('#campaign-home').onclick=()=>newGame();
  },
  rules(){
-  if(this.club()){
+  if(this.club()&&!this.prototype()){Club.showRules();return;}
+  if(this.prototype()){
    showOverlay('<div class="kicker">Подпольный клуб · пробная глава</div><h2>Три боя в клубе</h2><div class="rules"><p>Каждый бой начинается с четырьмя ходами. Зазывала атакует на 23, Ловкач — на 30, хозяин — на 38 HP. Переборы по-прежнему причиняют дополнительный урон.</p><p>У Ловкача один раз за бой собери в одном розыгрыше два стола с суммой от цели −2 до цели: получишь дополнительный ход. Остальные столы могут быть пустыми или перебранными.</p><p>Хозяин чередует стойки. В защите он получает щит после твоего удара. В открытой стойке указанный стол получает +60% урона, хозяин атакует. Стойка и стол показаны до добора.</p><p>После первого и второго боёв доступны магазин и остановка. После Ловкача — реликвия и гарантированный выбор отдыха или кузницы перед боссом. Это короткая пробная глава, её победа пока не открывает Игорный дом.</p></div><button class="primary" id="ov-close">Понятно</button>');$('#ov-close').onclick=closeOverlay;return;
   }
-  showOverlay('<div class="kicker">Путь из Темницы</div><h2>Десять уровней до свободы</h2><div class="rules"><p>Пройди 10 уровней и победи начальника темницы. Каждая из пяти локаций — отдельный забег. Победа навсегда открывает следующую локацию, поражение возвращает к началу текущей.</p><p>На ход — три стола, четвёртый можно купить. Добор кладёт карту на первый открытый стол. «Стоп на столе» переводит добор дальше, «Сыграть ход» наносит общий урон. Обычно на бой 4 хода.</p><p>Не превышай цель карт. Расходники исправляют сумму, удаляют и переносят карты. Красные столы из трёх карт лечат, чёрные бьют сильнее. Талант и джокеры определяют сборку.</p><p>После каждого уровня, кроме финала, — магазин и одна остановка. После уровней 4 и 8 даётся реликвия. Лечение доступно после 4, 8 и 9, а также после добровольной элиты. Перед уровнем 10 гарантирован выбор отдыха или кузницы.</p><p>Старые забеги можно продолжить до конца по прежним правилам. Ежедневный забег проходит в Темнице без стартовых покупок лавки. После Темницы доступна пробная глава «Подпольный клуб» из трёх боёв. Остальные главы пока готовятся.</p></div><div class="row-btns"><button class="primary" id="ov-close">Понятно</button></div>');$('#ov-close').onclick=closeOverlay;
+  showOverlay('<div class="kicker">Путь из Темницы</div><h2>Десять уровней до свободы</h2><div class="rules"><p>Пройди 10 уровней и победи начальника темницы. Каждая из пяти локаций — отдельный забег. Победа навсегда открывает следующую локацию, поражение возвращает к началу текущей.</p><p>На ход — три стола, четвёртый можно купить. Добор кладёт карту на первый открытый стол. «Стоп на столе» переводит добор дальше, «Сыграть ход» наносит общий урон. Обычно на бой 4 хода.</p><p>Не превышай цель карт. Расходники исправляют сумму, удаляют и переносят карты. Красные столы из трёх карт лечат, чёрные бьют сильнее. Талант и джокеры определяют сборку.</p><p>После каждого уровня, кроме финала, — магазин и одна остановка. После уровней 4 и 8 даётся реликвия. Лечение доступно после 4, 8 и 9, а также после добровольной элиты. Перед уровнем 10 гарантирован выбор отдыха или кузницы.</p><p>Старые забеги можно продолжить до конца по прежним правилам. Ежедневный забег проходит в Темнице без стартовых покупок лавки. После Темницы доступен «Подпольный клуб» из десяти боёв. Остальные главы пока готовятся.</p></div><div class="row-btns"><button class="primary" id="ov-close">Понятно</button></div>');$('#ov-close').onclick=closeOverlay;
  }
 };

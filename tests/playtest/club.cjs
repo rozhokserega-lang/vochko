@@ -1,54 +1,43 @@
-const assert=require('node:assert/strict');
-const {launch,load}=require('./runtime.cjs');
+const assert=require('node:assert/strict');const {launch,load}=require('./runtime.cjs');
 (async()=>{const b=await launch();try{
  const p=await b.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'}),errors=[];p.on('pageerror',e=>errors.push(e.message));await load(p);
  await p.evaluate(()=>{META.onboarding={seen:true};newGame(0,'classic',{campaign:true,chapter:1});});assert.equal(await p.evaluate(()=>G.chapter),0);
- await p.evaluate(()=>{Campaign.progress().unlocked=1;metaSave();Campaign.locations();});
- await p.locator('[data-chapter="1"]').click();assert((await p.locator('.preparation-nav').textContent()).includes('Подпольный клуб'));await p.locator('#ov-go').click();
- assert.equal(await p.evaluate(()=>G.chapter),1);assert.equal(await p.evaluate(()=>G.boss),null);assert.equal(await p.locator('#hud-ante').textContent(),'1/3');await p.locator('#ov-start').click();assert.equal(await p.evaluate(()=>G.enemy.intent.amount),23);
- const bonus=await p.evaluate(()=>{
-  G.level=2;startBlind();hideOverlay();startSeat();G.enemy.hp=G.enemy.maxHp=100000;G.seatsLeft=1;
-  const c=(r,s)=>({...G.runDeck.find(c=>c.rank===r&&c.suit===s)});
-  G.seat.tables[0].cards=[c('K','♠'),c('9','♣')];G.seat.tables[1].cards=[c('Q','♠'),c('9','♦')];refreshTables(G.seat);render();
-  const result=evalSeat(G.seat),forecast=combatForecast(result),before=G.player.hp;
-  const previewCount=seatsCount();attackPreview(result);combatForecast(result);
-  finishSeat(result);saveRun();return {out:forecast.outOfSeats,previewCount,total:seatsCount(),left:G.seatsLeft,earned:G.battle.clubBonusEarned,hpLost:before-G.player.hp,phase:G.phase};
- });assert.deepEqual(bonus,{out:false,previewCount:4,total:5,left:1,earned:true,hpLost:30,phase:'play'});
- await p.reload();await p.locator('#ov-continue').click();assert.equal(await p.evaluate(()=>G.chapter),1);assert.equal(await p.evaluate(()=>seatsCount()),5);assert.equal(await p.evaluate(()=>G.seatsLeft),1);
- const repeat=await p.evaluate(()=>{const r={tables:[{sum:21},{sum:21}]};Club.reward(r);return {left:G.seatsLeft,total:seatsCount()};});assert.deepEqual(repeat,{left:1,total:5});
- const boss=await p.evaluate(()=>{
-  G.level=3;startBlind();hideOverlay();startSeat();const reset=seatsCount(),guard={...G.enemy.intent};
-  const r={total:1000,heal:0,exact:0,tables:[{score:500},{score:500}, {empty:true}]};
-  G.battle.turn=1;Enemy.plan();const open={...G.enemy.intent};Club.boostTables(r.tables);r.total=r.tables.reduce((sum,t)=>sum+(t.score||0),0);const hit=attackPreview(r),same=attackPreview(r);const before=G.enemy.hp;Combat.attack(r);
-  const actual=before-G.enemy.hp;
-  const c=(rank,suit)=>({...G.runDeck.find(c=>c.rank===rank&&c.suit===suit)});
-  G.seat.tables[0].cards=[c('K','♠'),c('9','♣')];G.seat.tables[1].cards=[c('Q','♠'),c('9','♦')];
-  G.enemy.intent.clubOpen=false;const base=evalSeat(G.seat);G.enemy.intent.clubOpen=true;const boosted=evalSeat(G.seat);render();
-  const highlight=document.querySelectorAll('.club-vulnerable').length;
-  G.jokers=[{...JOKERS.find(j=>j.id==='allin')}];G.battle.allinBusts=1;G.seat.tables[2].cards=[c('K','♣'),c('Q','♣'),c('9','♠')];const zero=attackPreview(evalSeat(G.seat)).hp;
-  return {reset,guard,open,expected:hit.hp,actual,same:hit.hp===same.hp,localBoost:boosted.tables[0].score===Math.round(base.tables[0].score*1.6),highlight,zero};
- });assert.equal(boss.reset,4);assert.equal(boss.guard.kind,'guard');assert.equal(boss.guard.amount,260);assert.equal(boss.open.clubOpen,true);assert.equal(boss.open.amount,38);assert.equal(boss.expected,1300);assert.equal(boss.actual,1300);assert.equal(boss.same,true);assert.equal(boss.localBoost,true);assert.equal(boss.highlight,1);assert.equal(boss.zero,0);
- // A real three-fight progression, including the earned relic and final victory.
- await p.evaluate(()=>{newGame(0,'classic',{campaign:true,chapter:1});});
- for(let level=1;level<=3;level++){
-  assert.equal(await p.evaluate(()=>G.level),level);await p.locator('#ov-start').click();
-  await p.evaluate(()=>{G.enemy.hp=1;G.seat.tables[0].cards.push(drawFromDeck());finishSeat(evalSeat(G.seat));});
-  await p.waitForFunction(()=>G.phase==='won'||!!G.shop||!!G.relicChoice?.length);
-  if(level===3)break;
-  if(level===2)await p.locator('[data-relic]').first().click();
-  assert.equal(await p.evaluate(()=>shopHealOpen()),true);await p.locator('#btn-next').click();
-  assert.equal(await p.locator('.passage-route-ribbon li').count(),3);
-  if(level===2)assert.deepEqual(await p.evaluate(()=>G.path),['rest','campfire','straight']);
-  await p.locator('[data-node="straight"]').click();
+ await p.evaluate(()=>{Campaign.progress().unlocked=1;metaSave();Campaign.locations();});await p.locator('[data-chapter="1"]').click();assert((await p.locator('.preparation-nav').textContent()).includes('10 боёв'));await p.locator('#ov-go').click();assert.equal(await p.locator('#hud-ante').textContent(),'1/10');assert.equal(await p.evaluate(()=>G.clubVersion),2);
+ for(let level=1;level<=10;level++){
+  assert.equal(await p.evaluate(()=>G.level),level);assert.equal(await p.evaluate(()=>G.enemy.portraitIndex),level-1);assert.equal(await p.evaluate(()=>G.enemy.hp),await p.evaluate(()=>Campaign.level().hp));assert.equal(await p.evaluate(()=>G.boss),null);
+  if(level===5){const before=await p.evaluate(()=>G.money);await p.locator('[data-club-deal]').click();assert.equal(await p.evaluate(()=>G.money),before+5);assert.equal(await p.locator('[data-club-deal]').count(),0);}
+  await p.locator('#ov-start').click();if(level===5)assert.equal(await p.evaluate(()=>G.enemy.intent.amount),Math.ceil(18*1.25));
+  await p.evaluate(()=>{G.enemy.hp=1;G.seat.tables[0].cards.push(drawFromDeck());finishSeat(evalSeat(G.seat));});await p.waitForFunction(()=>G.phase==='won'||!!G.shop||!!G.relicChoice?.length);
+  if(level===10)break;
+  assert.equal(await p.evaluate(()=>!!G.relicChoice?.length),[4,8].includes(level));if([4,8].includes(level))await p.locator('[data-relic]').first().click();assert.equal(await p.evaluate(()=>shopHealOpen()),true);await p.locator('#btn-next').click();assert.equal(await p.locator('.passage-route-ribbon li').count(),10);if(level===9)assert.deepEqual(await p.evaluate(()=>G.path),['rest','campfire','straight']);await p.locator('[data-node="straight"]').click();
  }
- await p.waitForFunction(()=>!!document.querySelector('#campaign-map'));assert.equal(await p.evaluate(()=>G.stats.blinds),3);assert.equal(await p.evaluate(()=>Campaign.progress().unlocked),1);assert.equal(await p.evaluate(()=>Campaign.progress().clubPrototypeCleared),true);
- const wins=await p.evaluate(()=>META.stats.wins);await p.evaluate(()=>Campaign.victory());assert.equal(await p.evaluate(()=>META.stats.wins),wins);
+ await p.waitForFunction(()=>!!document.querySelector('#campaign-map'));assert.equal(await p.evaluate(()=>G.stats.blinds),10);assert.equal(await p.evaluate(()=>Campaign.progress().unlocked),2);assert(await p.evaluate(()=>Campaign.progress().completed.includes(1)));assert.equal(await p.evaluate(()=>Campaign.progress().bestLevels[1]),10);
+ const wins=await p.evaluate(()=>META.stats.wins),coins=await p.evaluate(()=>META.shop.coins);await p.evaluate(()=>Campaign.victory());assert.equal(await p.evaluate(()=>META.stats.wins),wins);assert.equal(await p.evaluate(()=>META.shop.coins),coins);await p.reload();assert.equal(await p.evaluate(()=>Campaign.progress().unlocked),2);await p.locator('#menu-new-game').click();assert.equal(await p.locator('[data-chapter]').count(),2);console.log('Ten real transitions, two relics, voluntary advance, permanent completion and next-chapter eligibility passed');
+ // Exercise real scoring and both sides of each counter, with no pre-applied damage.
+ const mechanics=await p.evaluate(()=>{
+  const check=(condition,message)=>{if(!condition)throw Error(message)};
+  const begin=level=>{newGame(0,'classic',{campaign:true,chapter:1});G.level=level;startBlind();hideOverlay();startSeat();G.enemy.hp=G.enemy.maxHp=100000;G.money=10;};
+  const c=(rank,suit='♠')=>({...G.runDeck.find(c=>c.rank===rank&&c.suit===suit)});
+  const hand=(...ranks)=>ranks.map(rank=>c(rank));
+  begin(2);G.seat.tables[0].cards=hand('K','Q','9');G.seat.tables[1].cards=hand('K');const pocket=evalSeat(G.seat);const f0=combatForecast(pocket);check(G.money===10,'Preview stole money');finishSeat(pocket);check(G.money===8,'Marked bust must cost $2');check(G.player.hp===f0.playerHp,'Pocket forecast mismatch');
+  begin(3);G.seatsLeft=1;G.seat.tables[0].cards=hand('K','9');G.seat.tables[1].cards=hand('Q','9');const near=evalSeat(G.seat);check(!combatForecast(near).outOfSeats,'Bonus turn missing in forecast');check(!G.battle.clubBonusEarned,'Preview granted bonus');finishSeat(near);check(G.seatsLeft===1&&seatsCount()===5,'Last-turn bonus failed');Club.reward(near);check(G.seatsLeft===1,'Bonus repeated');saveRun();
+  const saved=readSavedRun();check(saved.game.battle.clubBonusEarned&&saved.game.clubVersion===2,'Bonus not saved');resumeRun();check(G.seatsLeft===1&&seatsCount()===5,'Bonus not restored');
+  begin(4);G.seat.tables[0].cards=hand('K','Q','2');const exact=evalSeat(G.seat);check(exact.tables[0].exact,'Fixture goal mismatch');check(enemyResponse(exact).amount===11,'Marked exact must halve damage');const f4=combatForecast(exact);finishSeat(exact);check(G.player.hp===f4.playerHp,'Exact counter forecast mismatch');
+  begin(6);G.battle.turn=1;Enemy.plan();G.seat.tables[0].cards=hand('5','5','6','6');const long=evalSeat(G.seat);check(enemyResponse(long).amount===16,'Four cards must mitigate heavy hit');const f6=combatForecast(long);finishSeat(long);check(G.player.hp===f6.playerHp,'Long counter forecast mismatch');
+  begin(7);G.player.hp=60;G.seat.tables[0].cards=[c('7','♥'),c('7','♦'),c('8','♥')];const red=evalSeat(G.seat);check(enemyResponse(red).amount===10,'Red table must halve damage');const f7=combatForecast(red);finishSeat(red);check(G.player.hp===f7.playerHp,'Healing/counter forecast mismatch');
+  begin(8);G.seat.tables[0].cards=hand('K','Q','3');const armored=evalSeat(G.seat),hit=attackPreview(armored);check(Math.abs(hit.armor-.08)<1e-9,'Exact must remove 2% armor in preview');check(G.enemy.armor===.1,'Preview mutated armor');finishSeat(armored);check(Math.abs(G.enemy.armor-.08)<1e-9,'Armor reduction not persistent');
+  begin(9);G.seatsLeft=1;G.seat.tables[0].cards=hand('K','Q','3');finishSeat(evalSeat(G.seat));check(G.seatsLeft===1&&seatsCount()===5,'Debt extra turn failed');
+  begin(10);check(G.enemy.intent.kind==='guard'&&G.enemy.intent.amount===900,'Boss opening guard');G.battle.turn=1;Enemy.plan();check(G.enemy.intent.clubOpen&&G.enemy.intent.clubLane===0,'Boss open stance');G.seat.tables[0].cards=hand('K','Q','4');const open=evalSeat(G.seat);G.enemy.intent.clubOpen=false;const base=evalSeat(G.seat);check(open.tables[0].score===Math.round(base.tables[0].score*1.6),'Open lane bonus');G.battle.turn=2;Enemy.plan();check(G.enemy.intent.kind==='heavy'&&G.enemy.intent.amount===34,'Boss challenge stance');G.seat.tables[1].cards=hand('K','Q','2');G.seatsLeft=1;const boss=evalSeat(G.seat),fb=combatForecast(boss);check(enemyResponse(boss).amount===17,'Boss exact counter');check(!fb.outOfSeats,'Boss bonus not forecast');finishSeat(boss);check(G.player.hp===fb.playerHp&&G.seatsLeft===1,'Boss outcome mismatch');
+  begin(3);check(seatsCount()===4,'Earned turn leaked into a new fight');G.seat.tables[0].cards=hand('K');G.seat.tables[1].cards=hand('Q');check(!Club.canEarn(evalSeat(G.seat)),'Small tables gave a free turn');
+  return true;
+ });assert.equal(mechanics,true);console.log('All counters, shield/armor preview agreement, extra last turns, persistence and one-time rewards passed');
+ // Old completed prototype progress is archived, never promoted into a ten-fight victory.
+ const migration=await p.evaluate(()=>{META.campaign={unlocked:1,completed:[0],bestLevels:{0:10,1:3},clubPrototypeCleared:true};const progress=Campaign.progress();return {best:progress.bestLevels[1],old:progress.clubPrototypeBest,unlocked:progress.unlocked,completed:progress.completed};});assert.deepEqual(migration,{best:0,old:3,unlocked:1,completed:[0]});const failedPreview=await p.evaluate(()=>{META.campaign={unlocked:1,completed:[0],bestLevels:{0:10,1:2}};const m=Campaign.progress();return [m.bestLevels[1],m.clubPrototypeBest];});assert.deepEqual(failedPreview,[0,2]);
  for(const [width,height]of [[320,568],[390,844],[430,932],[1280,900]]){
-  await p.setViewportSize({width,height});await p.evaluate(()=>{newGame(0,'classic',{campaign:true,chapter:1});G.level=2;startBlind();hideOverlay();startSeat();render();});
-  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-  assert((await p.locator('.club-tactic').textContent()).includes('+1 ход'));
-  const intent=await p.locator('#enemy-intent').boundingBox(),player=await p.locator('.player-row').boundingBox();assert(intent.y+intent.height<=player.y||intent.x>=player.x+player.width,'Tactic must not overlap player health');
-  if(width===390)await p.screenshot({path:'/tmp/vochko-club.png'});
+  await p.setViewportSize({width,height});for(const level of [1,2,3,4,5,6,7,8,9,10]){
+   await p.evaluate(level=>{newGame(0,'classic',{campaign:true,chapter:1});G.level=level;startBlind();hideOverlay();startSeat();if(level===10){G.battle.turn=2;Enemy.plan();}render();},level);
+   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);const health=await p.locator('.battle-bar.enemy').boundingBox();const tactic=await p.locator('#enemy-intent').boundingBox(),budget=await p.locator('#round-budget').boundingBox();assert(tactic.y+tactic.height<=budget.y+1,'Tactic must not overlap the turn budget');assert(health.y+health.height<=tactic.y,'Name and health must not overlap the tactic');
+  }
  }
- assert.deepEqual(errors,[]);console.log('Club: unlock, chapter selection, extra last turn once, save/resume, boss preview/actual damage, three-fight victory and four layouts passed');
+ assert.deepEqual(errors,[]);console.log('Full-club progress migration and announced tactics at four viewport sizes passed');
 }finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

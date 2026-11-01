@@ -79,7 +79,7 @@ function attackPreview(result, healApplied = false) {
   const enemy = G.enemy, player = G.player;
   const ctx = Effects.run('attack', {result, mult:1, shieldBonus:0, playerHp:Math.min(player.maxHp,player.hp + (healApplied ? 0 : result.heal || 0))});
   const weak = player.effects.find(effect => effect.id === 'weak')?.power || 0;
-  const armor = enemy.id === 'sentinel' ? Math.max(0, enemy.armor - .02 * result.exact) : enemy.armor;
+  const armor = (enemy.id === 'sentinel'||Club.active()&&Campaign.level().mechanic==='armor') ? Math.max(0, enemy.armor - .02 * result.exact) : enemy.armor;
   const hit = Combat.damage(result.total * ctx.mult * (1 - weak), enemy.shield, armor, ctx.shieldBonus);
   return {...hit, hp:Math.min(enemy.hp, hit.hp), armor, steps:ctx.steps||[]};
 }
@@ -89,6 +89,7 @@ function enemyResponse(result, intent = G.enemy.intent) {
   const longTable = result.tables.some((table,index) => !table.empty && !table.bust && G.seat.tables[index].cards.length >= 4);
   if (G.enemy.id === 'brawler' && intent.kind === 'heavy' && longTable) amount = Math.floor(amount * .6);
   if (G.enemy.id === 'usurer' && intent.kind === 'heal' && result.exact >= 2) amount = 0;
+  amount=Club.counter(result,intent,amount);
   if(hasBargain('fury')&&['attack','heavy','hex'].includes(intent.kind))amount+=2;
   const paid = G.enemy.id === 'collector' && G.battle.bribed;
   return {raw:['attack','heavy','hex'].includes(intent.kind) && !paid ? amount : 0, kind:intent.kind, amount, paid};

@@ -1109,8 +1109,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <script src="assets/table-features.js?v=20261101-club1"></script>
 <script src="assets/fast-draw.js?v=20261029-1"></script>
 <link rel="stylesheet" href="assets/campaign.css?v=20261029-3">
-<script src="assets/campaign.js?v=20261101-club1"></script>
-<script src="assets/club.js?v=20261101-club1"></script>
+<script src="assets/campaign.js?v=20261101-fullclub1"></script>
+<script src="assets/club.js?v=20261101-fullclub1"></script>
 <link rel="stylesheet" href="assets/club.css?v=20261101-club1">
 <link rel="stylesheet" href="assets/card-marking.css?v=20261029-1">
 <script src="assets/card-marking.js?v=20261029-1"></script>
@@ -1118,11 +1118,11 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/duel-field.css?v=20261029-1">
 <link rel="stylesheet" href="assets/duel-art.css?v=20261029-2">
 <link rel="stylesheet" href="assets/passage.css?v=20261030-1">
-<script src="assets/passage.js?v=20261101-art1"></script>
+<script src="assets/passage.js?v=20261101-fullclub1"></script>
 <link rel="stylesheet" href="assets/preparation.css?v=20261030-1">
 <link rel="stylesheet" href="assets/graphics-pass.css?v=20261101-1">
-<link rel="stylesheet" href="assets/club-theme.css?v=20261101-art1">
-<script src="assets/preparation.js?v=20261101-art1"></script>
+<link rel="stylesheet" href="assets/club-theme.css?v=20261101-fullclub1">
+<script src="assets/preparation.js?v=20261101-fullclub1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
 <script src="assets/deckcraft.js?v=20261029-1"></script>
@@ -1249,7 +1249,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261101-club1"></script>
+<script src="assets/game-features.js?v=20261101-fullclub1"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261101-hits1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
@@ -1529,6 +1529,7 @@ const Enemy = {
     else if(i.kind==='heal'){const n=Math.min(response.amount,e.maxHp-e.hp);e.hp+=n;log(n?'Враг лечится: +'+fmt(n):'Два точных стола отменили лечение','bad');}
     else if(i.kind==='rage'){Effects.add(e,'rage',COMBAT.rage);log('Враг усилил следующую атаку ×1,5','bad');}
     // Bust punishment is incoming damage even on a defensive enemy turn.
+    Club.afterResponse(result);
     if(busts&&G.player.hp>0)Combat.receive(busts*bustPenalty(),'Перебор');
   },
   phase() {
@@ -1847,7 +1848,7 @@ function newGame(stake, deckKey, opts) {
   deckKey = DECKS[deckKey] ? deckKey : 'classic';
   G = {
     started:direct,
-    campaign:direct&&!!opts?.campaign,chapter:direct&&!!opts?.campaign&&!daily&&opts?.chapter===1&&Campaign.progress().unlocked>=1?1:0,level:1,
+    campaign:direct&&!!opts?.campaign,chapter:direct&&!!opts?.campaign&&!daily&&opts?.chapter===1&&Campaign.progress().unlocked>=1?1:0,level:1,clubVersion:2,
     stake,
     player: {hp:COMBAT.playerHp,maxHp:COMBAT.playerHp,shield:0,effects:[],revived:false},
     enemy:null, battle:null,
@@ -3546,7 +3547,7 @@ function tableHTML(s, t, ti, scored=null) {
   const active = activeTableIndex(s);
   const can = (s.sel !== null && !t.dead && !t.locked && t.cards.length) || (G.phase === 'play' && s.sel === null && ti === active && tableOpen(t));
   const activeClass = G.phase === 'play' && s.sel === null && ti === active && tableOpen(t) ? ' active' : '';
-  const cls = 'tbl' + (Club.active()&&G.enemy.intent?.clubOpen&&G.enemy.intent.clubLane===ti?' club-vulnerable':'') + (t.blocked ? ' blocked' : '') + activeClass + (t.locked ? ' ok' : '') + (!t.locked && !t.dead && r && !r.bust && r.sum === lim ? ' hit' : '') + (!t.dead && r && r.bust ? ' over' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
+  const cls = 'tbl' + (Club.active()&&G.enemy.intent?.clubOpen&&G.enemy.intent.clubLane===ti?' club-vulnerable':Club.active()&&G.enemy.intent?.clubChallenge==='exact'&&G.enemy.intent.clubLane===ti?' club-challenge':Club.active()&&G.enemy.intent?.clubChallenge==='pocket'&&G.enemy.intent.clubLane===ti?' club-marked':'') + (t.blocked ? ' blocked' : '') + activeClass + (t.locked ? ' ok' : '') + (!t.locked && !t.dead && r && !r.bust && r.sum === lim ? ' hit' : '') + (!t.dead && r && r.bust ? ' over' : '') + (t.dead ? ' dead' : '') + (can ? ' can' : '');
   const full = t.cards.length >= cap;
   const closed = t.blocked || t.dead || t.stood || t.locked || full;
   const state = t.blocked ? 'ЗАМОК' : t.dead ? 'ПЕРЕБОР' : t.stood ? 'СТОП' : t.locked ? 'ТОЧНО' : r && r.bust ? 'Спасти?' : full ? 'ПОЛОН' : ti === active ? 'НАБОР' : 'ЖДЁТ';
