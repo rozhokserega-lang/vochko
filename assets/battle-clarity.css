@@ -72,3 +72,5 @@ body.battle-clarity #table-supplies #dealer>.card.mini .tarot-card-name{font-siz
 body.battle-clarity #table-supplies #cons .cons-btn{flex:0 0 64px;overflow:hidden;gap:1px;padding:2px 3px;justify-content:center}
 body.battle-clarity #table-supplies #cons .cons-btn .item-art{width:17px;height:17px;flex:0 0 17px}
 body.battle-clarity #table-supplies #cons .cons-name{display:block;width:100%;min-width:0;height:22px;max-height:22px;flex:0 0 22px;overflow:hidden;overflow-wrap:anywhere;white-space:normal;text-align:center;font:600 10px/11px 'Segoe UI',sans-serif}
+body.endless-run #table #battle-panel #endless-tactic{position:absolute;left:10px;bottom:62px;max-width:42%;padding:3px 5px;border-radius:3px;background:#102219d9;color:#e8d3a0;font:600 9px/12px 'Segoe UI',sans-serif;z-index:2;pointer-events:none}
+.endless-bonus-rule{font:13px/1.5 'Segoe UI',sans-serif;color:#d2d5be;background:#102219;padding:10px 12px;border-left:2px solid #c6a567}

@@ -117,13 +117,14 @@ function combatForecast(result) {
   } else if (hasRelic('mend')) hp = Math.min(player.maxHp,hp + COMBAT.items.mend);
   const healEnemy = !win && response.kind === 'heal' ? Math.min(response.amount,enemy.maxHp - (enemy.hp - hit.hp)) : 0;
   const extraLife = hasJoker('phoenix') && !G.phoenixUsed && result.total === 0 && result.bust;
-  const outOfSeats = !win && G.seatsLeft <= 1 && !extraLife && !Club.canEarn(result);
-  return {hit,win,incoming,healed,playerHp:hp,playerShield:shield,revive,enemyHeal:healEnemy,response,outOfSeats};
+  const outOfSeats = !win && G.seatsLeft <= 1 && !extraLife && !Club.canEarn(result) && !Endless.canEarn(result);
+  return {hit,win,incoming,healed,playerHp:hp,playerShield:shield,revive,enemyHeal:healEnemy,response,outOfSeats,endlessExtraTurn:Endless.canEarn(result)};
 }
 function forecastText(forecast) {
   const f = forecast;
   return 'HP врага −' + fmt(f.hit.hp) + (f.hit.absorbed ? ' · щит −' + fmt(f.hit.absorbed) : '') +
     (f.win ? ' · победа' : ' · тебе −' + f.incoming + ' HP' + (f.enemyHeal ? ' · враг лечится +' + fmt(f.enemyHeal) : '')) +
+    (f.endlessExtraTurn?' · +1 ход за два точных стола':'') +
     (f.healed ? ' · лечение +' + f.healed : '') + (f.revive ? ' · возрождение' : '') + (f.playerHp <= 0 ? ' · опасно: поражение' : f.outOfSeats ? ' · ходы закончатся' : '');
 }
 function renderRoundBudget() {

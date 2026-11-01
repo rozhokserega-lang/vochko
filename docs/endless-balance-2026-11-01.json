@@ -1,0 +1,106 @@
+{
+  "beforeCommit": "93987d3",
+  "method": "24 identical seeds per arm; sharp talent; threshold 18; balanced shop; straight paths; no sleeve; peek only when visible; simulated UI and timers disabled",
+  "before": [
+    {
+      "group": "without-tarot",
+      "average": 18.2,
+      "median": 20,
+      "min": 5,
+      "max": 26,
+      "turnLoss": 17,
+      "healthLoss": 7
+    },
+    {
+      "group": "starter-tarot",
+      "average": 17.5,
+      "median": 20,
+      "min": 5,
+      "max": 26,
+      "turnLoss": 22,
+      "healthLoss": 2
+    },
+    {
+      "group": "advanced-tarot",
+      "average": 20.4,
+      "median": 23,
+      "min": 5,
+      "max": 29,
+      "turnLoss": 13,
+      "healthLoss": 11
+    }
+  ],
+  "after": [
+    {
+      "group": "without-tarot",
+      "runs": 24,
+      "average": 21,
+      "median": 23,
+      "min": 11,
+      "max": 35,
+      "healthLoss": 15,
+      "turnLoss": 9,
+      "errors": [],
+      "deathFights": {
+        "12": 1,
+        "14": 1,
+        "16": 1,
+        "17": 1,
+        "18": 3,
+        "21": 5,
+        "24": 8,
+        "27": 3,
+        "36": 1
+      }
+    },
+    {
+      "group": "starter-tarot",
+      "runs": 24,
+      "average": 20.5,
+      "median": 20,
+      "min": 11,
+      "max": 35,
+      "healthLoss": 8,
+      "turnLoss": 16,
+      "errors": [],
+      "deathFights": {
+        "12": 3,
+        "14": 1,
+        "15": 2,
+        "18": 2,
+        "19": 1,
+        "20": 1,
+        "21": 3,
+        "22": 1,
+        "24": 3,
+        "27": 4,
+        "30": 2,
+        "36": 1
+      }
+    },
+    {
+      "group": "advanced-tarot",
+      "runs": 24,
+      "average": 30.6,
+      "median": 32,
+      "min": 15,
+      "max": 38,
+      "healthLoss": 20,
+      "turnLoss": 4,
+      "errors": [],
+      "deathFights": {
+        "16": 1,
+        "21": 1,
+        "24": 1,
+        "27": 2,
+        "28": 1,
+        "30": 3,
+        "32": 1,
+        "33": 6,
+        "36": 5,
+        "38": 1,
+        "39": 2
+      }
+    }
+  ]
+}

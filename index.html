@@ -1118,14 +1118,14 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/duel-field.css?v=20261101-endless-art1">
 <link rel="stylesheet" href="assets/duel-art.css?v=20261101-endless-art1">
 <link rel="stylesheet" href="assets/passage.css?v=20261030-1">
-<script src="assets/passage.js?v=20261101-endless-art1"></script>
+<script src="assets/passage.js?v=20261101-endless-balance2"></script>
 <link rel="stylesheet" href="assets/preparation.css?v=20261030-1">
 <link rel="stylesheet" href="assets/graphics-pass.css?v=20261101-1">
 <link rel="stylesheet" href="assets/club-theme.css?v=20261101-fullclub1">
-<link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-fit3">
+<link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-endless-balance2">
 <link rel="stylesheet" href="assets/tarot.css?v=20261101-step2">
 <script src="assets/tarot.js?v=20261101-reuse1"></script>
-<script src="assets/endless.js?v=20261101-art1"></script>
+<script src="assets/endless.js?v=20261101-balance2"></script>
 <script src="assets/preparation.js?v=20261101-nickname1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
@@ -1253,7 +1253,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261101-tarot-reuse1"></script>
+<script src="assets/game-features.js?v=20261101-endless-balance2"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261101-tarot1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
@@ -1383,7 +1383,7 @@ function tablesPerSeat() { return 3 + ((G && G.extraTables) ? 1 : 0); }
 // Лечение и банки продаются только в магазине после босса (или элитного боя).
 function shopHealOpen() { return Campaign.active()?Campaign.healOpen():!!(G && (G.blind === 2 || G.elite)); }
 function baseReward() { return Math.max(0,CONFIG.baseReward - (G && G.stake >= 3 ? 1 : 0) - (hasBargain('pockets')?1:0)); }
-function seatsCount() { return CONFIG.seats + (Campaign.club()&&G.battle?.clubBonusEarned?1:0) + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
+function seatsCount() { return CONFIG.seats + (G?.endlessFromStart&&G.battle?.endlessBonusEarned?1:0) + (Campaign.club()&&G.battle?.clubBonusEarned?1:0) + (G && G.jokers && hasJoker('encore') ? 1 : 0) - (G && G.contract && G.contract.fewer ? 1 : 0); }
 function unlockedStake() {
   try { return Math.min(STAKES.length - 1, Number(localStorage.getItem('vochko.stake') || 0)); } catch (e) { return 0; }
 }
@@ -1942,11 +1942,11 @@ function startBlind() {
   G.pathEliteBoss=null;
   G.adrenaline = 0; G.phoenixUsed = false;
   G.boss2 = null;
-  if (G.boss && G.blind === 2 && (G.stake >= 2 || G.ante >= 7)) {
+  if (G.boss && G.blind === 2 && !G.endlessFromStart && (G.stake >= 2 || G.ante >= 7)) {
     G.boss2 = pick(BOSS_KEYS.filter((k) => k !== G.boss && !(BOSS_CLASH[G.boss] || []).includes(k)));
   }
   Campaign.applyRule();
-  G.limit = 21 + (G.ante - 1);
+  G.limit = G.endlessFromStart?Endless.goal():21 + (G.ante - 1);
   G.target = targetFor(G.ante, G.blind);
   if (G.elite) G.target = Math.round(G.target * 1.35);
   if (G.contract && G.contract.targetMul) G.target = Math.round(G.target * G.contract.targetMul);
@@ -2393,6 +2393,7 @@ function finishSeat(res, animated = false) {
   if (hasJoker('phoenix') && !G.phoenixUsed && res.total === 0 && res.bust) { G.phoenixUsed = true; log('Феникс: ход не потрачен', 'gold'); }
   else G.seatsLeft = Math.max(0, G.seatsLeft - 1);
   Club.reward(res);
+  Endless.reward(res);
   let healed = 0;
   if (res.heal) {
     healed = Combat.heal(res.heal,'tables');
