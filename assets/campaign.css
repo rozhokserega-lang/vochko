@@ -33,7 +33,7 @@
 .location-chapter[open] .location-chevron{transform:rotate(180deg)}
 .location-chapter .location-hero{border:0;border-top:1px solid #8e79514d;border-radius:0}
 .location-chapter.club{background:#2e1719}
-.location-chapter.club .location-hero{background:linear-gradient(90deg,#2e1719f5,#2e1719a0),url('club-interior-v1.webp') center/cover}
+.location-chapter.club .location-hero{background:linear-gradient(90deg,#10130bb3,#10130b40),url('club-interior-v1.webp') center/cover}
 .location-chapter:not(.dungeon):not(.club) .location-hero{background:#17231c}
 .location-chapter .location-lock{padding:0;white-space:normal}
 .location-chapter>summary:focus-visible{outline:2px solid #e2c382;outline-offset:-4px}

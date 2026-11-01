@@ -1108,7 +1108,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/table-features.css?v=20261029-1">
 <script src="assets/table-features.js?v=20261101-club1"></script>
 <script src="assets/fast-draw.js?v=20261029-1"></script>
-<link rel="stylesheet" href="assets/campaign.css?v=accordion1-20261029-3">
+<link rel="stylesheet" href="assets/campaign.css?v=20261101-visible-club">
 <script src="assets/campaign.js?v=20261101-accordion1"></script>
 <script src="assets/club.js?v=20261101-fullclub1"></script>
 <link rel="stylesheet" href="assets/club.css?v=20261101-club1">
@@ -1122,7 +1122,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/preparation.css?v=20261030-1">
 <link rel="stylesheet" href="assets/graphics-pass.css?v=20261101-1">
 <link rel="stylesheet" href="assets/club-theme.css?v=20261101-fullclub1">
-<link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-1">
+<link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-fit3">
 <link rel="stylesheet" href="assets/tarot.css?v=20261101-step2">
 <script src="assets/tarot.js?v=20261101-step2"></script>
 <script src="assets/preparation.js?v=20261101-tarot-step2"></script>
@@ -1252,7 +1252,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=tarot1-20261101-fullclub1"></script>
+<script src="assets/game-features.js?v=20261101-fit3"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261101-tarot1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
@@ -2608,7 +2608,7 @@ function makeCurse() { return { id: ++cardSeq, rank: '☠', val: 8, suit: '✖',
 function nextCardsHTML(s) {
   const n = s.peek3 ? 3 : (hasJoker('xray') || s.peek) ? 1 : 0;
   if (!n || !G.deck.length) return '';
-  return '<span class="dlabel">Следующая' + (n > 1 ? ' ×' + n : '') + '</span>' + G.deck.slice(-n).reverse().map((c) => cardElement(c, { mini: 1 })).join('');
+  return '<button type="button" class="dlabel deck-preview-label" title="Просмотреть оставшиеся карты колоды">Следующая' + (n > 1 ? ' ×' + n : '') + '</button>' + G.deck.slice(-n).reverse().map((c) => cardElement(c, { mini: 1 })).join('');
 }
 
 /* ---------- путь ---------- */
@@ -3662,7 +3662,7 @@ function renderActions() {
   $('#btn-stop-table').disabled = !play || activeTableIndex(s) === -1 || !s.tables[activeTableIndex(s)].cards.length;
   FastDraw.html($('#btn-stop-table'),'Стоп на столе <kbd>D</kbd>');
   const consHTML = G.cons.length
-    ? G.cons.map((k, i) => '<button class="cons-btn' + (s && s.sel === i ? ' on' : '') + '"'+(i>=3?' hidden':'')+' data-cons="' + i + '" title="' + k.desc + '">' + itemArt('cons', Object.keys(CONS).find(id => CONS[id] === k)) + k.name + '</button>').join('') + (G.cons.length>3?'<button class="cons-btn inventory-more'+(s&&s.sel>=3?' on':'')+'" data-cons-more>Ещё +'+(G.cons.length-3)+'</button>':'')
+    ? G.cons.map((k, i) => '<button class="cons-btn' + (s && s.sel === i ? ' on' : '') + '"'+(i>=3?' hidden':'')+' data-cons="' + i + '" title="' + k.desc + '">' + itemArt('cons', Object.keys(CONS).find(id => CONS[id] === k)) + '<span class="cons-name">'+k.name+'</span></button>').join('') + (G.cons.length>3?'<button class="cons-btn inventory-more'+(s&&s.sel>=3?' on':'')+'" data-cons-more>Ещё +'+(G.cons.length-3)+'</button>':'')
     : '<span class="hand-empty">нет расходников</span>';
   const consEl = $('#cons');
   const consChanged=consEl.innerHTML!==consHTML||consEl._drawWidth!==innerWidth;

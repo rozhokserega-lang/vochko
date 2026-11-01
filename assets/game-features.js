@@ -224,7 +224,7 @@ function movePlayedCard(s, fromIndex, cardIndex, toIndex) {
 function initRunFeatures() {
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveRun()});
   window.addEventListener('pagehide',saveRun);
-  $('#dealer').addEventListener('click',event=>{if(event.target.closest('.pile'))showDeckBook()});
+  $('#dealer').addEventListener('click',event=>{if(event.target.closest('.pile,.deck-preview-label'))showDeckBook()});
   $('#dealer').addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.closest('.pile')){event.preventDefault();event.stopPropagation();showDeckBook()}});
 }
 
