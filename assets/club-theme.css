@@ -1,0 +1,100 @@
+/* Chapter II: burgundy felt, walnut and aged brass. Paint only; geometry stays shared. */
+body.club-run{
+ --club-ivory:#efdbb5;--club-brass:#b78a4a;--club-wood:#21130f;
+ background:linear-gradient(#100a09e8,#140a0bec),url('club-interior-v1.webp') center 35%/cover fixed;
+ color:var(--club-ivory);
+}
+body.club-run #hud{background:linear-gradient(180deg,#302019,#1b100d);border-bottom-color:#98713e}
+body.club-run #hud .hud-btn{background:#2d1b17;border-color:#b28b4e55;color:#ead0a0}
+body.club-run #table{
+ background:radial-gradient(ellipse at 50% 0,#b97a3a16,transparent 65%),url('felt-noise.svg') 0 0/160px 160px,#281015;
+ background-blend-mode:normal,soft-light;
+ border-left-color:#8d663b88;border-right-color:#8d663b88;box-shadow:inset 0 0 40px #08020466;
+}
+body.club-run.campaign-run #table #battle-panel{
+ background:linear-gradient(90deg,#1c0d0b20,#1d0d0b99),url('club-interior-v1.webp') center 35%/cover;
+ border-bottom-color:#bd9655;
+}
+body.club-run.campaign-run #table #battle-panel #enemy-portrait{
+ background-image:url('club-opponents-v1.webp');background-size:300% 100%;background-position:var(--dungeon-x,0%) center;
+}
+body.club-run .bp-name b{color:#f2d9ad}
+body.club-run #enemy-intent{color:#ebd3ae}
+body.club-run .club-tactic{color:#edc47e}
+body.club-run #table .tables{
+ background:repeating-linear-gradient(0deg,#e5b57805 0 1px,transparent 1px 5px),linear-gradient(90deg,#1d0e0b,#593425 48%,#1d0e0b);
+}
+body.club-run #table .tables .tbl{
+ border-color:#aa7c4d66;
+ background:url('felt-noise.svg') 0 0/160px 160px,radial-gradient(130% 62% at 50% 0,#dda56b16,transparent 68%),linear-gradient(#51202c,#38151f 58%,#290f17);
+ background-blend-mode:soft-light,normal,normal;
+ box-shadow:inset 0 1px 0 #ffdcad12,inset 0 -26px 30px #10040966,inset 0 0 0 3px #17070b33;
+}
+body.club-run #table .tables .tbl.active{
+ border-color:#edc47c;
+ background:url('felt-noise.svg') 0 0/160px 160px,radial-gradient(105% 78% at 50% 4%,#ffd28a3d,transparent 74%),linear-gradient(#702d3c,#491b2a 62%,#32121d);
+ box-shadow:0 0 0 1px #e6b96c66,inset 0 0 0 1px #ffe5ae33,inset 0 -24px 30px #10040a55,0 0 24px #d39a4b33;
+}
+body.club-run #table .tables .tbl.hit,body.club-run #table .tables .tbl.ok{
+ border-color:#c9a35e;
+ background:url('felt-noise.svg') 0 0/160px 160px,radial-gradient(115% 80% at 50% 10%,#ffc87733,transparent 74%),linear-gradient(#65303a,#3e1a25 62%,#2c121b);
+}
+body.club-run #table .tables .tbl.over,body.club-run #table .tables .tbl.dead{
+ border-color:#bc5860;background:url('felt-noise.svg') 0 0/160px 160px,linear-gradient(#48151c,#22090e);
+}
+body.club-run #table .tables .tbl.blocked{background:linear-gradient(#2b2528,#171216);border-color:#6d5b52}
+body.club-run #table .tables .tbl.club-vulnerable:not(.dead):not(.over){
+ border-color:#a2e4d3;
+ background:url('felt-noise.svg') 0 0/160px 160px,radial-gradient(ellipse at 50% 0,#76d5ba3d,transparent 75%),linear-gradient(#4e2934,#301b25);
+ box-shadow:inset 0 0 18px #7fcbb22b,0 0 13px #7fcbb24d;
+}
+body.club-run #table .tables .t-cards:empty::before{background:#1e081344;box-shadow:inset 0 2px 5px #08010588,0 1px 0 #ffe1a61a;border-color:#16060c99;color:#08030666}
+body.club-run #table-supplies{background:linear-gradient(90deg,#3c241727,transparent)}
+body.club-run #table-supplies #cons{background:repeating-linear-gradient(25deg,#e2b48204 0 1px,transparent 1px 4px),linear-gradient(#39251b,#281810);box-shadow:inset 0 0 0 1px #ab805333,inset 0 2px 7px #0d060855}
+body.club-run #table-supplies #cons .cons-btn{background:linear-gradient(#463024,#2b1b16);border-color:#ac8650;color:#f0dec0}
+body.club-run #table-supplies #cons .cons-btn.on{background:linear-gradient(#655035,#3d2d24);border-color:#ffe1a0}
+body.club-run #table-supplies #dealer{position:relative;border-left-color:#b18b4c66}
+body.club-run #table-supplies #dealer::after{content:'♠';position:absolute;right:5px;top:10px;display:grid;place-items:center;width:22px;height:22px;border:1px solid #b18b4c88;border-radius:50%;background:radial-gradient(#6c4b27,#2a1b12);box-shadow:inset 0 0 0 2px #27160e;color:#daba7d;font:14px Georgia,serif;pointer-events:none}
+body.club-run #table-supplies #dealer .pile .card{background:repeating-linear-gradient(45deg,#c49e5c22 0 1px,transparent 1px 5px),linear-gradient(145deg,#732d3b,#38141f);border-color:#c7a16a}
+body.club-run #table-supplies #dealer .pile .card::before{content:'♠';position:absolute;inset:6px;display:grid;place-items:center;border:1px solid #d8b57a88;border-radius:2px;background:none;color:#e0c18c;font:20px Georgia,serif}
+body.club-run .table-upgrade{background:#2c1b16;color:#dfc69d;border-color:#a6824b66}
+body.club-run .formula{background:linear-gradient(#3b261b,#251711);box-shadow:inset 0 0 12px #0c050744,0 3px 5px #0006}
+body.club-run .damage-details-btn{color:#d1b991}
+body.club-run #jokers-bar{background:#241512;border-top-color:#9f784b66}
+body.club-run .joker-inventory-toggle{color:#e1c79e}
+body.club-run #dock{background:linear-gradient(#352019fa,#1d100dfc);border-top-color:#a78248}
+body.club-run #dock .btn.stop-table{background:linear-gradient(#503c2b,#2e211b);color:#ebd9b8}
+body.club-run #dock .btn.stand{background:linear-gradient(#8b3946,#4b1a28);color:#f3ddbe}
+body.club-run .run-details,body.club-run #side .panel{background:#251712;border-color:#9a774544}
+body.club-run .run-details>summary{color:#d9c19a}
+body.club-run #overlay:not(.home-overlay){background-color:#11090ce6}
+body.club-run #overlay .modal:not(.passage-modal){background:linear-gradient(#281719f5,#1b0e11f8),url('club-interior-v1.webp') center/cover;border-color:#a9844f88}
+body.club-run #overlay.passage-overlay{background:#120a0d}
+body.club-run #overlay .modal.passage-modal{background:#1b0d11!important}
+body.club-run .passage-screen{background:linear-gradient(#1c0c0b11,#1b0d11f7 65%),url('club-interior-v1.webp') 45% top/cover no-repeat,#1b0d11}
+body.club-run .passage-route-scene{background:linear-gradient(#1c0d0b66,transparent 38%,transparent 75%,#1b0d11e6),url('club-interior-v1.webp') 40% center/cover no-repeat}
+body.club-run .passage-enemy-portrait,body.club-run .passage-face{background-image:url('club-opponents-v1.webp');background-size:300% 100%;background-position:var(--passage-x) center}
+body.club-run .passage-enemy-scene::after{background:linear-gradient(90deg,#1b0d1140,transparent 20%,transparent 80%,#1b0d1140)}
+body.club-run .passage-enemy-caption h3{background:#291712ed}
+body.club-run .passage-next,body.club-run .passage-rule,body.club-run .passage-choice{background:linear-gradient(105deg,#482833dd,#25141be8);border-color:#b08e55}
+body.club-run .passage-choice:hover,body.club-run .passage-choice:focus-visible{background:#60303d;border-color:#e4c280}
+body.club-run .passage-stats.brief-stats>div{background:#341c24b3}
+body.club-run .passage-reward{background:#311b1755}
+body.club-run .campaign-exit{background:linear-gradient(transparent,#281719 110px),url('club-interior-v1.webp') center 28%/cover}
+.location-path .location-playable{background:linear-gradient(100deg,#2e1719ed 25%,#2e1719b8),url('club-interior-v1.webp') 38% center/cover!important;border-color:#b69055!important;border-radius:6px;box-shadow:inset 0 0 0 1px #e1bc7412}
+.location-playable h3{color:#f0d7ae}.location-playable .location-node{background:#3e2129;color:#edce9b;border-color:#af864b88}
+.location-playable .home-start{background:linear-gradient(#dfbf82,#a77c3c);color:#28170f}
+.modal:has(.club-preparation){background:linear-gradient(#28161bd9,#1b0e12f5),url('club-interior-v1.webp') 40% center/cover!important}
+.club-preparation .preparation-heading h2{color:#f1d7ad}
+.club-preparation .chosen-deck,.club-preparation .talent-current{background:linear-gradient(#43242e99,#27161cd9);border-color:#a77e4b77}
+.club-preparation .deck-option.selected,.club-preparation .talent-option[aria-pressed='true']{background:linear-gradient(#58323b,#351d26);border-color:#d4ad69}
+
+#overlay.preparation-overlay:has(.club-preparation){background:#130a0d}
+.preparation-screen.setup-screen.club-preparation{background:linear-gradient(#24110b99,#1d0f14f5 35%,#1b0d11fc 75%),url('club-interior-v1.webp') 38% top/cover no-repeat,#1b0d11}
+.preparation-modal .club-preparation .deck-option,.preparation-modal .club-preparation .talent-option{background:linear-gradient(#3c252b,#25151c);border-color:#9d7a4b77}
+.preparation-modal .club-preparation .deck-option.selected,.preparation-modal .club-preparation .talent-option[aria-pressed='true']{background:linear-gradient(#68434a,#3c232d);border-color:#e9c578}
+.club-preparation .preparation-section-title>span{background:#39231c;color:#e0be81}
+.preparation-modal .club-preparation .setup-footer{background:linear-gradient(#1b0d1100,#1b0d11 15%)}
+.club-preparation .preparation-options{border-color:#a17e4b55}
+
+body.club-run .passage-stop-art{background-image:url('club-stops-v1.webp')}
