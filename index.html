@@ -1124,7 +1124,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/club-theme.css?v=20261101-fullclub1">
 <link rel="stylesheet" href="assets/battle-clarity.css?v=20261101-fit3">
 <link rel="stylesheet" href="assets/tarot.css?v=20261101-step2">
-<script src="assets/tarot.js?v=20261101-endless1"></script>
+<script src="assets/tarot.js?v=20261101-reuse1"></script>
 <script src="assets/endless.js?v=20261101-1"></script>
 <script src="assets/preparation.js?v=20261101-modes1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
@@ -1253,7 +1253,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <div id="overlay" class="hidden"></div>
 
-<script src="assets/game-features.js?v=20261101-fit3"></script>
+<script src="assets/game-features.js?v=20261101-tarot-reuse1"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
 <script src="assets/attack-fx.js?v=20261101-tarot1"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
@@ -1932,7 +1932,8 @@ function startBlind() {
   G.seatsLeft = seatsCount();
   G.pushThisBlind = 0;
   G.seat = null;
-  G.deck = shuffle(G.runDeck.filter(c=>!(G.tarotSpent||[]).includes(c.id)).map((c) => ({ ...c })));
+  G.deck = shuffle(G.runDeck.map((c) => ({ ...c })));
+  G.tarotSpent=[];
   G.sleeve=[];G.sleeveUsed=0;G.tarotCandle=false;
   G.discard = [];
   G.boss = G.elite && G.pathEliteBoss ? G.pathEliteBoss : (G.blind === 2 || G.elite) ? pickBoss() : ((G.contract && G.contract.boss) || null);
@@ -2379,7 +2380,7 @@ function finishSeat(res, animated = false) {
   }
   const sums = res.tables.map((r) => (r.empty ? '—' : r.bust ? r.sum + '✗' : r.sum)).join(' · ');
   log((res.exact ? '<b>Точных столов: ' + res.exact + '</b> · ' : '') + 'столы ' + sums + ' (цель ' + limitNow() + ') — ' + fmt(res.total), res.exact ? 'gold' : (res.total ? '' : 'bad'));
-  s.tables.forEach((t) => G.discard.push(...t.cards.filter((c) => !broken.includes(c)&&!c.tarot)));
+  s.tables.forEach((t) => G.discard.push(...t.cards.filter((c) => !broken.includes(c))));
   const xj = G.jokers.find((j) => j.id === 'xray');
   if (xj) {
     xj.charges = (xj.charges || 5) - 1;
