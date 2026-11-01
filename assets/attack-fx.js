@@ -146,7 +146,6 @@ const AttackFX = {
       const origin=this.visiblePoint(rawOrigin),target=this.visiblePoint(rawTarget);
       const forecast=combatForecast(result);
       const caption=this.node(run,'attack-caption',{x:origin.x,y:origin.y+29},result.total?'ОЧКИ':'НЕТ УРОНА');
-      const orb=this.node(run,'attack-orb',origin);
       const number=this.node(run,'attack-charge-number',{x:origin.x,y:origin.y},'0');
       run.accumulator.classList.add('attack-accumulator');
       run.previewNote=$('#preview-note');
@@ -176,8 +175,7 @@ const AttackFX = {
           shard++;
         });
       });
-      if(!result.total){orb.hidden=true;number.hidden=true;await pause(220);run.commit(false);return}
-      this.animate(run,orb,[{transform:'translate(-50%,-50%) scale(.2)',opacity:0},{transform:'translate(-50%,-50%) scale(1)',opacity:.9}],{duration:470,easing:'ease-out'});
+      if(!result.total){number.hidden=true;await pause(220);run.commit(false);return}
       // Score the tables one at a time so the number climbs instead of appearing at once.
       let shown=0;
       for(let index=0;index<result.tables.length;index++){
@@ -232,13 +230,10 @@ const AttackFX = {
       const remaining=flightTime-(performance.now()-began);
       if(remaining>0)await pause(remaining);
       if(!this.valid(run))return;
-      const dx=target.x-origin.x,dy=target.y-origin.y;
-      const beam=this.node(run,'attack-beam',origin);beam.style.width=Math.hypot(dx,dy)+'px';beam.style.rotate=Math.atan2(dy,dx)+'rad';
-      this.animate(run,beam,[{transform:'scaleX(0)',opacity:0},{transform:'scaleX(1)',opacity:.85,offset:.6},{transform:'scaleX(1)',opacity:0}],{duration:260,easing:'ease-out'});
-      this.animate(run,orb,[{transform:'translate(-50%,-50%) scale(1)',opacity:1},{transform:'translate('+(dx-22)+'px,'+(dy-22)+'px) scale(.55)',opacity:.95}],{duration:220,easing:'cubic-bezier(.5,0,.9,.6)'});
+      // Cards carry the attack; the score finishes locally without a second projectile.
       this.animate(run,number,[{opacity:1},{opacity:0,transform:'translate(-50%,-20px)'}],{duration:160});
       await pause(220);if(!this.valid(run))return;
-      orb.style.visibility='hidden';caption.textContent=forecast.hit.hp?'ПОПАДАНИЕ':forecast.hit.absorbed?'В ЩИТ':'БЕЗ ПРОБИТИЯ';
+      caption.textContent=forecast.hit.hp?'ПОПАДАНИЕ':forecast.hit.absorbed?'В ЩИТ':'БЕЗ ПРОБИТИЯ';
       const ring=this.node(run,'attack-impact-ring'+(forecast.hit.absorbed?' shield-impact':''),target);
       this.animate(run,ring,[{transform:'translate(-50%,-50%) scale(.3)',opacity:1},{transform:'translate(-50%,-50%) scale(2.3)',opacity:0}],{duration:350,easing:'ease-out'});
       for(let j=0;j<Math.min(MOBILE_FX?5:14,6+shard);j++){

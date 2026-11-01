@@ -221,3 +221,42 @@ html body #dock #hint:not(.on){visibility:hidden}
 #table .tables .t-cards .card.m-wild{background:linear-gradient(135deg,#ead6f3,#d9e9f4 45%,#dce9ce);border-color:#9c65bc}
 #table .tables .t-cards .card.m-heavy{background:linear-gradient(145deg,#e8ebee,#b7bfc8);border-color:#6d7988}
 #table .tables .t-cards .card .seal-mark{position:absolute;right:3px;top:3px;z-index:3;padding:1px 3px;border-radius:3px;background:#24362c;color:#fff0cb;font:700 9px/12px Arial,sans-serif;box-shadow:0 1px 2px #0005}
+
+/* Two supply bays reuse the former metadata + inventory height. */
+body #table-supplies{
+  order:1;flex:0 0 88px;height:88px;min-width:0;
+  display:grid;grid-template-columns:minmax(0,65fr) minmax(0,35fr);
+  grid-template-rows:38px 46px;gap:4px 8px;
+}
+body #table-supplies #table-top{
+  grid-column:1;grid-row:1;order:0;min-width:0;min-height:0;
+  margin:0;gap:4px;flex-wrap:nowrap;
+}
+body #table-supplies .limit-badge{flex-shrink:0;font-size:10px;padding:1px 4px}
+body #table-supplies .limit-badge b{font-size:21px;margin-left:3px}
+body #table-supplies .table-upgrade{font-size:10px;padding:4px;min-width:0;max-width:106px}
+body #table-supplies #cons{
+  grid-column:1;grid-row:2;order:0;display:flex;min-width:0;
+  height:46px;min-height:46px;gap:5px;overflow-x:auto;overflow-y:hidden;
+  align-items:stretch;flex-wrap:nowrap;
+}
+body #table-supplies #cons .cons-btn{flex:0 0 58px;min-width:0;min-height:46px;font-size:9px;flex-direction:column;padding:3px;gap:2px}
+body #table-supplies #cons .item-art{width:23px;height:23px;flex-shrink:0}
+body #table-supplies #cons .hand-empty{align-self:center;font-size:11px}
+body #table-supplies #dealer{
+  grid-column:2;grid-row:1/3;order:0;min-width:0;min-height:0;
+  justify-content:flex-start;align-items:center;flex-wrap:nowrap;gap:9px;
+  padding:6px 7px 0 12px;border-left:1px solid #a88d4f55;
+  overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;
+}
+body #table-supplies #dealer .pile{
+  flex:0 0 50px;width:50px;height:60px;padding:0;margin:0 0 15px;
+}
+body #table-supplies #dealer .pile .card.mini{width:42px;height:59px;border-radius:4px}
+body #table-supplies #dealer .pcount{position:absolute;top:auto;left:0;right:0;transform:none;width:auto;white-space:nowrap;text-align:center;font:700 12px/15px Georgia,serif;padding:1px 0;bottom:-17px}
+body #table-supplies #dealer .pile.empty::before{width:42px;height:59px;line-height:59px}
+body #table-supplies #dealer>.card.mini{flex-shrink:0;width:37px;height:52px}
+body #table-supplies #dealer>.dlabel{flex-shrink:0;font-size:9px;max-width:55px;white-space:normal}
+@media(min-height:951px){
+  body #table-supplies{height:92px;flex-basis:92px;grid-template-rows:39px 46px;row-gap:7px}
+}

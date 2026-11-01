@@ -1090,8 +1090,8 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 .remove-card:hover,.remove-card:focus-visible{outline:2px solid #ebca80;outline-offset:2px}
 </style>
 <link rel="stylesheet" href="assets/reference-theme.css">
-<link rel="stylesheet" href="assets/attack-fx.css?v=20261101-1">
-<link rel="stylesheet" href="assets/mobile-polish.css?v=20261028-3">
+<link rel="stylesheet" href="assets/attack-fx.css?v=20261101-2">
+<link rel="stylesheet" href="assets/mobile-polish.css?v=20261101-1">
 <link rel="stylesheet" href="assets/heal-fx.css?v=20261028-4">
 <link rel="stylesheet" href="assets/game-menu.css?v=20261028-5">
 <link rel="stylesheet" href="assets/ui-refinements.css?v=20261028-2">
@@ -1118,7 +1118,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 <link rel="stylesheet" href="assets/passage.css?v=20261030-1">
 <script src="assets/passage.js?v=20261030-1"></script>
 <link rel="stylesheet" href="assets/preparation.css?v=20261030-1">
-<link rel="stylesheet" href="assets/graphics-pass.css?v=20261031-7">
+<link rel="stylesheet" href="assets/graphics-pass.css?v=20261101-1">
 <script src="assets/preparation.js?v=20261030-1"></script>
 <script src="assets/duel-field.js?v=20261029-2"></script>
 <script src="assets/tutorial.js?v=20261029-1"></script>
@@ -1152,11 +1152,14 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <main>
   <section id="table">
+    <div id="table-supplies">
     <div id="table-top">
       <div class="limit-badge">Цель <b id="tbl-limit">21</b></div>
       <span class="table-upgrade" id="table-upgrade">4-й стол · $100</span>
-      <div id="dealer"></div>
       <div class="seats-dots" id="seats-dots"></div>
+    </div>
+    <div id="cons" aria-label="Расходники"></div>
+    <div id="dealer" aria-label="Колода"></div>
     </div>
 
     <section id="battle-panel" aria-label="Сражение" hidden>
@@ -1180,7 +1183,6 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
       </div>
     </section>
     <div id="target-cycle" class="target-cycle" role="status" aria-live="polite" hidden></div>
-    <div id="cons" aria-label="Расходники"></div>
     <div id="hand"></div>
 
     <div id="seat-stats">
@@ -1246,7 +1248,7 @@ body{background:linear-gradient(#07100be0,#07100bf0),url('assets/club-room.png')
 
 <script src="assets/game-features.js?v=20261029-12"></script>
 <script src="assets/tactical-clarity.js?v=20261028-1"></script>
-<script src="assets/attack-fx.js?v=20261101-1"></script>
+<script src="assets/attack-fx.js?v=20261101-2"></script>
 <script src="assets/heal-fx.js?v=20261029-1"></script>
 <script src="assets/game-menu.js?v=20261030-3"></script>
 <script src="assets/stable-tables.js?v=20261031-3"></script>
