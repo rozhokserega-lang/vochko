@@ -74,3 +74,10 @@
 @media(max-width:380px){.meta-shop .tab{gap:4px;font-size:12px}.meta-shop .tab .item-art{width:23px;height:23px}.meta-shop .seal-opt{padding:9px}}
 #menu-endless{flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
 #menu-endless small{max-width:none;text-align:center;font-size:11px}
+.endless-identity label{display:block;font:600 14px/1.4 'Segoe UI',sans-serif;color:#ead6ab;margin:18px 0 8px}
+.endless-identity input{box-sizing:border-box;width:100%;min-width:0;padding:13px 12px;border:1px solid #bda26a;background:#102018;color:#f3e2bd;border-radius:5px;font:18px/1.4 'Segoe UI',sans-serif}
+.endless-identity input:focus{outline:2px solid #e1c58a;outline-offset:2px}.endless-identity input[aria-invalid=true]{border-color:#e79999}
+.endless-identity small{display:block;font:12px/1.5 'Segoe UI',sans-serif;color:#bec8b7;margin-top:8px}
+#endless-name-error{min-height:20px;color:#ffb5b5;font:13px/1.5 'Segoe UI',sans-serif}
+.endless-identity .row-btns{flex-wrap:wrap}.endless-identity .primary{white-space:normal}
+.endless-player{font:13px/1.5 'Segoe UI',sans-serif;color:#d7c5a0;overflow-wrap:anywhere}

@@ -14,12 +14,12 @@ const GameMenu={
    '<nav class="home-actions" aria-label="Главное меню">'+
    (saved?'<button class="home-start" id="ov-continue"><b>Продолжить</b><small>'+Campaign.savedLabel(saved.game)+'</small></button>':'')+
    '<button class="'+(saved?'home-secondary':'home-start')+'" id="menu-new-game">Кампания</button>'+
-   '<button class="home-secondary daily-action" id="menu-endless"><span>Бесконечный забег</span><small>Без финала · личный рекорд: '+(META.endlessRecord?.battles||0)+' врагов</small></button>'+
+   '<button class="home-secondary daily-action" id="menu-endless"><span>Бесконечный забег</span><small>'+(Endless.nickname()?Endless.nameHTML()+' · ':'Без финала · ')+'Личный рекорд: '+(META.endlessRecord?.battles||0)+' врагов</small></button>'+
    '<button class="home-secondary daily-action" id="menu-daily"><span>Ежедневный забег</span><small>Одна колода для всех</small></button>'+
    '<div class="home-links"><button id="menu-shop">'+itemArt('relic','coins')+'<span>Лавка</span></button><button id="menu-achievements">'+itemArt('relic','crown')+'<span>Достижения</span></button><button id="menu-rules">'+itemArt('joker','insurer')+'<span>Правила</span></button></div></nav>'+
    '<footer class="home-records"><span>Победы <b>'+stats.wins+'</b></span><span>Рекорд <b>'+(Campaign.progress().bestLevels[0]||0)+'/10'+'</b></span><span>Монеты <b>'+META.shop.coins+'</b></span></footer></div>',true);
   $('#overlay .modal').classList.add('game-home');
-  if($('#ov-continue'))$('#ov-continue').onclick=()=>{this.backTarget=null;resumeRun()};
+  if($('#ov-continue'))$('#ov-continue').onclick=()=>{if(saved.game.endlessFromStart){Endless.continueRun();return;}this.backTarget=null;resumeRun()};
   $('#menu-new-game').onclick=()=>Campaign.locations();
   $('#menu-endless').onclick=()=>Endless.setup();
   $('#menu-daily').onclick=()=>{this.backTarget=null;newGame(0,'classic',{daily:true,campaign:true})};
