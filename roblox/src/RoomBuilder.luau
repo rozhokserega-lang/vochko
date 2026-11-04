@@ -1,10 +1,11 @@
 -- All prototype geometry is grouped; existing Baseplate and SpawnLocation are preserved.
 return function()
  local function ensureLamp(root)
-  if root:FindFirstChild("CentralTableLamp") then return end
- local lamp=Instance.new("Model");lamp.Name="CentralTableLamp";lamp.Parent=root
+ for _, station in {{x=-19,name="DuelTableLamp"},{x=0,name="CentralTableLamp"},{x=19,name="CampaignTableLamp"}} do
+ if not root:FindFirstChild(station.name) then
+ local lamp=Instance.new("Model");lamp.Name=station.name;lamp.Parent=root
  local function lampPart(name,size,pos,color,material)
-  local p=Instance.new("Part");p.Name=name;p.Size=size;p.Position=pos;p.Anchored=true;p.CanCollide=false;p.Color=color;p.Material=material;p.Parent=lamp;return p
+  local p=Instance.new("Part");p.Name=name;p.Size=size;p.Position=pos+Vector3.new(station.x,0,0);p.Anchored=true;p.CanCollide=false;p.Color=color;p.Material=material;p.Parent=lamp;return p
  end
  lampPart("Suspension",Vector3.new(.12,4.7,.12),Vector3.new(0,15,-7),Color3.fromRGB(116,88,44),Enum.Material.Metal)
  lampPart("Shade",Vector3.new(5.2,.45,3.4),Vector3.new(0,12.5,-7),Color3.fromRGB(19,64,43),Enum.Material.Metal)
@@ -12,6 +13,8 @@ return function()
  local diffuser=lampPart("WarmDiffuser",Vector3.new(4.8,.12,3.05),Vector3.new(0,12.13,-7),Color3.fromRGB(255,218,151),Enum.Material.Neon)
  local down=Instance.new("SpotLight");down.Name="TableLight";down.Face=Enum.NormalId.Bottom;down.Angle=100;down.Range=22;down.Brightness=3;down.Color=Color3.fromRGB(255,218,167);down.Shadows=false;down.Parent=diffuser
  local glow=Instance.new("PointLight");glow.Name="LampGlow";glow.Range=12;glow.Brightness=.5;glow.Color=down.Color;glow.Shadows=false;glow.Parent=diffuser
+ end
+ end
  end
  local existing = workspace:FindFirstChild("VochkoPrototype")
  if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model"); ensureLamp(existing); return existing end
