@@ -1,0 +1,3 @@
+const fs=require('fs');
+const files={Config:'ServerStorage.VochkoPrototype.Config',Battle:'ServerStorage.VochkoPrototype.Battle',RoomBuilder:'ServerStorage.VochkoPrototype.RoomBuilder',Assets:'ReplicatedStorage.VochkoPrototype.Assets',Server:'ServerScriptService.VochkoPrototypeServer',Client:'StarterPlayer.StarterPlayerScripts.VochkoPrototypeClient'};
+console.log(JSON.stringify(Object.entries(files).map(([name,path])=>({name,path,source:fs.readFileSync('roblox/src/'+name+(name==='Server'?'.server':name==='Client'?'.client':'')+'.luau','utf8'),className:name==='Server'?'Script':name==='Client'?'LocalScript':'ModuleScript'}))));

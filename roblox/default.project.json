@@ -1,0 +1,62 @@
+{
+  "name": "VochkoPrototype",
+  "servePort": 34872,
+  "tree": {
+    "$className": "DataModel",
+    "$ignoreUnknownInstances": true,
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$ignoreUnknownInstances": true,
+      "VochkoPrototype": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true,
+        "Assets": { "$path": "src/Assets.luau" },
+        "Input": { "$className": "RemoteEvent" },
+        "Snapshot": { "$className": "RemoteEvent" }
+      }
+    },
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "$ignoreUnknownInstances": true,
+      "VochkoPrototype": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true,
+        "Config": { "$path": "src/Config.luau" },
+        "Battle": { "$path": "src/Battle.luau" },
+        "RoomBuilder": { "$path": "src/RoomBuilder.luau" }
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$ignoreUnknownInstances": true,
+      "VochkoPrototypeServer": { "$path": "src/Server.server.luau" }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "$ignoreUnknownInstances": true,
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$ignoreUnknownInstances": true,
+        "VochkoPrototypeClient": { "$path": "src/Client.client.luau" }
+      }
+    },
+    "StarterGui": { "$className": "StarterGui", "$properties": { "ScreenOrientation": "Sensor" } },
+    "Lighting": {
+      "$className": "Lighting",
+      "$ignoreUnknownInstances": true,
+      "$properties": { "ClockTime": 20, "Brightness": 2, "Ambient": [0.255, 0.239, 0.184], "OutdoorAmbient": [0.282, 0.294, 0.259] }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "$ignoreUnknownInstances": true,
+      "Baseplate": {
+        "$className": "Part",
+        "$properties": { "Anchored": true, "Size": [512, 20, 512], "Position": [0, -10, 0], "Color": [0.15, 0.17, 0.15], "Material": "Slate" }
+      },
+      "SpawnLocation": {
+        "$className": "SpawnLocation",
+        "$properties": { "Anchored": true, "Size": [6, 1, 6], "Position": [0, 2, 17], "Transparency": 1, "CanCollide": false, "Neutral": true }
+      }
+    }
+  }
+}
