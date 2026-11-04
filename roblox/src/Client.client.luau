@@ -3,8 +3,11 @@ local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("VochkoPrototype")
+local Tarot=require(remote:WaitForChild("Tarot"))
 local Assets = require(remote:WaitForChild("Assets"))
 local TableScene = require(remote:WaitForChild("TableScene"))
+local CameraControls = require(remote:WaitForChild("CameraControls"))
+local cameraControls
 local Input, Snapshot = remote:WaitForChild("Input"), remote:WaitForChild("Snapshot")
 local C = { ink=Color3.fromRGB(9,25,16), green=Color3.fromRGB(22,57,37), brass=Color3.fromRGB(183,147,78),
  paper=Color3.fromRGB(233,214,167), muted=Color3.fromRGB(172,189,156), red=Color3.fromRGB(128,46,36) }
@@ -60,13 +63,15 @@ local function cameraFor(screen)
   if controls then controls:Disable() end
  else
   TableScene.Destroy()
-  camera.CameraType=Enum.CameraType.Scriptable;camera.CFrame=CFrame.lookAt(Vector3.new(19,12,3),Vector3.new(19,4,-7))
+  camera.CameraType=Enum.CameraType.Scriptable;camera.CFrame=if screen=="wardrobe"then CFrame.lookAt(Vector3.new(-23,7,4),Vector3.new(-23,6,15))else CFrame.lookAt(Vector3.new(19,12,3),Vector3.new(19,4,-7))
   if controls then controls:Disable() end
  end
 end
 local function clearApp()
+ if cameraControls then cameraControls:Destroy();cameraControls=nil end
  for _,child in app:GetChildren() do if not child:IsA("UISizeConstraint") then child:Destroy() end end
  battleUI=nil
+ TableScene.Destroy()
 end
 local function scrollBody(bottom)
  local scroll=make("ScrollingFrame",{Name="Body",Size=UDim2.new(1,0,1,-bottom),CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,
@@ -91,165 +96,146 @@ local function simpleNotice(data)
  actionDock(function()send("return")end,"Вернуться в комнату")
 end
 local function intro(data)
- local s=data.battle;local body=scrollBody(72);header(body,"ТЕМНИЦА · ПЕРВЫЙ БОЙ")
+ local s=data.battle;local body=scrollBody(72);header(body,if s.mode=="duel"then "ДУЭЛЬ · ТРЕНИРОВКА С ИИ"else "ТЕМНИЦА · ПЕРВЫЙ БОЙ")
  make("ImageLabel",{Name="Opponent",Image=Assets.Portraits,ImageRectSize=Vector2.new(200,200),ImageRectOffset=Vector2.new(0,0),BackgroundTransparency=1,
   AnchorPoint=Vector2.new(.5,0),Position=UDim2.new(.5,0,0,60),Size=UDim2.fromOffset(250,250)},body)
  text(body,"EnemyTitle",s.enemyName,31,UDim2.fromOffset(18,316),UDim2.new(1,-36,0,40))
  text(body,"EnemyStats",string.format("Здоровье: %d  ·  Атака: %d\nЦель: %d  ·  Мест на зоне: %d\nРозыгрышей на бой: %d",s.enemyMaxHp,s.enemyAttack,s.target,s.slots,s.roundsTotal),20,UDim2.fromOffset(18,365),UDim2.new(1,-36,0,105),C.muted)
- text(body,"Hint","Добирай карты к цели. Точное попадание усиливает удар. Перебор можно исправить срезом до розыгрыша.",17,UDim2.fromOffset(18,480),UDim2.new(1,-36,0,90))
+ text(body,"Hint",if s.mode=="duel"then "У каждой стороны своя колода. ИИ набирает карты на твоих глазах: видны суммы, остановки и переборы. Цель растёт каждый раунд: 21, 22, 23… Удары одновременные; после восьми раундов сравнивается здоровье."else "Добирай карты к цели. Точное попадание усиливает удар. Перебор можно исправить срезом до розыгрыша.",17,UDim2.fromOffset(18,480),UDim2.new(1,-36,0,90))
  actionDock(function()send("begin")end,"ВОЙТИ В БОЙ")
 end
-local function wardrobe(data)
- local body=scrollBody(72);header(body,"ШКАФ КОЛЛЕКЦИИ")
- text(body,"DeckTitle","Классическая колода · 52 карты",23,UDim2.fromOffset(16,62),UDim2.new(1,-32,0,38))
- for i=1,3 do atlas(body,"CardPreview"..i,{rankIndex=9+i,suitIndex=1},UDim2.new(.5,(i-2)*72-30,0,112),UDim2.fromOffset(62,87)) end
- text(body,"OriginalArt","Карты и портреты — наша графика из ВОЧКО.",15,UDim2.fromOffset(16,212),UDim2.new(1,-32,0,35),C.muted)
- text(body,"TalentTitle","Стартовый талант",24,UDim2.fromOffset(16,258),UDim2.new(1,-32,0,34))
- local definitions={{id="healer",name="Лекарь",desc="Красные зоны лечат на 50% больше."},
-  {id="sharp",name="Картёжник",desc="Точные зоны наносят на 15% больше урона."},
-  {id="daring",name="Авантюрист",desc="Ровно один перебор: общий урон +30%."}}
- local active=data.battle and data.battle.phase~="won" and data.battle.phase~="lost"
- for i,def in definitions do
-  local b=button(body,"Talent_"..def.id,(if data.profile.talent==def.id then "✓ " else "")..def.name.."\n"..def.desc,UDim2.fromOffset(16,300+(i-1)*72),UDim2.new(1,-32,0,62),function()send("talent",{talent=def.id})end)
-  b.TextSize=17;if data.profile.talent==def.id then b.BackgroundColor3=Color3.fromRGB(68,70,35)end;enabled(b,not active)
+local function wardrobe(data,duelSetup)
+ local body=scrollBody(72);header(body,if duelSetup then "PVP · ВЫБЕРИ ТАРО НА ЭТОТ БОЙ"else "ШКАФ · ПОДГОТОВКА К ПАРТИИ")
+ local p=data.profile
+ text(body,"DeckTitle","01 · Твоя колода",25,UDim2.fromOffset(16,65),UDim2.new(1,-32,0,38))
+ text(body,"DeckCount","52 обычные + "..#p.tarot.." таро = "..(52+#p.tarot).." карт",22,UDim2.fromOffset(16,108),UDim2.new(1,-32,0,35))
+ text(body,"TarotTitle","02 · Таро · "..#p.tarot.." / 4",25,UDim2.fromOffset(16,160),UDim2.new(1,-32,0,36))
+ text(body,"Rules","Тест: все 12 таро открыты. До четырёх разных на бой, каждое выпадает один раз. Ноль очков, одно место на столе. При переборе эффект пропадает. В новой партии выбранный набор снова доступен.",17,UDim2.fromOffset(16,204),UDim2.new(1,-32,0,83),C.muted)
+ text(body,"Money",if duelSetup then (if data.preparation and data.preparation.ready then "Соперник готов · 4 таро в колоде"else "Соперник выбирает свои таро…")else "Монеты: "..p.coins.." · цель в бою: 21",19,UDim2.fromOffset(16,290),UDim2.new(1,-32,0,30))
+ for i,d in Tarot.List do
+  local y=336+(i-1)*158;local chosen=table.find(p.tarot,d.id)~=nil;local unlocked=Tarot.Unlocked(p,d)
+  make("ImageLabel",{Name="TarotArt_"..d.id,Image=Assets.Tarot[d.id],BackgroundTransparency=1,Position=UDim2.fromOffset(16,y),Size=UDim2.fromOffset(88,132)},body)
+  text(body,"TarotName_"..d.id,(if chosen then "✓ "else "")..d.name,24,UDim2.fromOffset(116,y),UDim2.new(1,-132,0,32))
+  text(body,"TarotDesc_"..d.id,d.desc,17,UDim2.fromOffset(116,y+34),UDim2.new(1,-132,0,44),C.muted)
+  local caption=if unlocked then (if chosen then "Убрать"else "Добавить")elseif d.price then "Открыть · "..d.price.." монет"else (if d.open=="win"then "Победи в кампании"else d.hint)
+  local b=button(body,"Tarot_"..d.id,caption,UDim2.fromOffset(116,y+84),UDim2.new(1,-132,0,44),function()send(if unlocked then "tarot"else "buyTarot",{item=d.id})end)
+  enabled(b,if unlocked then chosen or #p.tarot<4 else d.price~=nil and p.coins>=d.price)
  end
- text(body,"WardrobeStatus",if active then "Сборка текущего боя уже зафиксирована. Сменить талант можно после его завершения." else "Выбор применяется к следующему бою. В этой технической сборке профиль хранится до выхода с сервера.",15,UDim2.fromOffset(16,521),UDim2.new(1,-32,0,68),C.muted)
- text(body,"FutureCollection","Джокеры и таро\nСледующий этап: выбор стартовых предметов и сохранённые сборки.",19,UDim2.fromOffset(16,600),UDim2.new(1,-32,0,85))
- actionDock(function()send("open",{mode="campaign"})end,if active then "ПРОДОЛЖИТЬ БОЙ" else "К СТОЛУ КАМПАНИИ")
+ local y=336+#Tarot.List*158
+ text(body,"TalentTitle","03 · Стартовый талант",25,UDim2.fromOffset(16,y),UDim2.new(1,-32,0,38))
+ local definitions={{id="healer",name="Лекарь",desc="Красные зоны лечат на 50% больше."},{id="sharp",name="Картёжник",desc="Точные зоны: урон +15%."},{id="daring",name="Авантюрист",desc="Один перебор: общий урон +30%."}}
+ local active=data.battle and data.battle.phase~="won"and data.battle.phase~="lost"and data.battle.phase~="draw"
+ for i,d in definitions do local b=button(body,"Talent_"..d.id,(if p.talent==d.id then "✓ "else "")..d.name.." · "..d.desc,UDim2.fromOffset(16,y+48+(i-1)*62),UDim2.new(1,-32,0,54),function()send("talent",{talent=d.id})end);enabled(b,not active)end
+ text(body,"SetupStatus","Все таро открыты для теста. Сборка применяется к новой партии. ИИ выбирает свой набор. Профиль пока хранится до выхода с сервера.",17,UDim2.fromOffset(16,y+245),UDim2.new(1,-32,0,70),C.muted)
+ if not duelSetup then button(body,"GoPvP","К PvP-столу",UDim2.fromOffset(16,y+330),UDim2.new(1,-32,0,48),function()send("open",{mode="pvp"})end)end
+ for _,child in body:GetChildren()do child.Parent=body.Parent end;body:Destroy()
+ if duelSetup then
+  local dock=actionDock(function()send("begin")end,"НАЧАТЬ ДУЭЛЬ · "..#p.tarot.." ТАРО")
+  enabled(dock.Primary,data.preparation and data.preparation.ready==true)
+ else actionDock(function()send("open",{mode="campaign"})end,"К СТОЛУ КАМПАНИИ")end
 end
 local function result(data)
  local s=data.battle;local body=scrollBody(72);header(body,"ВОЧКО · ИТОГ БОЯ")
- text(body,"ResultTitle",if s.phase=="won" then "Противник повержен" else "Побег прервался",32,UDim2.fromOffset(20,98),UDim2.new(1,-40,0,80))
+ text(body,"ResultTitle",if s.phase=="won"then "Противник повержен"elseif s.phase=="draw"then "Ничья"elseif s.mode=="duel"then "Дуэль проиграна"else "Побег прервался",32,UDim2.fromOffset(20,98),UDim2.new(1,-40,0,80))
  local desc=if s.phase=="won" then "За победу: +4 монеты\nПобед в этой сессии: "..data.profile.wins else "Не хватило "..(if s.hp<=0 then "здоровья." else "розыгрышей.").."\nПопробуй другую стратегию или талант."
+ if s.mode=="duel"then desc="Тренировочная дуэль с ИИ\nЗдоровье: "..s.hp.." : "..s.enemyHp.."\nПобед над ИИ: "..(data.profile.duelWins or 0)end
  text(body,"ResultStats",desc.."\nМонеты этой сессии: "..data.profile.coins,21,UDim2.fromOffset(20,190),UDim2.new(1,-40,0,120),C.muted)
  text(body,"JournalTitle","Журнал боя",24,UDim2.fromOffset(20,330),UDim2.new(1,-40,0,35))
  text(body,"Journal",table.concat(s.journal,"\n"),16,UDim2.fromOffset(20,372),UDim2.new(1,-40,0,150),C.muted)
- actionDock(function()send("open",{mode="campaign"})end,"НОВАЯ ПОПЫТКА")
+ actionDock(function()send("open",{mode=if s.mode=="duel"then "pvp"else "campaign"})end,"НОВАЯ ПОПЫТКА")
 end
-local function buildBattle()
- local body,scroll=scrollBody(94);header(body,"ТЕМНИЦА · КРЫСОЛОВ")
- local scene=make("Frame",{Name="EnemyScene",Position=UDim2.fromOffset(8,53),Size=UDim2.new(1,-16,0,106),BackgroundColor3=C.green,BorderSizePixel=0},body);stroke(scene)
- make("ImageLabel",{Name="Portrait",Image=Assets.Portraits,ImageRectOffset=Vector2.new(0,0),ImageRectSize=Vector2.new(200,200),BackgroundTransparency=1,Size=UDim2.fromOffset(104,104)},scene)
- text(scene,"EnemyName","КРЫСОЛОВ",24,UDim2.fromOffset(112,5),UDim2.new(1,-120,0,31))
- local enemyHP=text(scene,"EnemyHP","",18,UDim2.fromOffset(112,37),UDim2.new(1,-120,0,26))
- local bar=make("Frame",{Name="HealthTrack",Position=UDim2.fromOffset(112,67),Size=UDim2.new(1,-122,0,11),BackgroundColor3=Color3.fromRGB(33,22,15),BorderSizePixel=0},scene)
- local fill=make("Frame",{Name="Fill",Size=UDim2.fromScale(1,1),BackgroundColor3=C.red,BorderSizePixel=0},bar)
- local intent=text(scene,"Intent","",15,UDim2.fromOffset(112,81),UDim2.new(1,-120,0,22),C.muted)
- local status=make("Frame",{Name="PlayerStatus",Position=UDim2.fromOffset(8,167),Size=UDim2.new(1,-16,0,43),BackgroundTransparency=1},body)
- local playerHP=text(status,"PlayerHP","",23,UDim2.new(),UDim2.new(.48,0,1,0),Color3.fromRGB(188,220,159))
- local rounds=text(status,"Rounds","",23,UDim2.fromScale(.48,0),UDim2.fromScale(.52,1));rounds.TextXAlignment=Enum.TextXAlignment.Right
- local target=text(body,"Target","",22,UDim2.fromOffset(10,212),UDim2.new(.48,-10,0,35))
- local deck=text(body,"Deck","",16,UDim2.new(.48,0,0,212),UDim2.new(.52,-10,0,35),C.muted);deck.TextXAlignment=Enum.TextXAlignment.Right
- local cons={}
- for i,item in {"minus2","minus4"}do
-  cons[item]=button(body,item,"",UDim2.new((i-1)*.5,8,0,252),UDim2.new(.5,-12,0,41),function()selectedItem=if selectedItem==item then nil else item;message(if selectedItem then "Нажми на зону с картами" else "Выбор отменён");if current then battleUI.update(current.battle)end end)
- end
- local laneRoot=make("Frame",{Name="Zones",Position=UDim2.fromOffset(8,302),Size=UDim2.new(1,-16,0,240),BackgroundTransparency=1},body)
- local lanes={}
- for i=1,3 do
-  local lane=make("Frame",{Name="Zone"..i,Position=UDim2.new((i-1)/3,2,0,0),Size=UDim2.new(1/3,-4,1,0),BackgroundColor3=C.green,BorderSizePixel=0,ClipsDescendants=true},laneRoot);stroke(lane)
-  local title=text(lane,"Title","ЗОНА "..i,16,UDim2.fromOffset(4,5),UDim2.new(1,-8,0,24));title.TextXAlignment=Enum.TextXAlignment.Center
-  local state=text(lane,"State","",12,UDim2.fromOffset(4,31),UDim2.new(1,-8,0,20),C.muted)
-  local cards=make("Frame",{Name="Cards",Position=UDim2.fromOffset(0,53),Size=UDim2.new(1,0,1,-104),BackgroundTransparency=1},lane)
-  local sum=text(lane,"Sum","—",29,UDim2.new(.1,0,1,-45),UDim2.new(.8,0,0,36),Color3.fromRGB(35,29,15));sum.BackgroundColor3=C.brass;sum.BackgroundTransparency=0;sum.TextXAlignment=Enum.TextXAlignment.Center
-  local click=make("TextButton",{Name="UseItem",Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Text="",ZIndex=9},lane)
-  click.Activated:Connect(function()if selectedItem then send("consume",{item=selectedItem,zone=i})end end)
-  lanes[i]={root=lane,status=state,cards=cards,sum=sum,nodes={}}
- end
- local damage=text(body,"Damage","",30,UDim2.fromOffset(8,552),UDim2.new(1,-16,0,44));damage.TextXAlignment=Enum.TextXAlignment.Center;damage.BackgroundTransparency=0;damage.BackgroundColor3=C.green;stroke(damage)
- local dock=make("Frame",{Name="Dock",AnchorPoint=Vector2.new(0,1),Position=UDim2.fromScale(0,1),Size=UDim2.new(1,0,0,90),BackgroundColor3=C.ink,BorderSizePixel=0},app);stroke(dock)
- local draw=button(dock,"Draw","ВЗЯТЬ\nКАРТУ",UDim2.new(0,7,0,7),UDim2.new(1/3,-9,0,53),function()send("draw")end,Color3.fromRGB(147,113,55))
- local stop=button(dock,"Stop","СТОП\nНА ЗОНЕ",UDim2.new(1/3,3,0,7),UDim2.new(1/3,-7,0,53),function()send("stop")end)
- local play=button(dock,"Play","СЫГРАТЬ\nХОД",UDim2.new(2/3,2,0,7),UDim2.new(1/3,-9,0,53),function()send("play")end,C.red)
- local hint=text(dock,"Hint","Space — добор · F — стоп · Enter — удар",12,UDim2.fromOffset(8,64),UDim2.new(1,-16,0,21),C.muted);hint.TextXAlignment=Enum.TextXAlignment.Center
- local lastReceipt=0
- TableScene.Create()
+local function buildBattle(s)
  app.BackgroundTransparency=1
- body.PageTitle.Visible=false
- body.Return.ZIndex=5
- scene.Position=UDim2.fromOffset(8,6);scene.Size=UDim2.new(1,-118,0,68)
- scene.Portrait.Visible=false
- scene.EnemyName.Position=UDim2.fromOffset(10,0);scene.EnemyName.Size=UDim2.new(.5,-10,0,28)
- enemyHP.Position=UDim2.new(.5,0,0,0);enemyHP.Size=UDim2.new(.5,-10,0,28);enemyHP.TextXAlignment=Enum.TextXAlignment.Right
- bar.Position=UDim2.fromOffset(10,31);bar.Size=UDim2.new(1,-20,0,9)
- intent.Position=UDim2.fromOffset(10,43);intent.Size=UDim2.new(1,-20,0,23)
- status.Position=UDim2.fromOffset(8,78)
- status.BackgroundTransparency=.12;status.BackgroundColor3=C.ink
- target.Position=UDim2.fromOffset(10,118);deck.Position=UDim2.new(.48,0,0,118)
- scroll.ScrollingEnabled=false;scroll.AutomaticCanvasSize=Enum.AutomaticSize.None
- damage.Visible=false
- for _,lane in lanes do lane.cards.Visible=false;lane.status.TextSize=14;lane.sum.TextSize=24;lane.root.BackgroundTransparency=.12 end
- local function update(s)
-  local size=app.AbsoluteSize;local laneH=66
-  laneRoot.Position=UDim2.new(0,8,0,size.Y-166);laneRoot.Size=UDim2.new(1,-16,0,laneH)
-  for _,lane in lanes do lane.root.Title.Size=UDim2.new(1,-8,0,20);lane.status.Position=UDim2.fromOffset(4,22);lane.status.Size=UDim2.new(.52,-4,0,36);lane.sum.Position=UDim2.new(.54,0,0,24);lane.sum.Size=UDim2.new(.43,0,0,34)end
-  for i,item in {"minus2","minus4"}do cons[item].Position=UDim2.new((i-1)*.5,8,0,size.Y-217);cons[item].Size=UDim2.new(.5,-12,0,44)end
-  body.Size=UDim2.new(1,0,0,math.max(1,size.Y-94))
-  TableScene.Update(s)
-  enemyHP.Text=string.format("%d / %d",s.enemyHp,s.enemyMaxHp);fill.Size=UDim2.fromScale(s.enemyHp/s.enemyMaxHp,1)
-  intent.Text="Далее: атака "..s.enemyAttack;playerHP.Text="♥ "..s.hp.." / "..s.maxHp
-  rounds.Text="ХОДОВ: "..s.roundsLeft.." / "..s.roundsTotal;target.Text="ЦЕЛЬ  "..s.target;deck.Text="КОЛОДА  "..s.deckCount.." / 52"
-  damage.Text="УРОН  "..s.forecast.damage
-  hint.Text="УРОН  "..s.forecast.damage.."   ·   ВЫБЕРИ СРЕЗ, ЗАТЕМ ЗОНУ";hint.TextSize=15
-  local combat=s.phase=="combat"
-  enabled(draw,combat and s.active~=nil);enabled(stop,combat and s.active~=nil and #s.zones[s.active].cards>0);enabled(play,combat and s.forecast.cards>0)
-  for item,b in cons do
-   b.Text=(if item=="minus2" then "Срез −2" else "Срез −4").." · "..(s.supplies[item]or 0)
-   enabled(b,combat and(s.supplies[item]or 0)>0);b.BackgroundColor3=if selectedItem==item then Color3.fromRGB(79,78,35)else C.green
-  end
-  if selectedItem and(s.supplies[selectedItem]or 0)<=0 then selectedItem=nil end
-  for i,z in s.zones do
-   local l=lanes[i];local r=s.forecast.zones[i]
-   l.status.Text=(if r.bust then "ПЕРЕБОР" elseif r.exact then "ТОЧНО" elseif z.stood then "СТОП" elseif s.active==i then "НАБОР" else "ЖДЁТ").." · "..#z.cards.."/"..s.slots
-   l.sum.Text=if #z.cards>0 then tostring(r.sum)else "—";l.root.BackgroundColor3=if s.active==i then Color3.fromRGB(34,67,40)else C.green
-   local width=math.max(40,math.min(l.root.AbsoluteSize.X*.78,(laneH-102)*.67*Assets.CardWidth/Assets.CardHeight))
-   local height=width*Assets.CardHeight/Assets.CardWidth;local step=math.max(7,math.min(20,(laneH-106-height)/math.max(1,s.slots-1)))
-   local keep={};for ci,card in z.cards do
-    local node=l.nodes[card.id];if not node then node=atlas(l.cards,"Card_"..card.id,card,UDim2.new(),UDim2.new());l.nodes[card.id]=node end
-    keep[card.id]=true;node.AnchorPoint=Vector2.new(.5,0);node.Position=UDim2.new(.5,0,0,(ci-1)*step);node.Size=UDim2.fromOffset(width,height);node.ZIndex=ci
-   end
-   for id,node in l.nodes do if not keep[id]then node:Destroy();l.nodes[id]=nil end end
-  end
-  if s.receipt and s.receipt.round>lastReceipt then
-   lastReceipt=s.receipt.round;local value=text(scene,"Hit","−"..s.receipt.damage,29,UDim2.fromOffset(15,25),UDim2.fromOffset(95,40),Color3.fromRGB(255,209,134));value.TextXAlignment=Enum.TextXAlignment.Center;value.ZIndex=12
-   TweenService:Create(value,TweenInfo.new(.65),{Position=UDim2.fromOffset(15,0),TextTransparency=1}):Play();task.delay(.7,function()value:Destroy()end)
-  end
+ TableScene.Create(player:WaitForChild("PlayerGui"),send,s.mode=="duel")
+ local top=make("Frame",{Name="BattleHUD",Size=UDim2.new(1,0,0,150),BackgroundTransparency=1},app)
+ local title=text(top,"Title",if s.mode=="duel"then "ВОЧКО / ДУЭЛЬ С ИИ"else "ВОЧКО / ТЕМНИЦА",20,UDim2.fromOffset(16,7),UDim2.new(.55,0,0,30));title.TextStrokeTransparency=.5
+ local returnButton=button(top,"Return","В комнату",UDim2.new(1,-116,0,7),UDim2.fromOffset(104,32),function()send("return")end);returnButton.TextSize=15
+ local function panel(name,x,w)
+  local p=make("Frame",{Name=name,Position=UDim2.new(x,if x==0 then 16 else -16,0,50),AnchorPoint=Vector2.new(x,0),Size=UDim2.new(w,0,0,88),BackgroundColor3=C.ink,BackgroundTransparency=.12,BorderSizePixel=0},top)
+  make("UICorner",{CornerRadius=UDim.new(0,9)},p);stroke(p)
+  return p
  end
- return {update=update}
+ local own=panel("Player",0,.24)
+ local playerName=text(own,"Name",player.DisplayName,18,UDim2.fromOffset(10,4),UDim2.new(1,-20,0,24))
+ local hp=text(own,"HP","",21,UDim2.fromOffset(10,31),UDim2.new(1,-20,0,24),Color3.fromRGB(177,216,146))
+ local track=make("Frame",{Position=UDim2.fromOffset(10,64),Size=UDim2.new(1,-20,0,8),BackgroundColor3=C.green,BorderSizePixel=0},own)
+ local hpFill=make("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(102,177,93),BorderSizePixel=0},track)
+ local enemy=panel("Enemy",1,.29)
+ local name=text(enemy,"Name","КРЫСОЛОВ",20,UDim2.fromOffset(10,3),UDim2.new(1,-20,0,23))
+ local enemyHP=text(enemy,"HP","",18,UDim2.fromOffset(10,28),UDim2.new(1,-20,0,23),Color3.fromRGB(234,162,138))
+ local enemyTrack=make("Frame",{Position=UDim2.fromOffset(10,51),Size=UDim2.new(1,-20,0,6),BackgroundColor3=C.green,BorderSizePixel=0},enemy)
+ local enemyFill=make("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.red,BorderSizePixel=0},enemyTrack)
+ local intent=text(enemy,"Intent","",15,UDim2.fromOffset(10,57),UDim2.new(1,-20,0,24),C.muted)
+ cameraControls=CameraControls.Create(app,TableScene,function()return root.AbsoluteSize end)
+ local function update(s)
+  cameraControls:Refresh()
+  TableScene.Update(s)
+  local compact=app.AbsoluteSize.X<650
+  own.Size=UDim2.new(if compact then .36 else .24,0,0,88);enemy.Size=UDim2.new(if compact then .47 else .29,0,0,88)
+  playerName.TextSize=if compact then 14 else 18;name.TextSize=if compact then 16 else 20
+  hp.Text="♥ "..s.hp.." / "..s.maxHp;hpFill.Size=UDim2.fromScale(s.hp/s.maxHp,1)
+  name.Text=s.enemyName
+  enemyHP.Text=s.enemyHp.." / "..s.enemyMaxHp;enemyFill.Size=UDim2.fromScale(s.enemyHp/s.enemyMaxHp,1)
+  intent.Text=if s.mode=="duel"then "ИИ · Раунд "..s.round.."/"..s.roundsTotal else "Атака "..s.enemyAttack.." · Ходы "..s.roundsLeft.."/"..s.roundsTotal
+ end
+ return {update=update,impact=function(value,maxHp,damage,side)
+  if side=="player"then hp.Text="♥ "..value.." / "..maxHp;TweenService:Create(hpFill,TweenInfo.new(.08),{Size=UDim2.fromScale(value/maxHp,1)}):Play()
+  else enemyHP.Text=value.." / "..maxHp;TweenService:Create(enemyFill,TweenInfo.new(.08),{Size=UDim2.fromScale(value/maxHp,1)}):Play()end
+ end}
 end
 local function lobbyUI()
  local title=text(lobby,"Title","ВОЧКО\nКомната поединков",25,UDim2.fromOffset(16,8),UDim2.fromOffset(280,64));title.TextStrokeTransparency=.4
  local shortcuts=make("Frame",{Name="Shortcuts",AnchorPoint=Vector2.new(.5,1),Position=UDim2.new(.5,0,1,-14),Size=UDim2.new(1,-20,0,100),BackgroundTransparency=1},lobby)
  make("UISizeConstraint",{MaxSize=Vector2.new(600,100)},shortcuts)
- local names={{"campaign","Кампания"},{"wardrobe","Коллекция"},{"pvp","PvP"},{"endless","Бесконечный"}}
+ local names={{"campaign","Кампания"},{"wardrobe","Шкаф · подготовка"},{"pvp","PvP"},{"endless","Бесконечный"}}
  for i,pair in names do button(shortcuts,pair[1],pair[2],UDim2.new((i-1)%2*.5,3,0,math.floor((i-1)/2)*49),UDim2.new(.5,-6,0,44),function()send("open",{mode=pair[1]})end)end
 end
 lobbyUI()
 local function render(data,force)
  current=data;local screen=data.screen or "lobby";local s=data.battle
  local key=screen..(if s then ":"..s.id else "")
- if screen=="battle" and s and(s.phase=="won" or s.phase=="lost")then key..=":"..s.phase end
+ if screen=="battle" and s and(s.phase=="won" or s.phase=="lost" or s.phase=="draw")then key..=":"..s.phase end
  if key~=screenKey or force then
-  clearApp();app.BackgroundTransparency=0;app.UISizeConstraint.MaxSize=Vector2.new(if screen=="battle" then 1100 else 640,1600);screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
+  clearApp();app.BackgroundTransparency=0;app.UISizeConstraint.MaxSize=Vector2.new(if screen=="battle" then 2400 else 640,2400);screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
   if screen=="intro" and s then intro(data)
-  elseif screen=="wardrobe"then wardrobe(data)
+  elseif screen=="wardrobe"or screen=="duelsetup"then wardrobe(data,screen=="duelsetup")
   elseif screen=="notice"then simpleNotice(data)
   elseif screen=="battle"and s then
-   if s.phase=="won"or s.phase=="lost"then result(data)else battleUI=buildBattle()end
+   if s.phase=="won"or s.phase=="lost"or s.phase=="draw"then result(data)else battleUI=buildBattle(s);TableScene.Camera(root.AbsoluteSize,false)end
   end
- elseif screen=="wardrobe"then clearApp();wardrobe(data)end
+ elseif screen=="wardrobe"or screen=="duelsetup"then local old=app:FindFirstChild("Body");local pos=old and old.CanvasPosition;clearApp();wardrobe(data,screen=="duelsetup");if pos then app.Body.CanvasPosition=pos end end
  if battleUI and s then battleUI.update(s)end
  message(data.message)
 end
+local attackPlayback,pendingSnapshot=false,nil
+local animatedReceipts={}
 Snapshot.OnClientEvent:Connect(function(data)
- if type(data)=="table"then render(data,false)end
+ if type(data)~="table"then return end
+ local s=data.battle
+ if attackPlayback then
+  if data.screen=="battle" and current and s and current.battle and s.id==current.battle.id then pendingSnapshot=data;return end
+  attackPlayback=false;pendingSnapshot=nil
+  render(data,false);return
+ end
+ local receipt=s and s.receipt
+ if data.screen=="battle" and battleUI and current and current.screen=="battle" and current.battle and s and s.id==current.battle.id
+  and receipt and receipt.hits and receipt.round>(animatedReceipts[s.id]or 0)then
+  animatedReceipts[s.id]=receipt.round;attackPlayback=true;pendingSnapshot=data
+  TableScene.PlayAttack(s,function(hp,maxHp,damage,side)if battleUI then battleUI.impact(hp,maxHp,damage,side)end end,function()
+   if not attackPlayback then return end
+   attackPlayback=false;local nextData=pendingSnapshot;pendingSnapshot=nil
+   if nextData then render(nextData,false)end
+  end)
+  return
+ end
+ render(data,false)
 end)
 local resizeQueued=false
 app:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
- if resizeQueued then return end;resizeQueued=true;task.defer(function()resizeQueued=false;if battleUI and current and current.battle then TableScene.Camera(root.AbsoluteSize,false);battleUI.update(current.battle)end end)
+ if resizeQueued then return end;resizeQueued=true;task.defer(function()resizeQueued=false;if battleUI and current and current.battle then TableScene.Camera(root.AbsoluteSize,false);if not TableScene.ImpactActive then battleUI.update(current.battle) end end end)
 end)
 UIS.InputBegan:Connect(function(input,processed)
- if processed or not current or current.screen~="battle"or not current.battle or current.battle.phase~="combat"then return end
+ if TableScene.CameraTuning or TableScene.ImpactActive or processed or not current or current.screen~="battle"or not current.battle or current.battle.phase~="combat"then return end
  if input.KeyCode==Enum.KeyCode.Space then send("draw")elseif input.KeyCode==Enum.KeyCode.F then send("stop")elseif input.KeyCode==Enum.KeyCode.Return then send("play")end
 end)
 task.spawn(function()pcall(function()game:GetService("ContentProvider"):PreloadAsync({Assets.Cards,Assets.Portraits})end)end)

@@ -1,19 +1,25 @@
 -- All prototype geometry is grouped; existing Baseplate and SpawnLocation are preserved.
 return function()
  local function ensureTableVisual(root)
-  local station=root:FindFirstChild("Table_campaign")
   local storage=game:GetService("ServerStorage"):FindFirstChild("VochkoPrototype")
   local template=storage and storage:FindFirstChild("TavernTable")
-  if not station or not template then return end
-  if not station:FindFirstChild("TavernTable") then
-   local visual=template:Clone();visual.Name="TavernTable"
-   local mesh=visual:FindFirstChildWhichIsA("MeshPart",true)
-   if not mesh then visual:Destroy();return end
-   mesh.CFrame=CFrame.new(19,1.2+mesh.Size.Y/2,-7)*CFrame.Angles(0,math.pi/2,0)
-   mesh.Anchored=true;mesh.CanCollide=false;mesh.CanTouch=false;visual.Parent=station
-  end
-  for _,p in station:GetChildren()do
-   if p:IsA("BasePart")and p.Name~="CardDeck"and p.Name~="DeckPaper"and p.Name~="LaneEdge"then p.Transparency=1 end
+  if not template then return end
+  for _,definition in {{key="campaign",x=19,depth=9.47247314453125},{key="pvp",x=-19,depth=12.2}}do
+   local station=root:FindFirstChild("Table_"..definition.key)
+   if station then
+    if not station:FindFirstChild("TavernTable")then
+     local visual=template:Clone();visual.Name="TavernTable"
+     local mesh=visual:FindFirstChildWhichIsA("MeshPart",true)
+     if mesh then
+      mesh.Size=Vector3.new(definition.depth,mesh.Size.Y,18.2)
+      mesh.CFrame=CFrame.new(definition.x,1.2+mesh.Size.Y/2,-7)*CFrame.Angles(0,math.pi/2,0)
+      mesh.Anchored=true;mesh.CanCollide=false;mesh.CanTouch=false;visual.Parent=station
+     else visual:Destroy()end
+    end
+    for _,p in station:GetChildren()do
+     if p:IsA("BasePart")and p.Name~="CardDeck"and p.Name~="DeckPaper"and p.Name~="LaneEdge"then p.Transparency=1 end
+    end
+   end
   end
  end
  local function ensureLamp(root)
@@ -96,12 +102,15 @@ return function()
  local shelf
  for _,y in {1.3,4.3,7.3,10.8} do shelf=part("Shelf",Vector3.new(10,.4,3.5),Vector3.new(-23,y,15),colors.wood,nil,cabinet)
   part("ShelfEdge",Vector3.new(10,.15,.15),Vector3.new(-23,y+.12,13.2),colors.brass,Enum.Material.Metal,cabinet) end
- for row=0,2 do for col=0,4 do
-  local card=part("CollectionCard",Vector3.new(.95,1.45,.1),Vector3.new(-27+col*2,2.25+row*3,14.0),Color3.fromRGB(205,183,131),Enum.Material.SmoothPlastic,cabinet)
-  local gui=Instance.new("SurfaceGui");gui.Face=Enum.NormalId.Front;gui.CanvasSize=Vector2.new(100,140);gui.Parent=card
-  local t=Instance.new("TextLabel");t.Size=UDim2.fromScale(1,1);t.BackgroundTransparency=1;t.Text=({"♠","♥","♦","♣","✦"})[col+1];t.TextSize=62;t.Font=Enum.Font.Garamond;t.TextColor3=Color3.fromRGB(54,38,24);t.Parent=gui
- end end
- sign(shelf,"КОЛЛЕКЦИЯ","Колода · таланты · будущие сборки");prompt(shelf,"wardrobe","Шкаф коллекции")
+ local assets=require(game.ReplicatedStorage.VochkoPrototype.Assets)
+ local tarot=require(game.ReplicatedStorage.VochkoPrototype.Tarot)
+ for i,d in tarot.List do
+  local row=math.floor((i-1)/4);local col=(i-1)%4
+  local card=part("CollectionCard_"..d.id,Vector3.new(1.2,1.8,.1),Vector3.new(-26.6+col*2.4,2.4+row*3,14),Color3.fromRGB(205,183,131),Enum.Material.SmoothPlastic,cabinet)
+  local gui=Instance.new("SurfaceGui");gui.Face=Enum.NormalId.Front;gui.CanvasSize=Vector2.new(256,384);gui.Parent=card
+  local art=Instance.new("ImageLabel");art.Size=UDim2.fromScale(1,1);art.BackgroundTransparency=1;art.Image=assets.Tarot[d.id];art.Parent=gui
+ end
+ sign(shelf,"ПОДГОТОВКА","Подготовка · таро · таланты");prompt(shelf,"wardrobe","Подготовка к партии")
  part("WardrobeCrown",Vector3.new(11,.8,4),Vector3.new(-23,11.6,15),colors.wood,nil,cabinet)
  for _,x in {-31,31} do for _,z in {-17,3,18} do
   part("Sconce",Vector3.new(.6,2,.6),Vector3.new(x,8,z),colors.brass,Enum.Material.Metal)

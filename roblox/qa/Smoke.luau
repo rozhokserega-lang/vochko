@@ -1,6 +1,7 @@
 -- Gameplay QA: run in Studio against ServerStorage.VochkoPrototype modules.
 local Battle=require(game.ServerStorage.VochkoPrototype.Battle)
 local defaults=require(game.ServerStorage.VochkoPrototype.Config).ForBattle()
+defaults.Target=30
 local checks={}
 local function check(name,value)assert(value,name);table.insert(checks,name)end
 local deck=Battle.Deck()

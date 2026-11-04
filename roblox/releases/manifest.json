@@ -1,0 +1,178 @@
+{
+  "format": 1,
+  "place": "roblox/releases/VochkoPrototype.rbxl",
+  "note": "Source GLBs contain embedded geometry and PBR textures. The place loads published Roblox assets by ID; use the same Roblox account or grant access/reimport for a different owner.",
+  "robloxAssets": [
+    "rbxassetid://105939024325017",
+    "rbxassetid://114005423696242",
+    "rbxassetid://114405523897722",
+    "rbxassetid://116448422523262",
+    "rbxassetid://118189784508321",
+    "rbxassetid://118357318946115",
+    "rbxassetid://119827633018778",
+    "rbxassetid://125128067761419",
+    "rbxassetid://126504298884435",
+    "rbxassetid://139242092721503",
+    "rbxassetid://70495481355526",
+    "rbxassetid://72809768313497",
+    "rbxassetid://76658903035159",
+    "rbxassetid://77289558315048",
+    "rbxassetid://78475411009007",
+    "rbxassetid://78955767921126",
+    "rbxassetid://79379639898464",
+    "rbxassetid://82826802074242",
+    "rbxassetid://89834733292942"
+  ],
+  "files": [
+    {
+      "path": "assets/tarot/candle-v1.webp",
+      "bytes": 160920,
+      "sha256": "0ad77240e8c95c31aa4c91bc9006776e9a2614adf3496bde4080dd43a7ed2014"
+    },
+    {
+      "path": "assets/tarot/coin-v1.webp",
+      "bytes": 163604,
+      "sha256": "395b3ea10666c0b958fe2c497607c9d207bc5714b915416497930e683d473843"
+    },
+    {
+      "path": "assets/tarot/echo-v1.webp",
+      "bytes": 168374,
+      "sha256": "8538ae5c80bc235dcb58f9b536e711e8fe437e4f0e45593e59a2034ff60d84a9"
+    },
+    {
+      "path": "assets/tarot/guardian-v1.webp",
+      "bytes": 162610,
+      "sha256": "eff8575b0054692f797a9d6b55b950f95d2a495ec56225dc6917ab9ae07effa5"
+    },
+    {
+      "path": "assets/tarot/hourglass-v1.webp",
+      "bytes": 157754,
+      "sha256": "62d8b5098c3c704b0340bce67b1e905c4ad25853f34d94f56afe7d208a936849"
+    },
+    {
+      "path": "assets/tarot/moon-v1.webp",
+      "bytes": 154448,
+      "sha256": "3109db115e3eb54d65c9794e983a8f0593b6fc4fa8c7c3544be68054121ade1c"
+    },
+    {
+      "path": "assets/tarot/rose-v1.webp",
+      "bytes": 153324,
+      "sha256": "ae2d1fb347ad735ec8f30dff5b0950435c9c59056efa643c85c517207b341df7"
+    },
+    {
+      "path": "assets/tarot/scales-v1.webp",
+      "bytes": 131544,
+      "sha256": "68adcb2ea66cf84d1a2d8fb5f641a2a373eb50e2f356b55cb441cfeb00a09519"
+    },
+    {
+      "path": "assets/tarot/seal-v1.webp",
+      "bytes": 145528,
+      "sha256": "3286c70e630a74449c4ceab6286c824117a89d047216cebd7ab9b103b87572cf"
+    },
+    {
+      "path": "assets/tarot/sun-v1.webp",
+      "bytes": 161816,
+      "sha256": "dba49f40a5407bdbfe815bbbd8d2dbaf5bce9b56fba203063f4a8a12e51e492d"
+    },
+    {
+      "path": "assets/tarot/thread-v1.webp",
+      "bytes": 129944,
+      "sha256": "4243a22f53711e4eca63d85f46559581017928ebdec8f816cfb7e9f5afacf224"
+    },
+    {
+      "path": "assets/tarot/tower-v1.webp",
+      "bytes": 151060,
+      "sha256": "fc568655cdadaf9796d53ff9d3639d18832290b3b7a6e2ad0d9694514301e7aa"
+    },
+    {
+      "path": "roblox/assets/cards-atlas.png",
+      "bytes": 242867,
+      "sha256": "0aae3e888ad420e415637146b240f7e275399679438bc12a98c4afc881d1e5fd"
+    },
+    {
+      "path": "roblox/assets/models/TavernTable.rbxmx",
+      "bytes": 1167,
+      "sha256": "087478d934132974f3be5912c24504b31a8aea2c02a46ef86106f997aab00af7"
+    },
+    {
+      "path": "roblox/assets/models/source-tripo-meshopt.glb",
+      "bytes": 8644292,
+      "sha256": "9a9c9e0897d41748b6091e41a9760ef0a520e0fc88b46b9af172586b29eb7030"
+    },
+    {
+      "path": "roblox/assets/models/tavern-table.glb",
+      "bytes": 3626756,
+      "sha256": "6e285ea3cf1c6063198a55635e04ff895fcec03fec0b223e3307ba932e9a2c00"
+    },
+    {
+      "path": "roblox/assets/opponents.png",
+      "bytes": 1013923,
+      "sha256": "48e332bf253599dc8c483602e796489ba327f9adc8ec5cebb97804c7c1793d8d"
+    },
+    {
+      "path": "roblox/default.project.json",
+      "bytes": 3597,
+      "sha256": "d453f32ba892037797fc3878a9038f583ba0e7d5c102dc3aaf10529ab18286cd"
+    },
+    {
+      "path": "roblox/releases/VochkoPrototype.rbxl",
+      "bytes": 60219,
+      "sha256": "1c270ca95cd2ab31ea61af9a92d316a19aea44b1b09c099d8965cafdc32c5d77"
+    },
+    {
+      "path": "roblox/src/Assets.luau",
+      "bytes": 724,
+      "sha256": "798f6635fb606f6d04d40a1a791cd090b377112f6610bb58839df8eee3942b80"
+    },
+    {
+      "path": "roblox/src/Battle.luau",
+      "bytes": 10290,
+      "sha256": "fcd1ff397d045813e1b49187444d3ce53f94199dd2fe4d5aa97fb316723d0ad6"
+    },
+    {
+      "path": "roblox/src/CameraControls.luau",
+      "bytes": 6804,
+      "sha256": "6062b2dcf0cb4d03f8be69fd393a66d75522b6e9b658eaf0919caf1d097a32ae"
+    },
+    {
+      "path": "roblox/src/CardImpact.luau",
+      "bytes": 4513,
+      "sha256": "b1c5df9088475e38944c9be1cde2f9e647c4fcceb30e88935d0e5b18303c43e8"
+    },
+    {
+      "path": "roblox/src/Client.client.luau",
+      "bytes": 20520,
+      "sha256": "fa9bfd9c579b4569daf7b7ca34fdc1a100ea72d6e77c9cc0da3168b8e2fd0d1e"
+    },
+    {
+      "path": "roblox/src/Config.luau",
+      "bytes": 1428,
+      "sha256": "d3da2d61ce33836785459a30ddca4b1eea55bb37737a4caaf72ae68fef26087d"
+    },
+    {
+      "path": "roblox/src/Duel.luau",
+      "bytes": 8970,
+      "sha256": "50e1a90eaba4639db3c03362b66767f00f36b11c74e86b158437bcd698e22b54"
+    },
+    {
+      "path": "roblox/src/RoomBuilder.luau",
+      "bytes": 10783,
+      "sha256": "3904ae694473d73805fb83aa23acf79a0437bfb82413068f96a6afd582a4858b"
+    },
+    {
+      "path": "roblox/src/Server.server.luau",
+      "bytes": 9984,
+      "sha256": "6b5f1952dbb0d140ff6f2197af57c6baac2f7f3017a4f07d90a42cca0367c38b"
+    },
+    {
+      "path": "roblox/src/TableScene.luau",
+      "bytes": 36500,
+      "sha256": "ea7536cb388a25b085139518656e29d4f4900c6bfa3341902e028c031e8a384a"
+    },
+    {
+      "path": "roblox/src/Tarot.luau",
+      "bytes": 4395,
+      "sha256": "e321ea2b2098f68f2fe2e53c81bf819da07a9f3cc74541a2cd54a5e0055cfe60"
+    }
+  ]
+}

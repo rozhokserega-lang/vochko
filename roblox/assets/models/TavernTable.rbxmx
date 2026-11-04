@@ -5,16 +5,17 @@
    <Properties>
     <string name="Name">TableMesh</string>
     <bool name="Anchored">true</bool><bool name="CanCollide">false</bool><bool name="CanTouch">false</bool>
-    <Vector3 name="Size"><X>9.47247314453125</X><Y>3.537811279296875</Y><Z>14.0093994140625</Z></Vector3>
-    <Content name="MeshId"><url>rbxassetid://130051660213969</url></Content>
+    <Vector3 name="Size"><X>9.47247314453125</X><Y>3.537811279296875</Y><Z>18.2</Z></Vector3>
+    <Vector3 name="InitialSize"><X>0.676605224609375</X><Y>0.2527008056640625</Y><Z>1.00067138671875</Z></Vector3>
+    <Content name="MeshId"><url>rbxassetid://118189784508321</url></Content>
    </Properties>
    <Item class="SurfaceAppearance" referent="TableAppearance">
     <Properties>
      <string name="Name">SurfaceAppearance</string>
-     <Content name="ColorMap"><url>rbxassetid://131877755470676</url></Content>
-     <Content name="NormalMap"><url>rbxassetid://86423731367269</url></Content>
-     <Content name="MetalnessMap"><url>rbxassetid://80860405035004</url></Content>
-     <Content name="RoughnessMap"><url>rbxassetid://120113061227864</url></Content>
+     <Content name="ColorMap"><url>rbxassetid://78475411009007</url></Content>
+     <Content name="NormalMap"><url>rbxassetid://77289558315048</url></Content>
+     <Content name="MetalnessMap"><url>rbxassetid://105939024325017</url></Content>
+     <Content name="RoughnessMap"><url>rbxassetid://119827633018778</url></Content>
     </Properties>
    </Item>
   </Item>
