@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-04",
+  "scope": "Toy comparison, not a gameplay win-rate test or a Roblox policy assessment",
+  "results": [
+    {
+      "target": 21,
+      "slots": 4,
+      "boards": 30000,
+      "policy": "Draw until target minus 3, exact, bust or slot limit; aces 1/11; no items or effects",
+      "averageCardsPerZone": 2.996,
+      "exactPercent": 12.5,
+      "bustPercent": 34.79,
+      "slotLimitBelowThresholdPercent": 5.46
+    },
+    {
+      "target": 30,
+      "slots": 4,
+      "boards": 30000,
+      "policy": "Draw until target minus 3, exact, bust or slot limit; aces 1/11; no items or effects",
+      "averageCardsPerZone": 3.836,
+      "exactPercent": 9.74,
+      "bustPercent": 15.99,
+      "slotLimitBelowThresholdPercent": 41.44
+    },
+    {
+      "target": 30,
+      "slots": 5,
+      "boards": 30000,
+      "policy": "Draw until target minus 3, exact, bust or slot limit; aces 1/11; no items or effects",
+      "averageCardsPerZone": 4.247,
+      "exactPercent": 13.56,
+      "bustPercent": 31.61,
+      "slotLimitBelowThresholdPercent": 12.53
+    }
+  ]
+}
