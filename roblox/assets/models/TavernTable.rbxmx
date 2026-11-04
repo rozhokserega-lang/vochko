@@ -1,0 +1,22 @@
+<roblox version="4">
+ <Item class="Model" referent="TableModel">
+  <Properties><string name="Name">TavernTable</string></Properties>
+  <Item class="MeshPart" referent="TableMesh">
+   <Properties>
+    <string name="Name">TableMesh</string>
+    <bool name="Anchored">true</bool><bool name="CanCollide">false</bool><bool name="CanTouch">false</bool>
+    <Vector3 name="Size"><X>9.47247314453125</X><Y>3.537811279296875</Y><Z>14.0093994140625</Z></Vector3>
+    <Content name="MeshId"><url>rbxassetid://130051660213969</url></Content>
+   </Properties>
+   <Item class="SurfaceAppearance" referent="TableAppearance">
+    <Properties>
+     <string name="Name">SurfaceAppearance</string>
+     <Content name="ColorMap"><url>rbxassetid://131877755470676</url></Content>
+     <Content name="NormalMap"><url>rbxassetid://86423731367269</url></Content>
+     <Content name="MetalnessMap"><url>rbxassetid://80860405035004</url></Content>
+     <Content name="RoughnessMap"><url>rbxassetid://120113061227864</url></Content>
+    </Properties>
+   </Item>
+  </Item>
+ </Item>
+</roblox>

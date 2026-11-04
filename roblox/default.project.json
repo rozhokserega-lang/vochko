@@ -24,7 +24,8 @@
         "$ignoreUnknownInstances": true,
         "Config": { "$path": "src/Config.luau" },
         "Battle": { "$path": "src/Battle.luau" },
-        "RoomBuilder": { "$path": "src/RoomBuilder.luau" }
+        "RoomBuilder": { "$path": "src/RoomBuilder.luau" },
+        "TavernTable": { "$path": "assets/models/TavernTable.rbxmx" }
       }
     },
     "ServerScriptService": {

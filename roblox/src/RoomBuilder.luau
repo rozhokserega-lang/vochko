@@ -1,5 +1,21 @@
 -- All prototype geometry is grouped; existing Baseplate and SpawnLocation are preserved.
 return function()
+ local function ensureTableVisual(root)
+  local station=root:FindFirstChild("Table_campaign")
+  local storage=game:GetService("ServerStorage"):FindFirstChild("VochkoPrototype")
+  local template=storage and storage:FindFirstChild("TavernTable")
+  if not station or not template then return end
+  if not station:FindFirstChild("TavernTable") then
+   local visual=template:Clone();visual.Name="TavernTable"
+   local mesh=visual:FindFirstChildWhichIsA("MeshPart",true)
+   if not mesh then visual:Destroy();return end
+   mesh.CFrame=CFrame.new(19,1.2+mesh.Size.Y/2,-7)*CFrame.Angles(0,math.pi/2,0)
+   mesh.Anchored=true;mesh.CanCollide=false;mesh.CanTouch=false;visual.Parent=station
+  end
+  for _,p in station:GetChildren()do
+   if p:IsA("BasePart")and p.Name~="CardDeck"and p.Name~="DeckPaper"and p.Name~="LaneEdge"then p.Transparency=1 end
+  end
+ end
  local function ensureLamp(root)
  for _, station in {{x=-19,name="DuelTableLamp"},{x=0,name="CentralTableLamp"},{x=19,name="CampaignTableLamp"}} do
  if not root:FindFirstChild(station.name) then
@@ -17,7 +33,7 @@ return function()
  end
  end
  local existing = workspace:FindFirstChild("VochkoPrototype")
- if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model"); ensureLamp(existing); return existing end
+ if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model"); ensureLamp(existing);ensureTableVisual(existing);return existing end
  local root = Instance.new("Model"); root.Name = "VochkoPrototype"; root:SetAttribute("Owner", "vochko.prototype.v1"); root.Parent = workspace
  local colors = { stone = Color3.fromRGB(36,42,36), wood = Color3.fromRGB(61,39,24), brass = Color3.fromRGB(159,124,61), felt = Color3.fromRGB(18,61,41) }
  local n = 0
@@ -96,5 +112,6 @@ return function()
  local gui=Instance.new("SurfaceGui");gui.Face=Enum.NormalId.Back;gui.CanvasSize=Vector2.new(900,180);gui.Parent=plaque
  local title=Instance.new("TextLabel");title.Size=UDim2.fromScale(1,1);title.BackgroundTransparency=1;title.Font=Enum.Font.Garamond;title.Text="ВОЧКО  ·  КОМНАТА ПОЕДИНКОВ";title.TextSize=58;title.TextColor3=Color3.fromRGB(229,198,133);title.Parent=gui
  root:SetAttribute("SpawnPosition",Vector3.new(0,4.5,17));root:SetAttribute("Version",1)
+ ensureTableVisual(root)
  return root
 end
