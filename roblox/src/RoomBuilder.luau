@@ -1,7 +1,20 @@
 -- All prototype geometry is grouped; existing Baseplate and SpawnLocation are preserved.
 return function()
+ local function ensureLamp(root)
+  if root:FindFirstChild("CentralTableLamp") then return end
+ local lamp=Instance.new("Model");lamp.Name="CentralTableLamp";lamp.Parent=root
+ local function lampPart(name,size,pos,color,material)
+  local p=Instance.new("Part");p.Name=name;p.Size=size;p.Position=pos;p.Anchored=true;p.CanCollide=false;p.Color=color;p.Material=material;p.Parent=lamp;return p
+ end
+ lampPart("Suspension",Vector3.new(.12,4.7,.12),Vector3.new(0,15,-7),Color3.fromRGB(116,88,44),Enum.Material.Metal)
+ lampPart("Shade",Vector3.new(5.2,.45,3.4),Vector3.new(0,12.5,-7),Color3.fromRGB(19,64,43),Enum.Material.Metal)
+ lampPart("BrassRim",Vector3.new(5.35,.12,3.55),Vector3.new(0,12.23,-7),Color3.fromRGB(174,134,65),Enum.Material.Metal)
+ local diffuser=lampPart("WarmDiffuser",Vector3.new(4.8,.12,3.05),Vector3.new(0,12.13,-7),Color3.fromRGB(255,218,151),Enum.Material.Neon)
+ local down=Instance.new("SpotLight");down.Name="TableLight";down.Face=Enum.NormalId.Bottom;down.Angle=100;down.Range=22;down.Brightness=3;down.Color=Color3.fromRGB(255,218,167);down.Shadows=false;down.Parent=diffuser
+ local glow=Instance.new("PointLight");glow.Name="LampGlow";glow.Range=12;glow.Brightness=.5;glow.Color=down.Color;glow.Shadows=false;glow.Parent=diffuser
+ end
  local existing = workspace:FindFirstChild("VochkoPrototype")
- if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model"); return existing end
+ if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model"); ensureLamp(existing); return existing end
  local root = Instance.new("Model"); root.Name = "VochkoPrototype"; root:SetAttribute("Owner", "vochko.prototype.v1"); root.Parent = workspace
  local colors = { stone = Color3.fromRGB(36,42,36), wood = Color3.fromRGB(61,39,24), brass = Color3.fromRGB(159,124,61), felt = Color3.fromRGB(18,61,41) }
  local n = 0
@@ -57,6 +70,7 @@ return function()
   part("DeckPaper",Vector3.new(1.07,.28,1.57),deck.Position-Vector3.new(0,.02,0),Color3.fromRGB(205,186,140),Enum.Material.SmoothPlastic,m)
   sign(top,mode.title,mode.sub);prompt(top,mode.key,mode.title);chair(mode.x,-1.0,1);chair(mode.x,-13,-1)
  end
+ ensureLamp(root)
  local cabinet=Instance.new("Model");cabinet.Name="CollectionWardrobe";cabinet.Parent=root
  part("CabinetBack",Vector3.new(10,10,.6),Vector3.new(-23,6.1,16),colors.wood,nil,cabinet)
  for _,x in {-28,-18} do part("CabinetSide",Vector3.new(.6,10,3.2),Vector3.new(x,6.1,15),colors.wood,nil,cabinet) end
