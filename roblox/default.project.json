@@ -11,6 +11,7 @@
         "$className": "Folder",
         "$ignoreUnknownInstances": true,
         "Assets": { "$path": "src/Assets.luau" },
+        "TableScene": { "$path": "src/TableScene.luau" },
         "Input": { "$className": "RemoteEvent" },
         "Snapshot": { "$className": "RemoteEvent" }
       }

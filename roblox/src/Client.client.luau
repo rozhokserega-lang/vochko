@@ -4,6 +4,7 @@ local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("VochkoPrototype")
 local Assets = require(remote:WaitForChild("Assets"))
+local TableScene = require(remote:WaitForChild("TableScene"))
 local Input, Snapshot = remote:WaitForChild("Input"), remote:WaitForChild("Snapshot")
 local C = { ink=Color3.fromRGB(9,25,16), green=Color3.fromRGB(22,57,37), brass=Color3.fromRGB(183,147,78),
  paper=Color3.fromRGB(233,214,167), muted=Color3.fromRGB(172,189,156), red=Color3.fromRGB(128,46,36) }
@@ -50,10 +51,15 @@ task.spawn(function()local module=player.PlayerScripts:WaitForChild("PlayerModul
 local function cameraFor(screen)
  local camera=workspace.CurrentCamera;if not camera then return end
  if screen=="lobby" then
+  TableScene.Destroy();camera.FieldOfView=70
   camera.CameraType=Enum.CameraType.Custom
   local humanoid=player.Character and player.Character:FindFirstChildOfClass("Humanoid");if humanoid then camera.CameraSubject=humanoid end
   if controls then controls:Enable() end
+ elseif screen=="battle" then
+  TableScene.Camera(root.AbsoluteSize,true)
+  if controls then controls:Disable() end
  else
+  TableScene.Destroy()
   camera.CameraType=Enum.CameraType.Scriptable;camera.CFrame=CFrame.lookAt(Vector3.new(19,12,3),Vector3.new(19,4,-7))
   if controls then controls:Disable() end
  end
@@ -157,14 +163,34 @@ local function buildBattle()
  local play=button(dock,"Play","СЫГРАТЬ\nХОД",UDim2.new(2/3,2,0,7),UDim2.new(1/3,-9,0,53),function()send("play")end,C.red)
  local hint=text(dock,"Hint","Space — добор · F — стоп · Enter — удар",12,UDim2.fromOffset(8,64),UDim2.new(1,-16,0,21),C.muted);hint.TextXAlignment=Enum.TextXAlignment.Center
  local lastReceipt=0
+ TableScene.Create()
+ app.BackgroundTransparency=1
+ body.PageTitle.Visible=false
+ body.Return.ZIndex=5
+ scene.Position=UDim2.fromOffset(8,6);scene.Size=UDim2.new(1,-118,0,68)
+ scene.Portrait.Visible=false
+ scene.EnemyName.Position=UDim2.fromOffset(10,0);scene.EnemyName.Size=UDim2.new(.5,-10,0,28)
+ enemyHP.Position=UDim2.new(.5,0,0,0);enemyHP.Size=UDim2.new(.5,-10,0,28);enemyHP.TextXAlignment=Enum.TextXAlignment.Right
+ bar.Position=UDim2.fromOffset(10,31);bar.Size=UDim2.new(1,-20,0,9)
+ intent.Position=UDim2.fromOffset(10,43);intent.Size=UDim2.new(1,-20,0,23)
+ status.Position=UDim2.fromOffset(8,78)
+ status.BackgroundTransparency=.12;status.BackgroundColor3=C.ink
+ target.Position=UDim2.fromOffset(10,118);deck.Position=UDim2.new(.48,0,0,118)
+ scroll.ScrollingEnabled=false;scroll.AutomaticCanvasSize=Enum.AutomaticSize.None
+ damage.Visible=false
+ for _,lane in lanes do lane.cards.Visible=false;lane.status.TextSize=14;lane.sum.TextSize=24;lane.root.BackgroundTransparency=.12 end
  local function update(s)
-  local size=app.AbsoluteSize;local laneH=math.clamp(size.Y-465,180,340)
-  laneRoot.Size=UDim2.new(1,-16,0,laneH);damage.Position=UDim2.fromOffset(8,312+laneH)
-  body.Size=UDim2.new(1,0,0,364+laneH)
+  local size=app.AbsoluteSize;local laneH=66
+  laneRoot.Position=UDim2.new(0,8,0,size.Y-166);laneRoot.Size=UDim2.new(1,-16,0,laneH)
+  for _,lane in lanes do lane.root.Title.Size=UDim2.new(1,-8,0,20);lane.status.Position=UDim2.fromOffset(4,22);lane.status.Size=UDim2.new(.52,-4,0,36);lane.sum.Position=UDim2.new(.54,0,0,24);lane.sum.Size=UDim2.new(.43,0,0,34)end
+  for i,item in {"minus2","minus4"}do cons[item].Position=UDim2.new((i-1)*.5,8,0,size.Y-217);cons[item].Size=UDim2.new(.5,-12,0,44)end
+  body.Size=UDim2.new(1,0,0,math.max(1,size.Y-94))
+  TableScene.Update(s)
   enemyHP.Text=string.format("%d / %d",s.enemyHp,s.enemyMaxHp);fill.Size=UDim2.fromScale(s.enemyHp/s.enemyMaxHp,1)
   intent.Text="Далее: атака "..s.enemyAttack;playerHP.Text="♥ "..s.hp.." / "..s.maxHp
   rounds.Text="ХОДОВ: "..s.roundsLeft.." / "..s.roundsTotal;target.Text="ЦЕЛЬ  "..s.target;deck.Text="КОЛОДА  "..s.deckCount.." / 52"
   damage.Text="УРОН  "..s.forecast.damage
+  hint.Text="УРОН  "..s.forecast.damage.."   ·   ВЫБЕРИ СРЕЗ, ЗАТЕМ ЗОНУ";hint.TextSize=15
   local combat=s.phase=="combat"
   enabled(draw,combat and s.active~=nil);enabled(stop,combat and s.active~=nil and #s.zones[s.active].cards>0);enabled(play,combat and s.forecast.cards>0)
   for item,b in cons do
@@ -204,7 +230,7 @@ local function render(data,force)
  local key=screen..(if s then ":"..s.id else "")
  if screen=="battle" and s and(s.phase=="won" or s.phase=="lost")then key..=":"..s.phase end
  if key~=screenKey or force then
-  clearApp();screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
+  clearApp();app.BackgroundTransparency=0;app.UISizeConstraint.MaxSize=Vector2.new(if screen=="battle" then 1100 else 640,1600);screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
   if screen=="intro" and s then intro(data)
   elseif screen=="wardrobe"then wardrobe(data)
   elseif screen=="notice"then simpleNotice(data)
@@ -220,7 +246,7 @@ Snapshot.OnClientEvent:Connect(function(data)
 end)
 local resizeQueued=false
 app:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
- if resizeQueued then return end;resizeQueued=true;task.defer(function()resizeQueued=false;if battleUI and current and current.battle then battleUI.update(current.battle)end end)
+ if resizeQueued then return end;resizeQueued=true;task.defer(function()resizeQueued=false;if battleUI and current and current.battle then TableScene.Camera(root.AbsoluteSize,false);battleUI.update(current.battle)end end)
 end)
 UIS.InputBegan:Connect(function(input,processed)
  if processed or not current or current.screen~="battle"or not current.battle or current.battle.phase~="combat"then return end
