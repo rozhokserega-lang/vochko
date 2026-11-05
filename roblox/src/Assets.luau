@@ -21,16 +21,26 @@ function Assets.CreateTarotArt(parent,id)
  return art
 end
 local warmed=false
-function Assets.WarmTarot()
+local fetchReport={}
+function Assets.GetLoadReport()return table.clone(fetchReport)end
+function Assets.PreloadAll()
  if warmed then return end;warmed=true
  task.spawn(function()
-  local ids={};for _,id in Assets.Tarot do table.insert(ids,id)end
+  -- Raw rbxassetid strings can take a different resolution path: reproduced
+  -- Failure for a string and Success for the same ImageLabel.Image in Studio.
+  -- Give ContentProvider typed image dependencies, including on cold startup.
+  local images={}
+  local function add(id)local image=Instance.new('ImageLabel');image.Image=id;table.insert(images,image)end
+  add(Assets.Cards);add(Assets.Portraits);for _,id in Assets.Tarot do add(id)end
   local ok,err=pcall(function()
-   game:GetService("ContentProvider"):PreloadAsync(ids,function(id,status)
-    if status~=Enum.AssetFetchStatus.Success then warn("[VOCHKO Tarot] "..id.." "..tostring(status).."; universe="..game.GameId.."; check asset permissions/moderation")end
+   game:GetService("ContentProvider"):PreloadAsync(images,function(id,status)
+    fetchReport[id]=tostring(status)
+    if status~=Enum.AssetFetchStatus.Success then warn("[VOCHKO Art] ImageLabel preload failed: "..id.." "..tostring(status).."; universe="..game.GameId)end
    end)
   end)
-  if not ok then warn("[VOCHKO Tarot] preload: "..tostring(err))end
+  for _,image in images do image:Destroy()end
+  if not ok then warn("[VOCHKO Art] preload: "..tostring(err))end
  end)
 end
+function Assets.WarmTarot()Assets.PreloadAll()end
 return table.freeze(Assets)
