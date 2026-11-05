@@ -265,10 +265,6 @@ local function buildBattle(s)
 end
 local function lobbyUI()
  local title=text(lobby,"Title","ВОЧКО\nКомната поединков",25,UDim2.fromOffset(16,8),UDim2.fromOffset(280,64));title.TextStrokeTransparency=.4
- local shortcuts=make("Frame",{Name="Shortcuts",AnchorPoint=Vector2.new(.5,1),Position=UDim2.new(.5,0,1,-14),Size=UDim2.new(1,-20,0,100),BackgroundTransparency=1},lobby)
- make("UISizeConstraint",{MaxSize=Vector2.new(600,100)},shortcuts)
- local names={{"training","Тренировочный"},{"pvp","PvP · центральный стол"},{"campaign","Кампания"},{"wardrobe","Шкаф · подготовка"}}
- for i,pair in names do button(shortcuts,pair[1],pair[2],UDim2.new((i-1)%2*.5,3,0,math.floor((i-1)/2)*49),UDim2.new(.5,-6,0,44),function()send("open",{mode=pair[1]})end)end
 end
 lobbyUI()
 local function render(data,force)
