@@ -71,8 +71,8 @@ function Inventory.Build(app,data,duelSetup,send)
  local valid,why=Loadout.Validate(p.class,p.jokers,p.duelTarot)
  local ready=valid and (not duelSetup or data.preparation and data.preparation.ready)
  text(dock,if not valid then why elseif duelSetup and not ready then "Соперник собирает набор…"else "1 класс · 2 джокера · 3 таро",UDim2.fromOffset(16,0),UDim2.new(1,-32,0,28),16,C.muted)
- local go=make("TextButton",{Name="Primary",Text=if frozen then "ПРОДОЛЖИТЬ ДУЭЛЬ"elseif duelSetup then "ГОТОВ · НАЧАТЬ ДУЭЛЬ"else "К СТОЛУ PVP",Position=UDim2.fromOffset(16,34),Size=UDim2.new(1,-32,0,52),BackgroundColor3=C.gold,TextColor3=C.dark,Font=Enum.Font.Garamond,TextSize=22,BorderSizePixel=0,AutoButtonColor=ready==true,TextTransparency=if ready then 0 else .5},dock);border(go)
- go.Activated:Connect(function()if frozen or ready then if duelSetup then send("begin")else send("open",{mode="pvp"})end end end)
+ local go=make("TextButton",{Name="Primary",Text=if frozen then "ПРОДОЛЖИТЬ ДУЭЛЬ"elseif duelSetup then "ГОТОВ · НАЧАТЬ ДУЭЛЬ"else "К ТРЕНИРОВОЧНОМУ СТОЛУ",Position=UDim2.fromOffset(16,34),Size=UDim2.new(1,-32,0,52),BackgroundColor3=C.gold,TextColor3=C.dark,Font=Enum.Font.Garamond,TextSize=22,BorderSizePixel=0,AutoButtonColor=ready==true,TextTransparency=if ready then 0 else .5},dock);border(go)
+ go.Activated:Connect(function()if frozen or ready then if duelSetup then send("begin")else send("open",{mode="training"})end end end)
  if tipState then showTip(tipState.title,tipState.description,tipState.rect)end
 end
 return Inventory

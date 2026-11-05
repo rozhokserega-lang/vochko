@@ -116,8 +116,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 79612,
-      "sha256": "a92fe3398c76ec21a80fa25e99089bf6e45ee9dbd5ee8a710876ff000dc04284"
+      "bytes": 80526,
+      "sha256": "eafa177e8a51d13cf9524d5af072505704d01220116d3d52500e678478940a1d"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -141,8 +141,8 @@
     },
     {
       "path": "roblox/src/Client.client.luau",
-      "bytes": 25733,
-      "sha256": "a852f22672c9a627a0f71b2af7f8cb23a1e812c124bb9af9685ff114df5314aa"
+      "bytes": 25778,
+      "sha256": "b6936cc1c602b5a60c4b627081930129f7fa95bcb56afb6f72a5abdc5126c68e"
     },
     {
       "path": "roblox/src/Config.luau",
@@ -161,8 +161,8 @@
     },
     {
       "path": "roblox/src/Inventory.luau",
-      "bytes": 7945,
-      "sha256": "777a48f82e29fa850f9f42e92230a74d024b4e8337a2851b720df088f99f2123"
+      "bytes": 8053,
+      "sha256": "cb23ffef91eb333411338a8dbf6972bc8e40ee0fc1b10cd6a387dc05ba700ca4"
     },
     {
       "path": "roblox/src/Loadout.luau",
@@ -171,23 +171,23 @@
     },
     {
       "path": "roblox/src/RoomBuilder.luau",
-      "bytes": 11793,
-      "sha256": "992d59616894c966f3885989c55af41d03dca128ce592964ba7a4cc290f46165"
+      "bytes": 13185,
+      "sha256": "81621fc278a8654fd22875ccbe95b8cfacbc9489a97e467d7fe717f35f8c926b"
     },
     {
       "path": "roblox/src/Seating.luau",
-      "bytes": 1906,
-      "sha256": "5879327095c7cae1f1e3d108b36fa435303cd0a3035cd96e328b13ccb3d83b16"
+      "bytes": 1944,
+      "sha256": "69001fa98acac0c813c93144d86686a0137819386a1508d8df83713dfad3014f"
     },
     {
       "path": "roblox/src/Server.server.luau",
-      "bytes": 12210,
-      "sha256": "f023f8f12d15e18cc8af6c382f9351501700966fa2291c0a0854d3309ba38ad6"
+      "bytes": 12770,
+      "sha256": "3b8b6c3944d26357c44a606e901c7d36ce8bd3ed1a51540e891f26d9b569d672"
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 45045,
-      "sha256": "65eb6985dbeabe806fe072ace5fab7d9b71c06cf35882905ecc113b09812e4ab"
+      "bytes": 45050,
+      "sha256": "38fb04562b000317101d014190746759059d51b1a9d3a027e64df301ecdf5980"
     },
     {
       "path": "roblox/src/Tarot.luau",

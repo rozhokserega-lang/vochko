@@ -1,17 +1,19 @@
 -- All prototype geometry is grouped; existing Baseplate and SpawnLocation are preserved.
 return function()
  local function ensureSeats(root)
-  for _,entry in {{key="campaign",x=19},{key="pvp",x=-19}}do
+  for _,entry in {{key="campaign",x=19},{key="training",x=-19},{key="pvp",x=0}}do
    local station=root:FindFirstChild("Table_"..entry.key)
-   if station and not station:FindFirstChild("PlayerSeat")then
+   if station then
     for _,chair in root:GetChildren()do
      local cushion=chair:IsA("Model")and chair.Name=="Chair"and chair:FindFirstChild("Seat")
      if cushion and math.abs(cushion.Position.X-entry.x)<.1 and math.abs(cushion.Position.Z+1)<.1 then
       chair:PivotTo(CFrame.new(0,0,2.3)*chair:GetPivot());chair:SetAttribute("BattleChair",entry.key)
      end
     end
+    if not station:FindFirstChild("PlayerSeat")then
     local seat=Instance.new("Seat");seat.Name="PlayerSeat";seat.Size=Vector3.new(2.5,.2,2.2);seat.CFrame=CFrame.new(entry.x,3.1,1.3)
     seat.Anchored=true;seat.Transparency=1;seat.CanCollide=false;seat.CanTouch=false;seat.Parent=station
+    end
    end
   end
  end
@@ -19,7 +21,7 @@ return function()
   local storage=game:GetService("ServerStorage"):FindFirstChild("VochkoPrototype")
   local template=storage and storage:FindFirstChild("TavernTable")
   if not template then return end
-  for _,definition in {{key="campaign",x=19,depth=9.47247314453125},{key="pvp",x=-19,depth=12.2}}do
+  for _,definition in {{key="campaign",x=19,depth=9.47247314453125},{key="training",x=-19,depth=12.2},{key="pvp",x=0,depth=12.2}}do
    local station=root:FindFirstChild("Table_"..definition.key)
    if station then
     if not station:FindFirstChild("TavernTable")then
@@ -53,8 +55,27 @@ return function()
  end
  end
  end
+ local function arrangeTables(root)
+  -- Migrate already-built places as well as fresh Rojo builds, once.
+  local training=root:FindFirstChild("Table_training")
+  if not training then training=root:FindFirstChild("Table_pvp");if training then training.Name="Table_training"end end
+  if not training then return end
+  local endless=root:FindFirstChild("Table_endless");if endless then endless:Destroy()end
+  if not root:FindFirstChild("Table_pvp")then
+   local copy=training:Clone();copy.Name="Table_pvp"
+   for _,p in copy:GetDescendants()do if p:IsA("BasePart")then p.CFrame=CFrame.new(19,0,0)*p.CFrame end end
+   copy.Parent=root
+  end
+  for _,entry in {{key="training",title="ТРЕНИРОВОЧНЫЙ",sub="Бой с ИИ"},{key="pvp",title="PVP",sub="Игрок против игрока"}}do
+   local station=root:FindFirstChild("Table_"..entry.key)
+   for _,v in station:GetDescendants()do
+    if v:IsA("ProximityPrompt")and v.Name=="VochkoPrompt"then v.ObjectText=entry.title;v.Parent:SetAttribute("VochkoMode",entry.key)end
+    if v:IsA("BillboardGui")and v.Name=="StationSign"then for _,label in v:GetChildren()do if label:IsA("TextLabel")then label.Text=if label.Position.Y.Scale==0 then entry.title else entry.sub end end end
+   end
+  end
+ end
  local existing = workspace:FindFirstChild("VochkoPrototype")
- if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model"); ensureLamp(existing);ensureTableVisual(existing);ensureSeats(existing);return existing end
+ if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model");arrangeTables(existing);ensureLamp(existing);ensureTableVisual(existing);ensureSeats(existing);return existing end
  local root = Instance.new("Model"); root.Name = "VochkoPrototype"; root:SetAttribute("Owner", "vochko.prototype.v1"); root.Parent = workspace
  local colors = { stone = Color3.fromRGB(36,42,36), wood = Color3.fromRGB(61,39,24), brass = Color3.fromRGB(159,124,61), felt = Color3.fromRGB(18,61,41) }
  local n = 0
@@ -136,6 +157,7 @@ return function()
  local gui=Instance.new("SurfaceGui");gui.Face=Enum.NormalId.Back;gui.CanvasSize=Vector2.new(900,180);gui.Parent=plaque
  local title=Instance.new("TextLabel");title.Size=UDim2.fromScale(1,1);title.BackgroundTransparency=1;title.Font=Enum.Font.Garamond;title.Text="ВОЧКО  ·  КОМНАТА ПОЕДИНКОВ";title.TextSize=58;title.TextColor3=Color3.fromRGB(229,198,133);title.Parent=gui
  root:SetAttribute("SpawnPosition",Vector3.new(0,4.5,17));root:SetAttribute("Version",1)
+ arrangeTables(root)
  ensureTableVisual(root)
  ensureSeats(root)
  return root

@@ -18,7 +18,7 @@ end
 function Seating.Enter(player,mode)
  local character=player.Character;local h=character and character:FindFirstChildOfClass("Humanoid")
  if not h or h.Health<=0 then return false,"Персонаж ещё не готов"end
- local key=if mode=="duel"or mode=="pvp"then "pvp"else "campaign"
+ local key=if mode=="duel"or mode=="training"then "training"elseif mode=="pvp"then "pvp"else "campaign"
  local room=workspace:FindFirstChild("VochkoPrototype");local station=room and room:FindFirstChild("Table_"..key)
  local seat=station and station:FindFirstChild("PlayerSeat")
  if not seat then return false,"У стола пока нет места для игрока"end

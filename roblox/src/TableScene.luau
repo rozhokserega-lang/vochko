@@ -385,7 +385,7 @@ function Scene.Create(playerGui,send,duel)
  local tilt=if duel then CFrame.new(19,4.77,-1.95)*CFrame.Angles(math.rad(8),0,0)*CFrame.new(-19,-4.77,1.95)else tableTilt
  for _,p in tableParts do if p.Parent then p.CFrame=tilt*p.CFrame end end
  if duel then for _,p in model:GetDescendants()do if p:IsA("BasePart")then p.CFrame=offset*p.CFrame end end end
- local station=room and room:FindFirstChild(if duel then "Table_pvp"else "Table_campaign")
+ local station=room and room:FindFirstChild(if duel then "Table_training"else "Table_campaign")
  local visual=station and station:FindFirstChild("TavernTable")
  tableMesh=visual and visual:FindFirstChildWhichIsA("MeshPart",true)
  if tableMesh then tableMeshHome=tableMesh.CFrame;tableMesh.CFrame=offset*tilt*offset:Inverse()*tableMeshHome end

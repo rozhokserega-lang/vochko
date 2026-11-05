@@ -40,14 +40,14 @@ local function push(player, message, notice)
 end
 local function open(player, mode)
  if not nearby(player, Vector3.new(0,4,0), 65) then push(player,"Подойди к комнате поединков"); return end
- if mode == "campaign" or mode=="pvp" then
-  local cache=if mode=="pvp"then duelSessions else campaignSessions
+ if mode == "campaign" or mode=="training" then
+  local cache=if mode=="training"then duelSessions else campaignSessions
   local state=cache[player]
   if not state or state.phase=="won"or state.phase=="lost"or state.phase=="draw"then
-   local engine=if mode=="pvp"then Duel else Battle
+   local engine=if mode=="training"then Duel else Battle
    state=engine.New(Config.ForBattle(),Random.new():NextInteger(1,1000000000),profile(player).talent,Http:GenerateGUID(false),profile(player).tarot)
    state.phase="intro";cache[player]=state
-   if mode=="pvp"then
+   if mode=="training"then
     local preparing=state
     task.delay(2,function()
      if player.Parent==Players and duelSessions[player]==preparing then
@@ -58,13 +58,16 @@ local function open(player, mode)
    end
   end
   sessions[player]=state
-  screens[player] = if state.phase == "intro" then (if mode=="pvp"then "duelsetup"else "intro")else "battle"
+  screens[player] = if state.phase == "intro" then (if mode=="training"then "duelsetup"else "intro")else "battle"
   if screens[player]=="battle"then local ok,why=Seating.Enter(player,state.mode);if not ok then screens[player]="lobby";push(player,why);return end else Seating.Leave(player)end
   push(player)
  elseif mode == "wardrobe" then Seating.Leave(player);screens[player] = "wardrobe"; push(player)
+ elseif mode == "pvp" then
+  Seating.Leave(player);screens[player]="notice"
+  push(player,nil,{title="PvP · центральный стол",body="Стол для двух игроков подготовлен: скопированы модель и размеры тренировочного стола. Сетевой подбор и бой с другим игроком пока не подключены. Потренироваться с ИИ можно за левым столом."})
  elseif mode == "endless" then
-  screens[player] = "notice"; push(player,nil,{ title = if mode == "pvp" then "Дуэль" else "Бесконечный поход",
-   body = if mode == "pvp" then "Этот стол предназначен для боя с другим игроком. Подбор и отдельный баланс PvP появятся после проверки основного боя."
+  screens[player] = "notice"; push(player,nil,{ title = if mode == "training" then "Дуэль" else "Бесконечный поход",
+   body = if mode == "training" then "Этот стол предназначен для боя с другим игроком. Подбор и отдельный баланс PvP появятся после проверки основного боя."
     else "Здесь начнётся поход с растущей сложностью и рекордами. В первой сборке доступен бой у стола кампании." })
  end
 end
@@ -85,7 +88,7 @@ Input.OnServerEvent:Connect(function(player, data)
  if rid <= (requests[player] or 0) then push(player); return end
  requests[player] = rid
  if kind == "open" then
-  if data.mode == "campaign" or data.mode == "wardrobe" or data.mode == "pvp" or data.mode == "endless" then open(player,data.mode) end
+  if data.mode == "campaign" or data.mode == "wardrobe" or data.mode == "training" or data.mode == "pvp" or data.mode == "endless" then open(player,data.mode) end
   return
  elseif kind == "return" then Seating.Leave(player);screens[player] = "lobby"; push(player); return
  elseif kind=="tarot"or kind=="buyTarot"then
