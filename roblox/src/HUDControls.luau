@@ -46,6 +46,7 @@ function HUD.Create(app,panels,scene,viewport,relayout,returnButton)
   self.editing=false;scene.HUDTuning=false;draft=nil;active=nil;relayout()
  end
  connect(toggle.Activated,function()
+  if scene.CameraTuning then return end
   if self.editing then finish(false)else self.editing=true;scene.HUDTuning=true;draft=table.clone(saved[mode()]or {});relayout()end
  end)
  connect(fix.Activated,function()finish(true)end)

@@ -17,22 +17,21 @@ local enemyLanes,enemyNodes={},{ }
 local enemyDeckLabel,enemySupplyLabels,playerTarget
 Scene.DuelMode=false;Scene.CanvasHeight=900
 local cameraPreferences={}
-local cameraLimits={distance={-3,8},height={7,18},pitch={18,60},fov={45,95}}
+local cameraLimits={distance={-5,12},height={6,24},pitch={18,70},fov={40,100}}
 function Scene.IsMobileView(viewport)
  local input=game:GetService("UserInputService")
  return input.TouchEnabled or viewport.Y>viewport.X or (viewport.X<=1000 and viewport.Y<=600)
 end
-local function cameraMode(viewport)return (if Scene.DuelMode then "duel-"else "")..(if viewport.X<viewport.Y then "portrait" else "landscape")end
+local function cameraMode(viewport)return (if Scene.DuelMode then "duel-"else "")..(if Scene.IsMobileView(viewport)then "phone-"else "desktop-")..(if viewport.X<viewport.Y then "portrait" else "landscape")end
 function Scene.GetCameraSettings(viewport)
- if Scene.IsMobileView(viewport)then return {distance=8,height=18,pitch=42,fov=80}end
  local mode=cameraMode(viewport)
  if not cameraPreferences[mode]then
-  cameraPreferences[mode]=if Scene.DuelMode then (if viewport.X<viewport.Y then {distance=8,height=18,pitch=42,fov=80}else {distance=-1.65,height=12.54,pitch=50.31,fov=71.92})elseif mode=="portrait"then {distance=8,height=18,pitch=37.2,fov=70}else {distance=-2.38,height=10.15,pitch=44.14,fov=74.90}
+  cameraPreferences[mode]=if Scene.IsMobileView(viewport)then {distance=8,height=18,pitch=42,fov=80}elseif Scene.DuelMode then {distance=-1.65,height=12.54,pitch=50.31,fov=71.92}else {distance=-2.38,height=10.15,pitch=44.14,fov=74.90}
  end
  return table.clone(cameraPreferences[mode])
 end
 function Scene.SetCameraSetting(viewport,key,value)
- if Scene.CameraLocked or Scene.IsMobileView(viewport) then return false end
+ if Scene.CameraLocked then return false end
  local bounds=cameraLimits[key]
  if not bounds or type(value)~="number" or value~=value or math.abs(value)==math.huge then return false end
  Scene.GetCameraSettings(viewport)
@@ -48,7 +47,7 @@ local model, surface, board, head, home, cameraTween
 local inputConnection
 local handlers = {}
 local lanes, nodes, buttons = {}, {}, {}
-local targetLabel, damageLabel, deckLabel, helpLabel, receipt, session, selected, latest, dispatch
+local targetLabel, damageLabel, deckLabel, helpLabel, roundLabel, receipt, session, selected, latest, dispatch
 local hidden = {}
 local lightingRestore, tone = {}, nil
 local tableParts, placingOnTable = {}, false
@@ -237,6 +236,9 @@ function Scene.Create(playerGui,send,duel)
  end
  label(board,"Chapter","ТЕМНИЦА  ·  БОЙ I",775,28,585,50,30,C.muted)
  label(board,"SuppliesTitle","РАСХОДНИКИ",135,260,240,50,29,C.muted)
+ local roundBox=make("Frame",{Name="RoundCounter",Position=UDim2.fromOffset(135,640),Size=UDim2.fromOffset(240,90),BackgroundColor3=C.ink,BorderSizePixel=0},board);outline(roundBox,C.gold,2);make("UICorner",{CornerRadius=UDim.new(0,8)},roundBox)
+ label(roundBox,"Title","ХОДЫ",8,3,224,30,30,C.gold).TextXAlignment=Enum.TextXAlignment.Center
+ roundLabel=label(roundBox,"Value","",8,35,224,50,46,C.paper);roundLabel.TextXAlignment=Enum.TextXAlignment.Center
  for i=1,3 do
   local x=380+(i-1)*330
   local lane=make("Frame",{Name="Zone"..i,Position=UDim2.fromOffset(x,135),Size=UDim2.fromOffset(310,495),BackgroundColor3=C.green,BackgroundTransparency=1,BorderSizePixel=0},board)
@@ -338,6 +340,8 @@ function Scene.Create(playerGui,send,duel)
   buttons.play.Text="СЫГРАТЬ ХОД"
   for i,item in {"minus2","minus4"}do buttons[item].Position=UDim2.fromOffset(115,650+(i-1)*115);buttons[item].Size=UDim2.fromOffset(230,100)end
   board.SuppliesTitle.Position=UDim2.fromOffset(110,590);board.SuppliesTitle.Size=UDim2.fromOffset(235,45)
+  roundBox.Position=UDim2.fromOffset(110,465);roundBox.Size=UDim2.fromOffset(235,105)
+  roundLabel.Position=UDim2.fromOffset(8,42);roundLabel.Size=UDim2.fromOffset(219,56)
   label(board,"OwnJokersTitle","ТВОИ ДЖОКЕРЫ",85,870,280,24,22,C.gold)
   label(board,"EnemyJokersTitle","ДЖОКЕРЫ ИИ",1460,345,280,32,22,C.gold)
   for _,side in {"own","enemy"}do
@@ -450,14 +454,29 @@ local function tarotFeedback(zones,results,duel,title)
 end
 function Scene.Update(s)
  if not model then return end;latest=s
+ local mobile=Scene.IsMobileView(workspace.CurrentCamera.ViewportSize)
+ roundLabel.Text=(if Scene.DuelMode then s.round else s.roundsLeft).." / "..s.roundsTotal
+ roundLabel.TextSize=if mobile then 56 else 46
+ roundLabel.Parent.Title.Text=if Scene.DuelMode then "РАУНД"else "ХОДЫ"
+ roundLabel.Parent.Title.TextSize=if mobile then 36 else 30
+ board.SuppliesTitle.TextSize=if mobile then 36 else 29;board.DeckTitle.TextSize=if mobile then 34 else 28
+ deckLabel.TextSize=if mobile then 44 else 36
+ for _,id in {"draw","stop","play"}do buttons[id].TextSize=if mobile then 40 else 34 end
+ for _,id in {"minus2","minus4"}do
+  local b=buttons[id];local name=b:FindFirstChild("Name")
+  name.Position=UDim2.fromOffset(80,40);name.Size=UDim2.fromOffset(140,50);name.TextSize=if mobile then 32 else 27
+  b.Count.TextSize=if mobile then 32 else 26
+ end
  if session~=s.id then for _,node in nodes do node:Destroy()end;nodes={};receipt=0;session=s.id;selected=nil end
  if selected and (s.supplies[selected] or 0)<=0 then selected=nil end
  local keep={}
  for i,z in s.zones do
   local r=s.forecast.zones[i];local lane=lanes[i];local active=s.active==i
-  lane.tarot.Text=zoneTarotText(z,r,Scene.DuelMode,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if #z.cards>=3 then 20 else 22
+  lane.tarot.Text=zoneTarotText(z,r,Scene.DuelMode,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if mobile then 26 elseif #z.cards>=3 then 20 else 22
   lane.sum.Text=(if Scene.DuelMode then "Сумма "else "")..(if #z.cards>0 then tostring(r.sum)else "—")
-  if Scene.DuelMode then lane.sum.TextSize=67 end
+  lane.sum.TextSize=if Scene.DuelMode then (if mobile then 78 else 67)else (if mobile then 120 else 110)
+  lane.status.TextSize=if mobile then (if Scene.DuelMode then 26 else 30)else (if Scene.DuelMode then 20 else 24)
+  lane.root:FindFirstChild("Name").TextSize=if mobile then (if Scene.DuelMode then 34 else 40)else (if Scene.DuelMode then 27 else 35)
   lane.status.Text=(if r.bust then "ПЕРЕБОР" elseif r.exact then "ТОЧНО" elseif z.stood then "СТОП" elseif active then "НАБОР" else "ЖДЁТ").."   "..#z.cards.."/"..s.slots
   local fill=C.green
   local accent=if active or selected then C.active else C.gold
@@ -502,6 +521,8 @@ function Scene.Update(s)
    for i,card in jokerCards[side]do
     local id=list and list[i];local def=id and Loadout.Joker(id);card.id=id
     card.title.Text=if def then def.name else "Пусто";card.symbol.Text=if def then def.symbol else "—"
+    card.title.TextSize=if mobile then 27 else 23;card.title.Position=UDim2.fromOffset(8,37);card.title.Size=UDim2.fromOffset(120,54)
+    card.charges.TextSize=if mobile then 24 else 20
     card.charges.Text=if id=="xray"then tostring(if side=="own"then s.scanCharges else s.duel.enemyScanCharges).." / 2"else ""
     enable(card.frame,side=="own"and id=="xray"and combat and (s.scanCharges or 0)>0 and s.active~=nil and #s.peek==0)
     -- Passive opponent/own cards remain fully legible even without an action.
@@ -517,14 +538,16 @@ function Scene.Update(s)
  if s.peek and #s.peek>0 then local names={}for _,c in s.peek do table.insert(names,c.rank..c.suit)end;helpLabel.Text..=" · Далее: "..table.concat(names," / ")end
 end
 function Scene.UpdateEnemy(s)
+ local mobile=Scene.IsMobileView(workspace.CurrentCamera.ViewportSize)
  local results={}for i,z in s.duel.enemyZones do results[i]=z.result end
  opponentTarotLabel.Visible=false
  opponentTarotLabel.Text=tarotFeedback(s.duel.enemyZones,results,true,"ТАРО ИИ")
  local keep={}
  for i,z in s.duel.enemyZones do
   local lane=enemyLanes[i];local r=z.result
-  lane.tarot.Text=zoneTarotText(z,r,true,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if #z.cards>=3 then 20 else 22
-  lane.sum.Text="Сумма "..(if #z.cards>0 and r then tostring(r.sum)else "—");lane.sum.TextSize=67
+  lane.tarot.Text=zoneTarotText(z,r,true,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if mobile then 26 elseif #z.cards>=3 then 20 else 22
+  lane.sum.Text="Сумма "..(if #z.cards>0 and r then tostring(r.sum)else "—");lane.sum.TextSize=if mobile then 78 else 67
+  lane.status.TextSize=if mobile then 26 else 22;lane.root:FindFirstChild("Name").TextSize=if mobile then 34 else 27
   lane.status.Text=(if r and r.bust then "ПЕРЕБОР"elseif r and r.exact then "ТОЧНО"elseif z.stood then "СТОП"elseif #z.cards==0 then "ЖДЁТ"else "НАБОР").." "..#z.cards.."/"..s.slots
   lane.status.Text..=" · Урон "..(r and r.damage or 0)
   lane.root.BackgroundColor3=if r and r.bust then Color3.fromRGB(115,25,22)elseif r and r.exact then Color3.fromRGB(105,80,25)else C.red
@@ -546,6 +569,7 @@ function Scene.UpdateEnemy(s)
  end
  for id,node in enemyNodes do if not keep[id]then node:Destroy();enemyNodes[id]=nil end end
  enemyDeckLabel.Text=s.duel.enemyDeckCount.." / "..s.duel.enemyDeckTotal
+ enemyDeckLabel.TextSize=if mobile then 38 else 30
  for item,value in enemySupplyLabels do value.Text=(if item=="minus2"then "✂ −2"else "✂ −4").." ×"..s.duel.enemySupplies[item]end
 end
 function Scene.PlayAttack(s,onHit,onDone)

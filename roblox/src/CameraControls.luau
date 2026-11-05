@@ -22,10 +22,10 @@ function Controls.Create(parent,scene,viewport)
  local close=button(panel,"Close","×",UDim2.fromOffset(288,9),UDim2.fromOffset(28,28))
  local stateLabel=text(panel,"State","Настрой ракурс и зафиксируй его",14,37,302,28,12)
  local definitions={
-  {key="distance",name="Ближе / дальше",min=-3,max=8,unit=""},
-  {key="height",name="Высота",min=7,max=18,unit=""},
-  {key="pitch",name="Наклон взгляда",min=18,max=60,unit="°"},
-  {key="fov",name="Ширина обзора",min=45,max=95,unit="°"},
+  {key="distance",name="Ближе / дальше",min=-5,max=12,unit=""},
+  {key="height",name="Высота",min=6,max=24,unit=""},
+  {key="pitch",name="Наклон взгляда",min=18,max=70,unit="°"},
+  {key="fov",name="Ширина обзора",min=40,max=100,unit="°"},
  }
  local function connect(signal,callback)local c=signal:Connect(callback);table.insert(self.connections,c);return c end
  local function apply()scene.Camera(viewport(),false)end
@@ -55,7 +55,7 @@ function Controls.Create(parent,scene,viewport)
  end
  for i,d in definitions do
   local y=70+(i-1)*58
-  text(panel,d.key.."Label",d.name,14,y,214,24,15)
+  local name=text(panel,d.key.."Label",d.name,14,y,214,24,15)
   local value=text(panel,d.key.."Value","",230,y,86,24,14);value.TextXAlignment=Enum.TextXAlignment.Right
   local rail=make("Frame",{Name=d.key.."Rail",Position=UDim2.fromOffset(22,y+36),Size=UDim2.fromOffset(286,7),BackgroundColor3=C.green,BorderSizePixel=0},panel)
   make("UICorner",{CornerRadius=UDim.new(1,0)},rail)
@@ -63,13 +63,15 @@ function Controls.Create(parent,scene,viewport)
   local knob=make("Frame",{Name="Knob",AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(20,20),BackgroundColor3=C.gold,BorderSizePixel=0},rail)
   make("UICorner",{CornerRadius=UDim.new(1,0)},knob)
   local hit=make("TextButton",{Name=d.key.."Slider",Text="",Position=UDim2.fromOffset(14,y+22),Size=UDim2.fromOffset(302,34),BackgroundTransparency=1,Active=true,AutoButtonColor=false},panel)
-  self.sliders[d.key]={rail=rail,fill=fill,knob=knob,hit=hit,value=value}
+  self.sliders[d.key]={rail=rail,fill=fill,knob=knob,hit=hit,value=value,label=name}
   connect(hit.InputBegan,function(input)
    if scene.CameraLocked then return end
    if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then active=d;dragInput=input;drag(d,input.Position.X)end
   end)
  end
  local function open(value)
+  if value and scene.HUDTuning then return end
+  if value then scene.CameraLocked=false end
   panel.Visible=value;scene.CameraTuning=value;active=nil;dragInput=nil
   toggle.Text=if value then "Камера ×" else "Камера";refresh()
  end
@@ -86,11 +88,28 @@ function Controls.Create(parent,scene,viewport)
  -- No world action should pass through the camera panel while framing a shot.
  for _,o in panel:GetDescendants()do if o:IsA("GuiObject")then o.ZIndex=41 end end
  function self:Refresh()
-  if scene.IsMobileView(viewport())then panel.Visible=false;toggle.Visible=false;scene.CameraTuning=false;active=nil;dragInput=nil;return end
+  if scene.HUDTuning then panel.Visible=false;toggle.Visible=false;scene.CameraTuning=false;active=nil;dragInput=nil;return end
   toggle.Visible=true
-  local compact=viewport().X<650
-  panel.Position=UDim2.new(1,-12,0,if compact then 145 else 150)
-  local scale=math.min(1,math.max(.65,(viewport().Y-160)/380))
+  local v=viewport();local mobile=scene.IsMobileView(v);local wide=mobile and v.X>v.Y
+  toggle.Position=if mobile then UDim2.fromOffset(128,4)else UDim2.new(1,-230,0,7);toggle.Size=UDim2.fromOffset(104,if mobile then 40 else 32)
+  panel.Size=UDim2.fromOffset(if wide then 620 else 330,if wide then 260 else 380)
+  panel.AnchorPoint=if mobile then Vector2.new(.5,if wide then 0 else .5)else Vector2.new(1,0)
+  panel.Position=if mobile then (if wide then UDim2.new(.5,0,0,54)else UDim2.fromScale(.5,.5))else UDim2.new(1,-12,0,150)
+  for i,d in definitions do
+   local row=self.sliders[d.key];local x=if wide then 14+((i-1)%2)*310 else 14;local y=if wide then 55+math.floor((i-1)/2)*75 else 70+(i-1)*58
+   row.label.Position=UDim2.fromOffset(x,y);row.label.Size=UDim2.fromOffset(if wide then 210 else 214,24);row.label.TextSize=if mobile then 17 else 15
+   row.value.Position=UDim2.fromOffset(x+(if wide then 218 else 216),y);row.value.Size=UDim2.fromOffset(if wide then 70 else 86,24);row.value.TextSize=if mobile then 16 else 14
+   row.rail.Position=UDim2.fromOffset(x+8,y+(if wide then 42 else 36));row.rail.Size=UDim2.fromOffset(if wide then 270 else 286,7)
+   row.hit.Position=UDim2.fromOffset(x,y+(if wide then 22 else 22));row.hit.Size=UDim2.fromOffset(if wide then 286 else 302,if wide then 44 else 34)
+  end
+  panel.Title.Size=UDim2.fromOffset(if wide then 520 else 255,28)
+  close.Position=UDim2.fromOffset(if wide then 572 else 282,4);close.Size=UDim2.fromOffset(44,44)
+  stateLabel.Size=UDim2.fromOffset(if wide then 580 else 302,18)
+  fix.Position=UDim2.fromOffset(14,if wide then 206 else 310);fix.Size=UDim2.fromOffset(if wide then 310 else 184,44)
+  reset.Position=UDim2.fromOffset(if wide then 336 else 210,if wide then 206 else 310);reset.Size=UDim2.fromOffset(if wide then 270 else 106,44)
+  export.Visible=not wide;export.Position=UDim2.fromOffset(14,358);export.Size=UDim2.fromOffset(302,18)
+  local scale=if mobile then math.min(1,(v.X-24)/(if wide then 620 else 330),(v.Y-(if wide then 62 else 24))/(if wide then 260 else 380))else math.min(1,math.max(.65,(v.Y-160)/380))
+  scale=math.max(.4,scale)
   local uiScale=panel:FindFirstChildOfClass("UIScale") or make("UIScale",{},panel);uiScale.Scale=scale
   refresh()
  end

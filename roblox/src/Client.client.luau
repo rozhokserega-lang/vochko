@@ -188,6 +188,7 @@ local function buildBattle(s)
   enemyHP.Text=s.enemyHp.." / "..s.enemyMaxHp;enemyFill.Size=UDim2.fromScale(s.enemyHp/s.enemyMaxHp,1)
   intent.Text=if s.mode=="duel"then "ИИ · Раунд "..s.round.."/"..s.roundsTotal else "Атака "..s.enemyAttack.." · Ходы "..s.roundsLeft.."/"..s.roundsTotal
   if mobile then intent.Text=if s.mode=="duel"then "Раунд "..s.round.."/"..s.roundsTotal else "Ходы "..s.roundsLeft.."/"..s.roundsTotal end
+  intent.Visible=not mobile
   own.Size=UDim2.new(own.Size.X.Scale,own.Size.X.Offset,0,if mobile then 56 else 116)
   enemy.Size=UDim2.new(enemy.Size.X.Scale,enemy.Size.X.Offset,0,if mobile then 56 else 116)
   for _,pair in {{ownArmor,ownArmorTrack},{enemyArmor,enemyArmorTrack}}do
