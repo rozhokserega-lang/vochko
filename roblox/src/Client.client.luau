@@ -171,12 +171,33 @@ local function buildBattle(s)
   cameraControls:Refresh()
   TableScene.Update(s)
   local compact=app.AbsoluteSize.X<650
-  own.Size=UDim2.new(if compact then .36 else .24,0,0,88);enemy.Size=UDim2.new(if compact then .47 else .29,0,0,88)
+  local mobile=TableScene.IsMobileView(root.AbsoluteSize)
+  title.Visible=not mobile
+  top.Size=UDim2.new(1,0,0,if mobile then 64 else 150)
+  own.Position=if mobile then UDim2.fromOffset(6,3)else UDim2.fromOffset(16,50)
+  local landscape=root.AbsoluteSize.X>root.AbsoluteSize.Y
+  own.Size=if mobile then UDim2.new(if landscape then .22 else .34,-8,0,36)else UDim2.new(if compact then .36 else .24,0,0,88)
+  enemy.AnchorPoint=Vector2.new(1,0)
+  enemy.Position=if mobile then UDim2.new(1,-56,0,3)else UDim2.new(1,-16,0,50)
+  enemy.Size=if mobile then UDim2.new(if landscape then .25 else .66,if landscape then 0 else -62,0,36)else UDim2.new(if compact then .47 else .29,0,0,88)
+  returnButton.Text=if mobile then "×"else "В комнату"
+  returnButton.Position=UDim2.new(1,if mobile then -50 else -116,0,if mobile then 5 else 7)
+  returnButton.Size=UDim2.fromOffset(if mobile then 44 else 104,if mobile then 44 else 32)
+  track.Visible=not mobile;enemyTrack.Visible=not mobile
+  playerName.Visible=not mobile;name.Visible=not mobile
+  playerName.Position=UDim2.fromOffset(8,1);playerName.Size=UDim2.new(1,-16,0,if mobile then 18 else 24)
+  playerName.TextTruncate=Enum.TextTruncate.AtEnd;playerName.TextWrapped=false
+  hp.Position=UDim2.fromOffset(8,if mobile then 6 else 31);hp.TextSize=if mobile then 17 else 21
+  name.Position=UDim2.fromOffset(8,1);name.Size=UDim2.new(1,-16,0,if mobile then 18 else 23);name.TextTruncate=Enum.TextTruncate.AtEnd;name.TextWrapped=false
+  enemyHP.Position=UDim2.fromOffset(8,if mobile then 6 else 28);enemyHP.Size=UDim2.new(if mobile then .48 else 1,if mobile then -8 else -16,0,if mobile then 23 else 23);enemyHP.TextSize=if mobile then 16 else 18
+  intent.Position=if mobile then UDim2.new(.48,0,0,6)else UDim2.fromOffset(8,57);intent.Size=UDim2.new(if mobile then .52 else 1,if mobile then -6 else -16,0,24);intent.TextSize=if mobile then 12 else 15
   playerName.TextSize=if compact then 14 else 18;name.TextSize=if compact then 16 else 20
+  if mobile then playerName.TextSize=12;name.TextSize=13 end
   hp.Text="♥ "..s.hp.." / "..s.maxHp;hpFill.Size=UDim2.fromScale(s.hp/s.maxHp,1)
   name.Text=s.enemyName
   enemyHP.Text=s.enemyHp.." / "..s.enemyMaxHp;enemyFill.Size=UDim2.fromScale(s.enemyHp/s.enemyMaxHp,1)
   intent.Text=if s.mode=="duel"then "ИИ · Раунд "..s.round.."/"..s.roundsTotal else "Атака "..s.enemyAttack.." · Ходы "..s.roundsLeft.."/"..s.roundsTotal
+  if mobile then intent.Text=if s.mode=="duel"then "Раунд "..s.round.."/"..s.roundsTotal else "Ходы "..s.roundsLeft.."/"..s.roundsTotal end
  end
  return {update=update,impact=function(value,maxHp,damage,side)
   if side=="player"then hp.Text="♥ "..value.." / "..maxHp;TweenService:Create(hpFill,TweenInfo.new(.08),{Size=UDim2.fromScale(value/maxHp,1)}):Play()

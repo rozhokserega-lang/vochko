@@ -86,6 +86,8 @@ function Controls.Create(parent,scene,viewport)
  -- No world action should pass through the camera panel while framing a shot.
  for _,o in panel:GetDescendants()do if o:IsA("GuiObject")then o.ZIndex=41 end end
  function self:Refresh()
+  if scene.IsMobileView(viewport())then panel.Visible=false;toggle.Visible=false;scene.CameraTuning=false;active=nil;dragInput=nil;return end
+  toggle.Visible=true
   local compact=viewport().X<650
   panel.Position=UDim2.new(1,-12,0,if compact then 145 else 150)
   local scale=math.min(1,math.max(.65,(viewport().Y-160)/380))

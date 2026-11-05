@@ -17,8 +17,13 @@ local enemyDeckLabel,enemySupplyLabels,playerTarget
 Scene.DuelMode=false;Scene.CanvasHeight=900
 local cameraPreferences={}
 local cameraLimits={distance={-3,8},height={7,18},pitch={18,60},fov={45,95}}
+function Scene.IsMobileView(viewport)
+ local input=game:GetService("UserInputService")
+ return input.TouchEnabled or viewport.Y>viewport.X or (viewport.X<=1000 and viewport.Y<=600)
+end
 local function cameraMode(viewport)return (if Scene.DuelMode then "duel-"else "")..(if viewport.X<viewport.Y then "portrait" else "landscape")end
 function Scene.GetCameraSettings(viewport)
+ if Scene.IsMobileView(viewport)then return {distance=8,height=18,pitch=42,fov=80}end
  local mode=cameraMode(viewport)
  if not cameraPreferences[mode]then
   cameraPreferences[mode]=if Scene.DuelMode then (if viewport.X<viewport.Y then {distance=8,height=18,pitch=42,fov=80}else {distance=-1.65,height=12.54,pitch=50.31,fov=71.92})elseif mode=="portrait"then {distance=8,height=18,pitch=37.2,fov=70}else {distance=-2.38,height=10.15,pitch=44.14,fov=74.90}
@@ -26,7 +31,7 @@ function Scene.GetCameraSettings(viewport)
  return table.clone(cameraPreferences[mode])
 end
 function Scene.SetCameraSetting(viewport,key,value)
- if Scene.CameraLocked then return false end
+ if Scene.CameraLocked or Scene.IsMobileView(viewport) then return false end
  local bounds=cameraLimits[key]
  if not bounds or type(value)~="number" or value~=value or math.abs(value)==math.huge then return false end
  Scene.GetCameraSettings(viewport)
@@ -47,6 +52,7 @@ local hidden = {}
 local lightingRestore, tone = {}, nil
 local tableParts, placingOnTable = {}, false
 local tableMesh, tableMeshHome
+local layoutHomes={}
 -- Presentation-only tilt around the near rail. Lobby geometry stays level.
 local tableTilt=CFrame.new(19,4.77,-3.275)*CFrame.Angles(math.rad(12),0,0)*CFrame.new(-19,-4.77,3.275)
 local function make(class, props, parent)
@@ -104,7 +110,7 @@ function Scene.Destroy()
  Scene.CameraTuning=false;Scene.DuelMode=false;Scene.CanvasHeight=900
  enemyLanes={};enemyNodes={};enemyDeckLabel=nil;enemySupplyLabels={};playerTarget=nil
  if tableMesh and tableMesh.Parent and tableMeshHome then tableMesh.CFrame=tableMeshHome end
- tableMesh=nil;tableMeshHome=nil;tableParts={};placingOnTable=false
+ tableMesh=nil;tableMeshHome=nil;tableParts={};layoutHomes={};placingOnTable=false
  if inputConnection then inputConnection:Disconnect();inputConnection=nil end
  if cameraTween then cameraTween:Cancel();cameraTween=nil end
  for obj,value in hidden do if obj.Parent then if obj:IsA("BasePart") then obj.LocalTransparencyModifier=value else obj.Enabled=value end end end
@@ -249,6 +255,8 @@ function Scene.Create(playerGui,send,duel)
  buttons.hide=action(board,"SleeveHide","В рукав",115,if duel then 895 else 630,110,52,C.green,function()dispatch("consume",{item="hide"})end)
  buttons.release=action(board,"SleeveRelease","Из рукава",235,if duel then 895 else 630,110,52,C.green,function()dispatch("consume",{item="release"})end)
  buttons.hide.TextSize=20;buttons.hide.TextWrapped=true;buttons.release.TextSize=20;buttons.release.TextWrapped=true
+ -- Sleeve controls are paused for this version, including world hit testing.
+ buttons.hide.Visible=false;buttons.release.Visible=false
  buttons.play=action(board,"Play","СЫГРАТЬ ХОД",1095,796,330,80,C.red,function()dispatch("play")end)
  -- Route pointer input through the table plane. This also works for touch and
  -- avoids ScreenGui/SurfaceGui hit-test differences in Studio and on devices.
@@ -336,12 +344,21 @@ function Scene.Create(playerGui,send,duel)
  local visual=station and station:FindFirstChild("TavernTable")
  tableMesh=visual and visual:FindFirstChildWhichIsA("MeshPart",true)
  if tableMesh then tableMeshHome=tableMesh.CFrame;tableMesh.CFrame=offset*tilt*offset:Inverse()*tableMeshHome end
+ for _,p in tableParts do if p.Parent then layoutHomes[p]=p.CFrame end end
+ if tableMesh then layoutHomes[tableMesh]=tableMesh.CFrame end
 end
 function Scene.Camera(viewport,animate)
  local camera=workspace.CurrentCamera;if not camera then return end
  local settings=Scene.GetCameraSettings(viewport)
+ -- Move the entire felt assembly together, preserving card/label hit coordinates.
+ local shift=CFrame.new(0,0,if Scene.IsMobileView(viewport)then .55 else 0)
+ if not Scene.ImpactActive then for p,base in layoutHomes do if p.Parent then p.CFrame=shift*base end end end
  local frame=CFrame.new(if Scene.DuelMode then -19 else 19,settings.height,settings.distance)*CFrame.Angles(math.rad(-settings.pitch),0,0)
- camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=settings.fov
+ camera.CameraType=Enum.CameraType.Scriptable
+ -- 80 degrees is the portrait framing baseline. Preserve its readable table
+ -- scale in landscape instead of exposing a very wide slice of the room.
+ local aspect=viewport.X/math.max(1,viewport.Y)
+ camera.FieldOfView=if Scene.IsMobileView(viewport)and aspect>1 then math.deg(2*math.atan(math.tan(math.rad(settings.fov/2))*.68/aspect))else settings.fov
  if cameraTween then cameraTween:Cancel()end
  if animate then cameraTween=TweenService:Create(camera,TweenInfo.new(.45,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{CFrame=frame});cameraTween:Play()
  else camera.CFrame=frame end
@@ -423,7 +440,7 @@ function Scene.Update(s)
    keep[card.id]=true
    local node=nodes[card.id];local destination=if Scene.DuelMode then UDim2.fromOffset(410+(i-1)*330+(ci-1)*3,640+(ci-1)*8)else UDim2.fromOffset(410+(i-1)*330+(ci-1)*4,285+(ci-1)*24)
    if not node then
-    node=cardFace(card);node.Size=if Scene.DuelMode then UDim2.fromOffset(90,125)else UDim2.fromOffset(120,167);nodes[card.id]=node;node.Position=UDim2.fromOffset(1510,if Scene.DuelMode then 710 else 215)
+    node=cardFace(card);node.Size=if Scene.DuelMode then (if Scene.IsMobileView(workspace.CurrentCamera.ViewportSize)then UDim2.fromOffset(104,144)else UDim2.fromOffset(90,125))else UDim2.fromOffset(120,167);nodes[card.id]=node;node.Position=UDim2.fromOffset(1510,if Scene.DuelMode then 710 else 215)
     TweenService:Create(node,TweenInfo.new(.18,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=destination,Rotation=if ci%2==0 then 1 else -1}):Play()
    else node.Position=destination end
    node.ZIndex=ci+2;for _,v in node:GetDescendants()do if v:IsA("GuiObject")then v.ZIndex=node.ZIndex end end
@@ -467,7 +484,7 @@ function Scene.UpdateEnemy(s)
    if not node then
     if card.hidden then
      node=make("Frame",{Name="EnemyBack",Size=UDim2.fromOffset(100,139),BackgroundColor3=C.red,BorderSizePixel=0},board);make("UICorner",{CornerRadius=UDim.new(0,7)},node);outline(node,C.paper,2);label(node,"Spade","♠",4,30,104,90,60,C.paper)
-    else node=cardFace(card);node.Name="EnemyCard_"..card.id;node.Size=UDim2.fromOffset(90,125)end
+    else node=cardFace(card);node.Name="EnemyCard_"..card.id;node.Size=if Scene.IsMobileView(workspace.CurrentCamera.ViewportSize)then UDim2.fromOffset(104,144)else UDim2.fromOffset(90,125)end
     enemyNodes[card.id]=node
     node.Position=UDim2.fromOffset(210,280)
     TweenService:Create(node,TweenInfo.new(.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.fromOffset(410+(i-1)*330+(ci-1)*3,145+(ci-1)*8)}):Play()
