@@ -3,24 +3,24 @@
   "place": "roblox/releases/VochkoPrototype.rbxl",
   "note": "Source GLBs contain embedded geometry and PBR textures. The place loads published Roblox assets by ID; use the same Roblox account or grant access/reimport for a different owner.",
   "robloxAssets": [
-    "rbxassetid://105939024325017",
     "rbxassetid://114005423696242",
     "rbxassetid://114405523897722",
     "rbxassetid://116448422523262",
-    "rbxassetid://118189784508321",
     "rbxassetid://118357318946115",
-    "rbxassetid://119827633018778",
+    "rbxassetid://120113061227864",
     "rbxassetid://125128067761419",
     "rbxassetid://126504298884435",
+    "rbxassetid://130051660213969",
+    "rbxassetid://131877755470676",
     "rbxassetid://139242092721503",
     "rbxassetid://70495481355526",
     "rbxassetid://72809768313497",
     "rbxassetid://76658903035159",
-    "rbxassetid://77289558315048",
-    "rbxassetid://78475411009007",
     "rbxassetid://78955767921126",
     "rbxassetid://79379639898464",
+    "rbxassetid://80860405035004",
     "rbxassetid://82826802074242",
+    "rbxassetid://86423731367269",
     "rbxassetid://89834733292942"
   ],
   "files": [
@@ -91,8 +91,8 @@
     },
     {
       "path": "roblox/assets/models/TavernTable.rbxmx",
-      "bytes": 1167,
-      "sha256": "087478d934132974f3be5912c24504b31a8aea2c02a46ef86106f997aab00af7"
+      "bytes": 1190,
+      "sha256": "21d01db787e387afce4f4dabc35d2eb3ac1458ba31eb73437c1ee42e44cbeedd"
     },
     {
       "path": "roblox/assets/models/source-tripo-meshopt.glb",
@@ -111,68 +111,68 @@
     },
     {
       "path": "roblox/default.project.json",
-      "bytes": 3597,
-      "sha256": "d453f32ba892037797fc3878a9038f583ba0e7d5c102dc3aaf10529ab18286cd"
+      "bytes": 3762,
+      "sha256": "53cd90faec5c90e41ec5571ee5126814369f784afad0ebc14b979111daee57f6"
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
       "bytes": 60219,
-      "sha256": "1c270ca95cd2ab31ea61af9a92d316a19aea44b1b09c099d8965cafdc32c5d77"
+      "sha256": "41e7fa4ba3b5bf230546fd7a2bcd5d19fb92eb88d86795b50e3ea2a66687baca"
     },
     {
       "path": "roblox/src/Assets.luau",
-      "bytes": 724,
-      "sha256": "798f6635fb606f6d04d40a1a791cd090b377112f6610bb58839df8eee3942b80"
+      "bytes": 728,
+      "sha256": "782befc0a68c392a42f51c9c056ec83e949ce42d80b40d8e612624cdcca694d6"
     },
     {
       "path": "roblox/src/Battle.luau",
-      "bytes": 10290,
-      "sha256": "fcd1ff397d045813e1b49187444d3ce53f94199dd2fe4d5aa97fb316723d0ad6"
+      "bytes": 10478,
+      "sha256": "4160360484132a983eb9fa57e7c28b02068e8fdbb50cfea903e467feb0b3e6da"
     },
     {
       "path": "roblox/src/CameraControls.luau",
-      "bytes": 6804,
-      "sha256": "6062b2dcf0cb4d03f8be69fd393a66d75522b6e9b658eaf0919caf1d097a32ae"
+      "bytes": 6906,
+      "sha256": "0f5040e0fce91c2ea3412ed3811fbd1db4efa2935eed0c06cacc18890341b880"
     },
     {
       "path": "roblox/src/CardImpact.luau",
-      "bytes": 4513,
-      "sha256": "b1c5df9088475e38944c9be1cde2f9e647c4fcceb30e88935d0e5b18303c43e8"
+      "bytes": 4589,
+      "sha256": "ca46d1bc5b3666f95eb9f74b0ce5dbd7a265ebbdb99d6e89c3552d8e33eea262"
     },
     {
       "path": "roblox/src/Client.client.luau",
-      "bytes": 20520,
-      "sha256": "fa9bfd9c579b4569daf7b7ca34fdc1a100ea72d6e77c9cc0da3168b8e2fd0d1e"
+      "bytes": 20762,
+      "sha256": "bb3a46ebd1421c2e3395700f85b0f73ac9c00b3e88a276386d8a982a1a16d39f"
     },
     {
       "path": "roblox/src/Config.luau",
-      "bytes": 1428,
-      "sha256": "d3da2d61ce33836785459a30ddca4b1eea55bb37737a4caaf72ae68fef26087d"
+      "bytes": 1457,
+      "sha256": "5e5de94a4a92909ffa748cf9354dadbeeb0c63738c81f01752f92073b3c7a96f"
     },
     {
       "path": "roblox/src/Duel.luau",
-      "bytes": 8970,
-      "sha256": "50e1a90eaba4639db3c03362b66767f00f36b11c74e86b158437bcd698e22b54"
+      "bytes": 9138,
+      "sha256": "d9661bfb7468e03cd3dcbd7d33c41d50e430656cd0fcaa6a9100d3f07c495b2a"
     },
     {
       "path": "roblox/src/RoomBuilder.luau",
-      "bytes": 10783,
-      "sha256": "3904ae694473d73805fb83aa23acf79a0437bfb82413068f96a6afd582a4858b"
+      "bytes": 10909,
+      "sha256": "bfcd888334f62f3188e7b2febe05e9979597dcd16e83e1e8284c7d06a189bce6"
     },
     {
       "path": "roblox/src/Server.server.luau",
-      "bytes": 9984,
-      "sha256": "6b5f1952dbb0d140ff6f2197af57c6baac2f7f3017a4f07d90a42cca0367c38b"
+      "bytes": 10159,
+      "sha256": "76fb6623fa1dec2d7ef3f6f791d2ac8e85822f467bb9c8f5963c95327d113bed"
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 36500,
-      "sha256": "ea7536cb388a25b085139518656e29d4f4900c6bfa3341902e028c031e8a384a"
+      "bytes": 36996,
+      "sha256": "ebab6cce5beeb75827f089b2136a759bf3302366cd2fbb4719133067bb50a9ec"
     },
     {
       "path": "roblox/src/Tarot.luau",
-      "bytes": 4395,
-      "sha256": "e321ea2b2098f68f2fe2e53c81bf819da07a9f3cc74541a2cd54a5e0055cfe60"
+      "bytes": 4455,
+      "sha256": "461647fb4ac23c6a241295eb740bf27eb45eec82d41afd9dbc5533eacbd8a689"
     }
   ]
 }
