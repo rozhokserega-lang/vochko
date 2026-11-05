@@ -7,6 +7,8 @@ local Tarot=require(remote:WaitForChild("Tarot"))
 local Assets = require(remote:WaitForChild("Assets"))
 local TableScene = require(remote:WaitForChild("TableScene"))
 local CameraControls = require(remote:WaitForChild("CameraControls"))
+local Inventory=require(remote:WaitForChild("Inventory"))
+local Loadout=require(remote:WaitForChild("Loadout"))
 local cameraControls
 local Input, Snapshot = remote:WaitForChild("Input"), remote:WaitForChild("Snapshot")
 local C = { ink=Color3.fromRGB(9,25,16), green=Color3.fromRGB(22,57,37), brass=Color3.fromRGB(183,147,78),
@@ -104,36 +106,7 @@ local function intro(data)
  text(body,"Hint",if s.mode=="duel"then "У каждой стороны своя колода. ИИ набирает карты на твоих глазах: видны суммы, остановки и переборы. Цель растёт каждый раунд: 21, 22, 23… Удары одновременные; после восьми раундов сравнивается здоровье."else "Добирай карты к цели. Точное попадание усиливает удар. Перебор можно исправить срезом до розыгрыша.",17,UDim2.fromOffset(18,480),UDim2.new(1,-36,0,90))
  actionDock(function()send("begin")end,"ВОЙТИ В БОЙ")
 end
-local function wardrobe(data,duelSetup)
- local body=scrollBody(72);header(body,if duelSetup then "PVP · ВЫБЕРИ ТАРО НА ЭТОТ БОЙ"else "ШКАФ · ПОДГОТОВКА К ПАРТИИ")
- local p=data.profile
- text(body,"DeckTitle","01 · Твоя колода",25,UDim2.fromOffset(16,65),UDim2.new(1,-32,0,38))
- text(body,"DeckCount","52 обычные + "..#p.tarot.." таро = "..(52+#p.tarot).." карт",22,UDim2.fromOffset(16,108),UDim2.new(1,-32,0,35))
- text(body,"TarotTitle","02 · Таро · "..#p.tarot.." / 4",25,UDim2.fromOffset(16,160),UDim2.new(1,-32,0,36))
- text(body,"Rules","Тест: все 12 таро открыты. До четырёх разных на бой, каждое выпадает один раз. Ноль очков, одно место на столе. При переборе эффект пропадает. В новой партии выбранный набор снова доступен.",17,UDim2.fromOffset(16,204),UDim2.new(1,-32,0,83),C.muted)
- text(body,"Money",if duelSetup then (if data.preparation and data.preparation.ready then "Соперник готов · 4 таро в колоде"else "Соперник выбирает свои таро…")else "Монеты: "..p.coins.." · цель в бою: 21",19,UDim2.fromOffset(16,290),UDim2.new(1,-32,0,30))
- for i,d in Tarot.List do
-  local y=336+(i-1)*158;local chosen=table.find(p.tarot,d.id)~=nil;local unlocked=Tarot.Unlocked(p,d)
-  make("ImageLabel",{Name="TarotArt_"..d.id,Image=Assets.Tarot[d.id],BackgroundTransparency=1,Position=UDim2.fromOffset(16,y),Size=UDim2.fromOffset(88,132)},body)
-  text(body,"TarotName_"..d.id,(if chosen then "✓ "else "")..d.name,24,UDim2.fromOffset(116,y),UDim2.new(1,-132,0,32))
-  text(body,"TarotDesc_"..d.id,d.desc,17,UDim2.fromOffset(116,y+34),UDim2.new(1,-132,0,44),C.muted)
-  local caption=if unlocked then (if chosen then "Убрать"else "Добавить")elseif d.price then "Открыть · "..d.price.." монет"else (if d.open=="win"then "Победи в кампании"else d.hint)
-  local b=button(body,"Tarot_"..d.id,caption,UDim2.fromOffset(116,y+84),UDim2.new(1,-132,0,44),function()send(if unlocked then "tarot"else "buyTarot",{item=d.id})end)
-  enabled(b,if unlocked then chosen or #p.tarot<4 else d.price~=nil and p.coins>=d.price)
- end
- local y=336+#Tarot.List*158
- text(body,"TalentTitle","03 · Стартовый талант",25,UDim2.fromOffset(16,y),UDim2.new(1,-32,0,38))
- local definitions={{id="healer",name="Лекарь",desc="Красные зоны лечат на 50% больше."},{id="sharp",name="Картёжник",desc="Точные зоны: урон +15%."},{id="daring",name="Авантюрист",desc="Один перебор: общий урон +30%."}}
- local active=data.battle and data.battle.phase~="won"and data.battle.phase~="lost"and data.battle.phase~="draw"
- for i,d in definitions do local b=button(body,"Talent_"..d.id,(if p.talent==d.id then "✓ "else "")..d.name.." · "..d.desc,UDim2.fromOffset(16,y+48+(i-1)*62),UDim2.new(1,-32,0,54),function()send("talent",{talent=d.id})end);enabled(b,not active)end
- text(body,"SetupStatus","Все таро открыты для теста. Сборка применяется к новой партии. ИИ выбирает свой набор. Профиль пока хранится до выхода с сервера.",17,UDim2.fromOffset(16,y+245),UDim2.new(1,-32,0,70),C.muted)
- if not duelSetup then button(body,"GoPvP","К PvP-столу",UDim2.fromOffset(16,y+330),UDim2.new(1,-32,0,48),function()send("open",{mode="pvp"})end)end
- for _,child in body:GetChildren()do child.Parent=body.Parent end;body:Destroy()
- if duelSetup then
-  local dock=actionDock(function()send("begin")end,"НАЧАТЬ ДУЭЛЬ · "..#p.tarot.." ТАРО")
-  enabled(dock.Primary,data.preparation and data.preparation.ready==true)
- else actionDock(function()send("open",{mode="campaign"})end,"К СТОЛУ КАМПАНИИ")end
-end
+local function wardrobe(data,duelSetup)Inventory.Build(app,data,duelSetup,send)end
 local function result(data)
  local s=data.battle;local body=scrollBody(72);header(body,"ВОЧКО · ИТОГ БОЯ")
  text(body,"ResultTitle",if s.phase=="won"then "Противник повержен"elseif s.phase=="draw"then "Ничья"elseif s.mode=="duel"then "Дуэль проиграна"else "Побег прервался",32,UDim2.fromOffset(20,98),UDim2.new(1,-40,0,80))
@@ -166,6 +139,13 @@ local function buildBattle(s)
  local enemyTrack=make("Frame",{Position=UDim2.fromOffset(10,51),Size=UDim2.new(1,-20,0,6),BackgroundColor3=C.green,BorderSizePixel=0},enemy)
  local enemyFill=make("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.red,BorderSizePixel=0},enemyTrack)
  local intent=text(enemy,"Intent","",15,UDim2.fromOffset(10,57),UDim2.new(1,-20,0,24),C.muted)
+ local armorColor=Color3.fromRGB(103,196,218)
+ local ownArmor=text(own,"Armor","◇ Броня 0",15,UDim2.fromOffset(10,82),UDim2.new(1,-20,0,20),armorColor)
+ local ownArmorTrack=make("Frame",{Name="ArmorTrack",Position=UDim2.fromOffset(10,105),Size=UDim2.new(1,-20,0,5),BackgroundColor3=C.green,BorderSizePixel=0},own)
+ local ownArmorFill=make("Frame",{Name="Fill",Size=UDim2.fromScale(0,1),BackgroundColor3=armorColor,BorderSizePixel=0},ownArmorTrack)
+ local enemyArmor=text(enemy,"Armor","◇ Броня 0",15,UDim2.fromOffset(10,82),UDim2.new(1,-20,0,20),armorColor)
+ local enemyArmorTrack=make("Frame",{Name="ArmorTrack",Position=UDim2.fromOffset(10,105),Size=UDim2.new(1,-20,0,5),BackgroundColor3=C.green,BorderSizePixel=0},enemy)
+ local enemyArmorFill=make("Frame",{Name="Fill",Size=UDim2.fromScale(0,1),BackgroundColor3=armorColor,BorderSizePixel=0},enemyArmorTrack)
  cameraControls=CameraControls.Create(app,TableScene,function()return root.AbsoluteSize end)
  local function update(s)
   cameraControls:Refresh()
@@ -198,6 +178,22 @@ local function buildBattle(s)
   enemyHP.Text=s.enemyHp.." / "..s.enemyMaxHp;enemyFill.Size=UDim2.fromScale(s.enemyHp/s.enemyMaxHp,1)
   intent.Text=if s.mode=="duel"then "ИИ · Раунд "..s.round.."/"..s.roundsTotal else "Атака "..s.enemyAttack.." · Ходы "..s.roundsLeft.."/"..s.roundsTotal
   if mobile then intent.Text=if s.mode=="duel"then "Раунд "..s.round.."/"..s.roundsTotal else "Ходы "..s.roundsLeft.."/"..s.roundsTotal end
+  own.Size=UDim2.new(own.Size.X.Scale,own.Size.X.Offset,0,if mobile then 56 else 116)
+  enemy.Size=UDim2.new(enemy.Size.X.Scale,enemy.Size.X.Offset,0,if mobile then 56 else 116)
+  for _,pair in {{ownArmor,ownArmorTrack},{enemyArmor,enemyArmorTrack}}do
+   pair[1].Position=UDim2.fromOffset(8,if mobile then 30 else 82);pair[1].TextSize=if mobile then 12 else 15
+   pair[2].Position=UDim2.fromOffset(8,if mobile then 50 else 105);pair[2].Size=UDim2.new(1,-16,0,if mobile then 3 else 5)
+  end
+  local armor=s.armor or (s.forecast.tarot and s.forecast.tarot.shield)or 0
+  local theirs=s.enemyArmor or 0;local cap=s.armorMax or 15
+  ownArmor.Text="◇ Броня "..armor;enemyArmor.Text="◇ Броня "..theirs
+  TweenService:Create(ownArmorFill,TweenInfo.new(.2),{Size=UDim2.fromScale(math.clamp(armor/cap,0,1),1)}):Play()
+  TweenService:Create(enemyArmorFill,TweenInfo.new(.2),{Size=UDim2.fromScale(math.clamp(theirs/cap,0,1),1)}):Play()
+  if not mobile and s.mode=="duel"then
+   local ownClass=Loadout.Class(s.class);local theirClass=Loadout.Class(s.duel.enemyClass)
+   playerName.Text=player.DisplayName.." · "..(ownClass and ownClass.name or "")
+   name.Text="ИИ · "..(theirClass and theirClass.name or "")
+  end
  end
  return {update=update,impact=function(value,maxHp,damage,side)
   if side=="player"then hp.Text="♥ "..value.." / "..maxHp;TweenService:Create(hpFill,TweenInfo.new(.08),{Size=UDim2.fromScale(value/maxHp,1)}):Play()

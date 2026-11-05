@@ -1,5 +1,20 @@
 -- All prototype geometry is grouped; existing Baseplate and SpawnLocation are preserved.
 return function()
+ local function ensureSeats(root)
+  for _,entry in {{key="campaign",x=19},{key="pvp",x=-19}}do
+   local station=root:FindFirstChild("Table_"..entry.key)
+   if station and not station:FindFirstChild("PlayerSeat")then
+    for _,chair in root:GetChildren()do
+     local cushion=chair:IsA("Model")and chair.Name=="Chair"and chair:FindFirstChild("Seat")
+     if cushion and math.abs(cushion.Position.X-entry.x)<.1 and math.abs(cushion.Position.Z+1)<.1 then
+      chair:PivotTo(CFrame.new(0,0,2.3)*chair:GetPivot());chair:SetAttribute("BattleChair",entry.key)
+     end
+    end
+    local seat=Instance.new("Seat");seat.Name="PlayerSeat";seat.Size=Vector3.new(2.5,.2,2.2);seat.CFrame=CFrame.new(entry.x,3.1,1.3)
+    seat.Anchored=true;seat.Transparency=1;seat.CanCollide=false;seat.CanTouch=false;seat.Parent=station
+   end
+  end
+ end
  local function ensureTableVisual(root)
   local storage=game:GetService("ServerStorage"):FindFirstChild("VochkoPrototype")
   local template=storage and storage:FindFirstChild("TavernTable")
@@ -39,7 +54,7 @@ return function()
  end
  end
  local existing = workspace:FindFirstChild("VochkoPrototype")
- if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model"); ensureLamp(existing);ensureTableVisual(existing);return existing end
+ if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model"); ensureLamp(existing);ensureTableVisual(existing);ensureSeats(existing);return existing end
  local root = Instance.new("Model"); root.Name = "VochkoPrototype"; root:SetAttribute("Owner", "vochko.prototype.v1"); root.Parent = workspace
  local colors = { stone = Color3.fromRGB(36,42,36), wood = Color3.fromRGB(61,39,24), brass = Color3.fromRGB(159,124,61), felt = Color3.fromRGB(18,61,41) }
  local n = 0
@@ -122,5 +137,6 @@ return function()
  local title=Instance.new("TextLabel");title.Size=UDim2.fromScale(1,1);title.BackgroundTransparency=1;title.Font=Enum.Font.Garamond;title.Text="ВОЧКО  ·  КОМНАТА ПОЕДИНКОВ";title.TextSize=58;title.TextColor3=Color3.fromRGB(229,198,133);title.Parent=gui
  root:SetAttribute("SpawnPosition",Vector3.new(0,4.5,17));root:SetAttribute("Version",1)
  ensureTableVisual(root)
+ ensureSeats(root)
  return root
 end

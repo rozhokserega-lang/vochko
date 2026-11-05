@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-05",
+  "environment": "Roblox Studio; iPhone 17 Pro simulator and desktop",
+  "functionalBuildMatches": {
+    "checks": 1477,
+    "matches": 45,
+    "wins": 21,
+    "losses": 21,
+    "draws": 3,
+    "averageRounds": 7.822222222222222
+  },
+  "regressionChecks": {"Smoke":77,"Impact":278,"Tarot":146,"Duel":21853},
+  "regressionDuelMatches": {"matches":24,"wins":2,"losses":21,"draws":1,"policy":"Legacy fixed-threshold player against current bot; not mirror matches"},
+  "ui": ["Class selection", "Remove and add joker", "Incomplete build cannot start", "55-card duel decks", "Both public joker pairs on felt", "Real armor bar"],
+  "seating": {"serverSeatOccupied":true,"ownVisibleBodyPartsInBattle":0,"promptsInBattle":false,"promptsAfterExit":true,"walkSpeedAfterExit":16,"jumpPowerAfterExit":50,"cameraAfterExit":"Custom"},
+  "limitations": ["Not tested on physical phone", "No live human PvP yet", "Functional matches do not establish competitive balance"]
+}

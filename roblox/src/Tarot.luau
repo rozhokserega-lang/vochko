@@ -16,6 +16,10 @@ Tarot.List={
  {id='hourglass',name='Песочные часы',symbol='⌛',desc='Сумма всегда равна цели, даже при переборе',ach='last',hint='Победить на последнем ходу'}
 }
 function Tarot.Caption(id,duel,target)
+ if duel then
+  local pvp={rose="+8 HP",guardian="6 брони на ход",sun="Урон стола +25%",moon="Входящий урон −30%",tower="Стол очищен",coin="Вернуть потраченный срез",echo="Урон стола +50%",seal="Входящий урон −50%",scales="Точно: урон +25%",candle="Следующие 3 карты на новом ходу",hourglass="Подтянуть к цели на ±2",thread="Недоступно в PvP"}
+  return pvp[id]or ""
+ end
  local captions={rose=if duel then "+8 HP"else "+20 HP",guardian=if duel then "Защита 6"else "Защита 15",moon="Входящий урон −30%",sun="Урон стола +40%",tower="Стол очищен",echo="Урон стола ×2",scales="Точно: урон +50%",coin="+10 монет",candle="Разведка на новый ход",thread="+1 использование рукава",hourglass="Всегда "..(target or 21).." очко",seal=if duel then "Входящий урон −50%"else "Отмена атаки"}
  return captions[id]or ""
 end
@@ -24,15 +28,15 @@ function Tarot.Unlocked(profile,d)return Tarot.TestUnlockAll or d.open=='start'o
 function Tarot.Has(zone,id)for _,c in zone.cards do if c.tarot==id then return true end end;return false end
 function Tarot.Add(state,loadout)
  local seen,count={},0
- for _,id in loadout or {}do local d=Tarot.Def(id);if d and not seen[id]and count<4 then seen[id]=true;count+=1; table.insert(state.deck,{id='tarot-'..id,tarot=id,rank=d.name,suit='',value=0,red=false})end end
+ for _,id in loadout or {}do local d=Tarot.Def(id);if d and not seen[id]and count<(if state.pvp then 3 else 4)and (not state.pvp or id~='thread')then seen[id]=true;count+=1; table.insert(state.deck,{id='tarot-'..id,tarot=id,rank=d.name,suit='',value=0,red=false})end end
  state.deckTotal=#state.deck;state.tarotSpent={};state.tarotDrawn=0;state.sleeve={};state.sleeveUsed=0;state.money=0
 end
-function Tarot.Boost(zone,r)
+function Tarot.Boost(zone,r,duel)
  if r.bust then return end
  local factor=1
- if Tarot.Has(zone,'sun')then factor*=1.4 end
- if Tarot.Has(zone,'echo')then factor*=2 end
- if r.exact and Tarot.Has(zone,'scales')then factor*=1.5 end
+ if Tarot.Has(zone,'sun')then factor*=if duel then 1.25 else 1.4 end
+ if Tarot.Has(zone,'echo')then factor*=if duel then 1.5 else 2 end
+ if r.exact and Tarot.Has(zone,'scales')then factor*=if duel then 1.25 else 1.5 end
  r.damage=math.floor(r.damage*factor+.5)
 end
 function Tarot.Effects(state,result,duel)
@@ -41,7 +45,7 @@ function Tarot.Effects(state,result,duel)
   for _,c in z.cards do
    if c.tarot=='rose'then e.heal+=if duel then state.config.DuelRoseHeal else 20
    elseif c.tarot=='guardian'then e.shield+=if duel then state.config.DuelGuardianShield else 15
-   elseif c.tarot=='coin'then e.money+=10
+   elseif c.tarot=='coin'then if duel then e.restoreCut=true else e.money+=10 end
    elseif c.tarot then e[c.tarot]=true end
   end
  end end
@@ -53,6 +57,9 @@ function Tarot.Incoming(damage,e,duel)
  return math.max(0,damage-e.shield)
 end
 function Tarot.Commit(state,e)
+ if e.restoreCut then
+  if state.supplies.minus2<1 then state.supplies.minus2+=1 elseif state.supplies.minus4<1 then state.supplies.minus4+=1 end
+ end
  state.money=(state.money or 0)+e.money
  if e.candle then state.scoutPending=true end
  if e.thread then state.sleeveUsed=math.max(0,(state.sleeveUsed or 0)-1)end

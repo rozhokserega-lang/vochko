@@ -10,6 +10,7 @@ end
 local TweenService = game:GetService("TweenService")
 local Assets = require(script.Parent.Assets)
 local CardImpact = require(script.Parent.CardImpact)
+local Loadout=require(script.Parent.Loadout)
 local Scene = {CameraTuning=false,CameraLocked=true,ImpactActive=false}
 local impactJob
 local enemyLanes,enemyNodes={},{ }
@@ -52,6 +53,10 @@ local hidden = {}
 local lightingRestore, tone = {}, nil
 local tableParts, placingOnTable = {}, false
 local tableMesh, tableMeshHome
+local promptEnabledBefore
+local characterConnections={}
+local selfHumanoid,selfDisplay
+local jokerCards={}
 local layoutHomes={}
 -- Presentation-only tilt around the near rail. Lobby geometry stays level.
 local tableTilt=CFrame.new(19,4.77,-3.275)*CFrame.Angles(math.rad(12),0,0)*CFrame.new(-19,-4.77,3.275)
@@ -106,11 +111,14 @@ local function hideRoomDetail(obj)
  elseif obj:IsA("LayerCollector") then hidden[obj]=obj.Enabled;obj.Enabled=false end
 end
 function Scene.Destroy()
+ for _,connection in characterConnections do connection:Disconnect()end;characterConnections={}
+ if selfHumanoid and selfHumanoid.Parent then selfHumanoid.DisplayDistanceType=selfDisplay end;selfHumanoid=nil;selfDisplay=nil
+ if promptEnabledBefore~=nil then game:GetService("ProximityPromptService").Enabled=promptEnabledBefore;promptEnabledBefore=nil end
  if impactJob then impactJob:Cancel();impactJob=nil end;Scene.ImpactActive=false
  Scene.CameraTuning=false;Scene.DuelMode=false;Scene.CanvasHeight=900
  enemyLanes={};enemyNodes={};enemyDeckLabel=nil;enemySupplyLabels={};playerTarget=nil
  if tableMesh and tableMesh.Parent and tableMeshHome then tableMesh.CFrame=tableMeshHome end
- tableMesh=nil;tableMeshHome=nil;tableParts={};layoutHomes={};placingOnTable=false
+ tableMesh=nil;tableMeshHome=nil;tableParts={};layoutHomes={};jokerCards={};placingOnTable=false
  if inputConnection then inputConnection:Disconnect();inputConnection=nil end
  if cameraTween then cameraTween:Cancel();cameraTween=nil end
  for obj,value in hidden do if obj.Parent then if obj:IsA("BasePart") then obj.LocalTransparencyModifier=value else obj.Enabled=value end end end
@@ -167,12 +175,24 @@ end
 function Scene.Create(playerGui,send,duel)
  Scene.Destroy();dispatch=send;Scene.DuelMode=duel==true;Scene.CanvasHeight=if duel then 1100 else 900
  model=make("Model",{Name="VochkoLocalBattleScene"},workspace)
+ local prompts=game:GetService("ProximityPromptService");promptEnabledBefore=prompts.Enabled;prompts.Enabled=false
+ local player=game:GetService("Players").LocalPlayer
+ local function hideCharacter(character)
+  for _,p in character:GetDescendants()do if p:IsA("BasePart")then hideRoomDetail(p)end end
+  local humanoid=character:FindFirstChildOfClass("Humanoid")
+  if humanoid then selfHumanoid=humanoid;selfDisplay=humanoid.DisplayDistanceType;humanoid.DisplayDistanceType=Enum.HumanoidDisplayDistanceType.None end
+  table.insert(characterConnections,character.DescendantAdded:Connect(function(p)if p:IsA("BasePart")then hideRoomDetail(p)end end))
+ end
+ if player.Character then hideCharacter(player.Character)end
+ table.insert(characterConnections,player.CharacterAdded:Connect(function(character)hideCharacter(character)end))
  local room=workspace:FindFirstChild("VochkoPrototype")
  if room then
   for _,obj in room:GetDescendants() do
    if obj:IsA("BillboardGui") or (obj:IsA("SurfaceGui") and obj.Parent.Name=="WelcomePlaque") or (obj:IsA("BasePart") and (obj.Name=="LaneEdge" or obj.Name=="CardDeck" or obj.Name=="DeckPaper" or obj.Name=="WelcomePlaque")) then hideRoomDetail(obj) end
    if obj:IsA("Light") then lightingRestore[obj]=obj.Brightness;obj.Brightness*=.45 end
    if duel and obj:IsA("BasePart")and obj.Parent.Name=="DuelTableLamp"then hideRoomDetail(obj)end
+   -- The fixed phone camera sits near the ceiling: beams must not hide the felt.
+   if obj:IsA("BasePart")and obj.Name=="Beam"then hideRoomDetail(obj)end
   end
  end
  tone=make("ColorCorrectionEffect",{Name="VochkoBattleTone",Brightness=-.025,Contrast=.08,Saturation=-.14,TintColor=Color3.fromRGB(255,242,221)},game:GetService("Lighting"))
@@ -318,6 +338,23 @@ function Scene.Create(playerGui,send,duel)
   buttons.play.Text="СЫГРАТЬ ХОД"
   for i,item in {"minus2","minus4"}do buttons[item].Position=UDim2.fromOffset(115,650+(i-1)*115);buttons[item].Size=UDim2.fromOffset(230,100)end
   board.SuppliesTitle.Position=UDim2.fromOffset(110,590);board.SuppliesTitle.Size=UDim2.fromOffset(235,45)
+  label(board,"OwnJokersTitle","ТВОИ ДЖОКЕРЫ",85,870,280,24,22,C.gold)
+  label(board,"EnemyJokersTitle","ДЖОКЕРЫ ИИ",1460,345,280,32,22,C.gold)
+  for _,side in {"own","enemy"}do
+   jokerCards[side]={}
+   for i=1,2 do
+    local x=(if side=="own"then 85 else 1460)+(i-1)*145
+    local y=if side=="own"then 900 else 385
+    local frame=action(board,side.."Joker"..i,"",x,y,135,95,C.ink,function()
+     local card=jokerCards[side][i]
+     if side=="own"and card and card.id=="xray"then dispatch("consume",{item="scan"})end
+    end)
+    local symbol=label(frame,"Symbol","✦",6,3,40,40,32,C.gold)
+    local title=label(frame,"Title","Джокер",8,42,120,48,23,C.paper)
+    local charges=label(frame,"Charges","",48,5,80,30,20,C.gold)
+    jokerCards[side][i]={frame=frame,title=title,symbol=symbol,charges=charges}
+   end
+  end
   local originals={}
   for _,o in tableParts do if o.Name=="DeckTop"or string.find(o.Name,"DeckPaperLayer",1,true)then table.insert(originals,o)end end
   for _,o in originals do
@@ -393,7 +430,7 @@ local function zoneTarotText(z,r,duel,target)
  end
  for _,c in z.cards do if c.tarot then
   local caption=Tarot.Caption(c.tarot,duel,target)
-  local compact={moon="Входящий −30%",sun="Урон +40%",tower="Стол очищен",echo="Урон ×2",scales="Точно: +50%",candle="Разведка 3",thread="Рукав +1",hourglass="Всегда "..target,seal=if duel then "Входящий ÷2"else "Отмена атаки"}
+  local compact={moon="Входящий −30%",sun=if duel then "Урон +25%"else "Урон +40%",tower="Стол очищен",echo=if duel then "Урон +50%"else "Урон ×2",scales=if duel then "Точно: +25%"else "Точно: +50%",candle="Разведка 3",thread="Рукав +1",hourglass=if duel then "К цели на ±2"else "Всегда "..target,seal=if duel then "Входящий ÷2"else "Отмена атаки"}
   caption=compact[c.tarot]or caption
   if r.bust then caption="НЕ СРАБОТАЕТ"end
   local name=if c.tarot=="hourglass"then "Часы"else c.rank
@@ -459,6 +496,19 @@ function Scene.Update(s)
   b.BackgroundColor3=if selected==item then Color3.fromRGB(110,91,38)else C.green
  end end
  ownTarotLabel.Visible=false
+ if Scene.DuelMode then
+  for _,side in {"own","enemy"}do
+   local list=if side=="own"then s.jokers else s.duel.enemyJokers
+   for i,card in jokerCards[side]do
+    local id=list and list[i];local def=id and Loadout.Joker(id);card.id=id
+    card.title.Text=if def then def.name else "Пусто";card.symbol.Text=if def then def.symbol else "—"
+    card.charges.Text=if id=="xray"then tostring(if side=="own"then s.scanCharges else s.duel.enemyScanCharges).." / 2"else ""
+    enable(card.frame,side=="own"and id=="xray"and combat and (s.scanCharges or 0)>0 and s.active~=nil and #s.peek==0)
+    -- Passive opponent/own cards remain fully legible even without an action.
+    if id~="xray"or side=="enemy"then card.frame.TextTransparency=0;card.frame.BackgroundTransparency=0 end
+   end
+  end
+ end
  ownTarotLabel.Text=tarotFeedback(s.zones,s.forecast.zones,Scene.DuelMode,"ТВОИ ТАРО")
  if Scene.DuelMode and s.duel then Scene.UpdateEnemy(s)end
  targetLabel.Text=tostring(s.target);damageLabel.Text="УРОН  "..s.forecast.damage;deckLabel.Text=s.deckCount.." / "..s.deckTotal

@@ -6,6 +6,8 @@ local Config = require(storage.Config)
 local Battle = require(storage.Battle)
 local Duel = require(storage.Duel)
 local Tarot=require(RS.Tarot)
+local Loadout=require(RS.Loadout)
+local Seating=require(storage.Seating)
 local campaignSessions,duelSessions={},{}
 local function rules(state)return if state and state.mode=="duel"then Duel else Battle end
 local room = require(storage.RoomBuilder)()
@@ -14,7 +16,7 @@ local sessions, profiles, screens, requests, buckets = {}, {}, {}, {}, {}
 local talents = { sharp = true, healer = true, daring = true }
 task.spawn(Config.Load)
 local function profile(player)
- if not profiles[player] then profiles[player] = { talent = "sharp", deck = "classic", coins = 0, wins = 0, duelWins=0,tarot={},owned={},ach={},played=0,sleeveUses=0 } end
+ if not profiles[player] then profiles[player] = { class="sharp",jokers={"crimson","blot"},duelTarot={"rose","guardian","sun"},talent = "sharp", deck = "classic", coins = 0, wins = 0, duelWins=0,tarot={},owned={},ach={},played=0,sleeveUses=0 } end
  return profiles[player]
 end
 local function allowed(player)
@@ -30,7 +32,10 @@ end
 local function push(player, message, notice)
  if player.Parent ~= Players then return end
  local state = sessions[player]
+ local cachedDuel=duelSessions[player]
+ local locked=cachedDuel and cachedDuel.phase~="intro"and cachedDuel.phase~="won"and cachedDuel.phase~="lost"and cachedDuel.phase~="draw"
  Snapshot:FireClient(player, { screen = screens[player] or "lobby", profile = table.clone(profile(player)),
+  loadoutLocked=locked==true,
   battle = if state then rules(state).View(state) else nil, preparation=if state and state.mode=="duel"then {ready=state.botPrepared==true,count=state.botLoadout and #state.botLoadout or 0}else nil, message = message, notice = notice })
 end
 local function open(player, mode)
@@ -54,8 +59,9 @@ local function open(player, mode)
   end
   sessions[player]=state
   screens[player] = if state.phase == "intro" then (if mode=="pvp"then "duelsetup"else "intro")else "battle"
+  if screens[player]=="battle"then local ok,why=Seating.Enter(player,state.mode);if not ok then screens[player]="lobby";push(player,why);return end else Seating.Leave(player)end
   push(player)
- elseif mode == "wardrobe" then screens[player] = "wardrobe"; push(player)
+ elseif mode == "wardrobe" then Seating.Leave(player);screens[player] = "wardrobe"; push(player)
  elseif mode == "endless" then
   screens[player] = "notice"; push(player,nil,{ title = if mode == "pvp" then "Дуэль" else "Бесконечный поход",
    body = if mode == "pvp" then "Этот стол предназначен для боя с другим игроком. Подбор и отдельный баланс PvP появятся после проверки основного боя."
@@ -81,7 +87,7 @@ Input.OnServerEvent:Connect(function(player, data)
  if kind == "open" then
   if data.mode == "campaign" or data.mode == "wardrobe" or data.mode == "pvp" or data.mode == "endless" then open(player,data.mode) end
   return
- elseif kind == "return" then screens[player] = "lobby"; push(player); return
+ elseif kind == "return" then Seating.Leave(player);screens[player] = "lobby"; push(player); return
  elseif kind=="tarot"or kind=="buyTarot"then
   local p=profile(player);local d=type(data.item)=="string"and Tarot.Def(data.item)
   if not d then return end
@@ -90,6 +96,20 @@ Input.OnServerEvent:Connect(function(player, data)
   elseif Tarot.Unlocked(p,d)then
    local index=table.find(p.tarot,d.id)
    if index then table.remove(p.tarot,index)elseif #p.tarot<4 then table.insert(p.tarot,d.id)else push(player,"Можно выбрать до четырёх разных таро");return end
+  end
+  push(player);return
+ elseif kind=="buildClass"or kind=="buildJoker"or kind=="buildTarot"then
+  local active=duelSessions[player]
+  if active and active.phase~="intro"and active.phase~="won"and active.phase~="lost"and active.phase~="draw"then push(player,"Сборка уже зафиксирована до конца дуэли");return end
+  local p=profile(player);local id=data.item
+  if type(id)~="string"then return end
+  if kind=="buildClass"then if Loadout.Class(id)then p.class=id end
+  else
+   local list,limit,valid
+   if kind=="buildJoker"then list=p.jokers;limit=2;valid=Loadout.Joker(id)else list=p.duelTarot;limit=3;valid=table.find(Loadout.TarotIds,id)end
+   if not valid then return end
+   local index=table.find(list,id)
+   if index then table.remove(list,index)elseif #list<limit then table.insert(list,id)else push(player,"Сначала убери один выбранный предмет");return end
   end
   push(player);return
  elseif kind == "talent" then
@@ -103,11 +123,14 @@ Input.OnServerEvent:Connect(function(player, data)
  if kind == "begin" then
   if state.phase == "intro" then if state.mode=="duel"then
    if not state.botPrepared then push(player,"Соперник ещё выбирает таро");return end
+   local p=profile(player);local valid,why=Loadout.Validate(p.class,p.jokers,p.duelTarot)
+   if not valid then push(player,why);return end
    local prepared=state
-   state=Duel.New(prepared.config,prepared.seed,profile(player).talent,prepared.id,profile(player).tarot,prepared.botLoadout)
+   local seated,why=Seating.Enter(player,"duel");if not seated then push(player,why);return end
+   state=Duel.New(prepared.config,prepared.seed,p.class,prepared.id,p.duelTarot,prepared.botLoadout,p.jokers,Duel.ChooseBuild((prepared.seed+271)%1000000000))
    state.botLoadout=prepared.botLoadout;state.botPrepared=true
    sessions[player]=state;duelSessions[player]=state;Duel.Begin(state)
-  else state.phase="combat";state.revision+=1 end;screens[player]="battle"end
+  else local seated,why=Seating.Enter(player,"campaign");if not seated then push(player,why);return end;state.phase="combat";state.revision+=1 end;screens[player]="battle"end
   push(player); return
  end
  if screens[player] ~= "battle" then return end
@@ -142,6 +165,8 @@ local function added(player)
  local function spawned(character)
   local root = character:WaitForChild("HumanoidRootPart",10)
   if root then character:PivotTo(CFrame.new(room:GetAttribute("SpawnPosition"))) end
+  local state=sessions[player]
+  if state and screens[player]=="battle"then task.wait(.2);Seating.Enter(player,state.mode)end
  end
  player.CharacterAdded:Connect(spawned)
  if player.Character then task.spawn(spawned,player.Character) end
@@ -149,6 +174,7 @@ end
 Players.PlayerAdded:Connect(added)
 for _, player in Players:GetPlayers() do task.spawn(added,player) end
 Players.PlayerRemoving:Connect(function(player)
+ Seating.Leave(player)
  sessions[player]=nil;campaignSessions[player]=nil;duelSessions[player]=nil;profiles[player]=nil;screens[player]=nil;requests[player]=nil;buckets[player]=nil
 end)
 -- Read-only inspection in Studio; never exposed to clients or published servers.

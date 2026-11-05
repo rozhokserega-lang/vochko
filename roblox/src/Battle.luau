@@ -24,7 +24,7 @@ end
 function Battle.Shuffle(deck, random)
  for i = #deck, 2, -1 do local j = random:NextInteger(1, i); deck[i], deck[j] = deck[j], deck[i] end
 end
-function Battle.Zone(zone, target)
+function Battle.Zone(zone, target,duel)
  if #zone.cards == 0 then return { sum = 0, damage = 0, exact = false, bust = false, heal = 0 } end
  local raw, chips, aces, kings = zone.delta, zone.chipDelta * 10, 0, 0
  local allRed, allBlack = true, true
@@ -41,7 +41,8 @@ function Battle.Zone(zone, target)
  chips = math.max(0, chips)
  local best
  for lowAces = 0, aces do
-  local sum = if clock then target else raw - 10 * lowAces
+  local candidate=raw-10*lowAces
+  local sum = if clock and (not duel or math.abs(candidate-target)<=2)then target else candidate
   local bust = sum > target and kings < 3
   local score = if bust then 0 else rounded(chips * multiplier(math.abs(target - sum)))
   if regular == 2 and sum == target then score *= 2 end
@@ -61,7 +62,7 @@ function Battle.Zone(zone, target)
 end
 function Battle.Active(state)
  for i, zone in state.zones do
-  local r = Battle.Zone(zone, state.config.Target)
+  local r = Battle.Zone(zone, state.config.Target,state.config.PvP)
   if not zone.stood and #zone.cards < state.config.Slots and not r.bust and (not r.exact or Tarot.Has(zone,"hourglass"))then return i end
  end
  return nil
@@ -69,7 +70,7 @@ end
 function Battle.New(config, seed, talent, id,loadout)
  local random = Random.new(seed)
  local deck = Battle.Deck()
- local extra={deck=deck};Tarot.Add(extra,loadout);Battle.Shuffle(deck,random)
+ local extra={deck=deck,pvp=config.PvP};Tarot.Add(extra,loadout);Battle.Shuffle(deck,random)
  return {deckTotal=extra.deckTotal,tarotSpent={},tarotDrawn=0,sleeve={},sleeveUsed=0,money=0, id = id, config = table.clone(config), random = random, deck = deck, discard = {},
   zones = emptyZones(config.Zones), hp = config.PlayerHP, enemyHp = config.EnemyHP,
   roundsLeft = config.Rounds, round = 1, phase = "combat", talent = talent,

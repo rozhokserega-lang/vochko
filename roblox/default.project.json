@@ -13,6 +13,8 @@
         "Assets": {
           "$path": "src/Assets.luau"
         },
+        "Loadout": {"$path":"src/Loadout.luau"},
+        "Inventory": {"$path":"src/Inventory.luau"},
         "TableScene": {
           "$path": "src/TableScene.luau"
         },
@@ -42,6 +44,7 @@
         "Config": {
           "$path": "src/Config.luau"
         },
+        "Seating": {"$path":"src/Seating.luau"},
         "Battle": {
           "$path": "src/Battle.luau"
         },

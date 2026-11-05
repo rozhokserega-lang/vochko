@@ -41,12 +41,12 @@ check(s.sleeveUsed==0,'Thread restores sleeve use');Battle.Next(s)
 check(#Battle.View(s).peek==3,'Candle reveals next three cards next round')
 local d=Duel.New(config,43,'sharp','duel',{'rose','guardian','sun','echo'});Duel.Begin(d)
 while not d.botReady do Duel.StepBot(d)end
-check(d.player.deckTotal==56 and d.bot.deckTotal==56,'Equal mixed deck sizes')
+check(d.player.deckTotal==55 and d.bot.deckTotal==55,'PvP has three tarot per deck')
 d.player.zones={z({c('2','♠'),t('rose'),t('guardian')}),z({}),z({})}
 r=Duel.Evaluate(d.player);check(r.heal==8 and r.tarot.shield==6,'PvP healing and guard scaled')
 check(Tarot.Incoming(20,{seal=true,moon=false,shield=0},true)==10,'PvP seal halves instead of cancels')
 d.player.zones[1]=z({c('A','♠'),c('K','♥'),t('sun'),t('echo')})
-check(Duel.Evaluate(d.player).damage==25,'PvP exact sharp sun echo combination')
+check(Duel.Evaluate(d.player).damage==17,'PvP exact sharp sun echo combination is bounded')
 local limitConfig=table.clone(config);limitConfig.EnemyHP=1000000000;limitConfig.EnemyAttack=0;limitConfig.BustPenalty=0;limitConfig.Rounds=30
 local limited=Battle.New(limitConfig,91,'sharp','limit',{'rose','sun','guardian','echo'})
 local seen={};local tarotCount=0
@@ -65,9 +65,9 @@ check(tarotCount==4 and #limited.tarotSpent==4,'All four tarot used once and ret
 local fresh=Battle.New(limitConfig,91,'sharp','next',{'rose','sun','guardian','echo'})
 check(fresh.tarotDrawn==0 and #fresh.deck==56,'New battle restores full selected loadout')
 local chosen=Duel.ChooseTarot(73);local set={}
-for _,id in chosen do check(Tarot.Def(id)~=nil and not set[id],'AI chooses four distinct valid tarot');set[id]=true end
+for _,id in chosen do check(Tarot.Def(id)~=nil and not set[id],'AI chooses three distinct valid tarot');set[id]=true end
 local independent=Duel.New(config,11,'sharp','different',{'rose'},chosen)
-check(independent.player.deckTotal==53 and independent.bot.deckTotal==56,'Player and AI prepare separate loadouts')
+check(independent.player.deckTotal==53 and independent.bot.deckTotal==55,'Player and AI prepare separate loadouts')
 local cut=state();cut.zones[1]=z({c('10','♠')})
 check(Battle.Consume(cut,'minus4',1),'Minus four accepted')
 check(Battle.Zone(cut.zones[1],21).sum==6 and cut.supplies.minus4==0 and cut.supplies.minus2==1,'Minus four changes four and leaves minus two untouched')
