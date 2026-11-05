@@ -15,6 +15,7 @@
         },
         "Loadout": {"$path":"src/Loadout.luau"},
         "Inventory": {"$path":"src/Inventory.luau"},
+        "HUDControls": {"$path":"src/HUDControls.luau"},
         "TableScene": {
           "$path": "src/TableScene.luau"
         },

@@ -9,6 +9,8 @@ local TableScene = require(remote:WaitForChild("TableScene"))
 local CameraControls = require(remote:WaitForChild("CameraControls"))
 local Inventory=require(remote:WaitForChild("Inventory"))
 local Loadout=require(remote:WaitForChild("Loadout"))
+local HUDControls=require(remote:WaitForChild("HUDControls"))
+local hudControls
 local cameraControls
 local Input, Snapshot = remote:WaitForChild("Input"), remote:WaitForChild("Snapshot")
 local C = { ink=Color3.fromRGB(9,25,16), green=Color3.fromRGB(22,57,37), brass=Color3.fromRGB(183,147,78),
@@ -70,6 +72,7 @@ local function cameraFor(screen)
  end
 end
 local function clearApp()
+ if hudControls then hudControls:Destroy();hudControls=nil end
  if cameraControls then cameraControls:Destroy();cameraControls=nil end
  for _,child in app:GetChildren() do if not child:IsA("UISizeConstraint") then child:Destroy() end end
  battleUI=nil
@@ -153,6 +156,7 @@ local function buildBattle(s)
   return if TableScene.IsMobileView(root.AbsoluteSize)then UDim2.fromScale(1,value)else UDim2.fromScale(value,1)
  end
  cameraControls=CameraControls.Create(app,TableScene,function()return root.AbsoluteSize end)
+ hudControls=HUDControls.Create(app,{own,enemy},TableScene,function()return app.AbsoluteSize end,function()if battleUI and current and current.battle then battleUI.update(current.battle)end end,returnButton)
  local function update(s)
   cameraControls:Refresh()
   TableScene.Update(s)
@@ -230,6 +234,7 @@ local function buildBattle(s)
    playerName.Text=player.DisplayName.." · "..(ownClass and ownClass.name or "")
    name.Text="ИИ · "..(theirClass and theirClass.name or "")
   end
+  hudControls:Apply()
  end
  return {update=update,impact=function(value,maxHp,damage,side)
   local mobile=TableScene.IsMobileView(root.AbsoluteSize)
@@ -289,7 +294,7 @@ app:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
  if resizeQueued then return end;resizeQueued=true;task.defer(function()resizeQueued=false;if battleUI and current and current.battle then TableScene.Camera(root.AbsoluteSize,false);if not TableScene.ImpactActive then battleUI.update(current.battle) end end end)
 end)
 UIS.InputBegan:Connect(function(input,processed)
- if TableScene.CameraTuning or TableScene.ImpactActive or processed or not current or current.screen~="battle"or not current.battle or current.battle.phase~="combat"then return end
+ if TableScene.CameraTuning or TableScene.HUDTuning or TableScene.ImpactActive or processed or not current or current.screen~="battle"or not current.battle or current.battle.phase~="combat"then return end
  if input.KeyCode==Enum.KeyCode.Space then send("draw")elseif input.KeyCode==Enum.KeyCode.F then send("stop")elseif input.KeyCode==Enum.KeyCode.Return then send("play")end
 end)
 task.spawn(function()

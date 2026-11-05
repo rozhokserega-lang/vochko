@@ -281,7 +281,7 @@ function Scene.Create(playerGui,send,duel)
  -- Route pointer input through the table plane. This also works for touch and
  -- avoids ScreenGui/SurfaceGui hit-test differences in Studio and on devices.
  inputConnection=game:GetService("UserInputService").InputBegan:Connect(function(input)
-  if Scene.CameraTuning or Scene.ImpactActive then return end
+  if Scene.CameraTuning or Scene.HUDTuning or Scene.ImpactActive then return end
   if input.UserInputType~=Enum.UserInputType.MouseButton1 and input.UserInputType~=Enum.UserInputType.Touch then return end
   if game:GetService("UserInputService"):GetFocusedTextBox() then return end
   local camera=workspace.CurrentCamera;if not camera or not plane.Parent then return end

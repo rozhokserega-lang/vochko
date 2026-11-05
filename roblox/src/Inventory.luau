@@ -2,7 +2,7 @@ local Loadout=require(script.Parent.Loadout)
 local Tarot=require(script.Parent.Tarot)
 local Assets=require(script.Parent.Assets)
 local Inventory={}
-local selectedDescription="Выбери класс, два джокера и три разных таро. Джокеры видны сопернику с начала матча."
+local tipState
 local rowPositions={}
 local C={wood=Color3.fromRGB(57,35,22),dark=Color3.fromRGB(18,12,9),gold=Color3.fromRGB(207,168,91),paper=Color3.fromRGB(241,225,187),muted=Color3.fromRGB(192,174,137)}
 local function make(class,props,parent)local p=Instance.new(class);for k,v in props do p[k]=v end;p.Parent=parent;return p end
@@ -13,6 +13,18 @@ local function border(p,color,width)make("UIStroke",{Color=color or C.gold,Thick
 function Inventory.Build(app,data,duelSetup,send)
  local savedPositions=table.clone(rowPositions)
  local p=data.profile;local frozen=data.loadoutLocked==true
+ local function showTip(title,description,rect)
+  local old=app:FindFirstChild("ItemTip");if old then old:Destroy()end
+  local width=math.min(300,app.AbsoluteSize.X-20);local height=146
+  local maxY=math.max(8,app.AbsoluteSize.Y-100-height-8)
+  local x=math.clamp(rect.X,10,math.max(10,app.AbsoluteSize.X-width-10))
+  local y=rect.Y+rect.Z+8;if y>maxY then y=rect.Y-height-8 end;y=math.clamp(y,8,maxY)
+  local frame=make("Frame",{Name="ItemTip",Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(width,height),BackgroundColor3=C.dark,BorderSizePixel=0,ZIndex=60,Active=true},app);border(frame,C.gold,2)
+  local heading=text(frame,title,UDim2.fromOffset(12,8),UDim2.new(1,-64,0,30),21,C.gold);heading.ZIndex=61
+  local desc=text(frame,description,UDim2.fromOffset(12,46),UDim2.new(1,-24,0,88),17);desc.ZIndex=61;desc.TextYAlignment=Enum.TextYAlignment.Top
+  local close=make("TextButton",{Name="Close",Text="×",Position=UDim2.new(1,-48,0,2),Size=UDim2.fromOffset(44,44),TextSize=25,Font=Enum.Font.Garamond,BackgroundTransparency=1,TextColor3=C.gold,ZIndex=62},frame)
+  close.Activated:Connect(function()tipState=nil;frame:Destroy()end)
+ end
  local body=make("ScrollingFrame",{Name="Body",Size=UDim2.new(1,0,1,-100),CanvasSize=UDim2.fromOffset(0,760),ScrollBarThickness=3,BackgroundColor3=C.dark,BorderSizePixel=0},app)
  text(body,"ШКАФ",UDim2.fromOffset(16,8),UDim2.new(1,-132,0,42),32,C.gold)
  local back=make("TextButton",{Name="Return",Text="В комнату",Position=UDim2.new(1,-116,0,10),Size=UDim2.fromOffset(100,44),TextSize=16,Font=Enum.Font.Garamond,TextColor3=C.paper,BackgroundColor3=C.wood,BorderSizePixel=0},body);border(back);back.Activated:Connect(function()send("return")end)
@@ -25,7 +37,7 @@ function Inventory.Build(app,data,duelSetup,send)
  end
  local function card(row,index,id,title,symbol,description,chosen,kind,image)
   local width=if image then 106 else 116
-  local b=make("TextButton",{Name=kind.."_"..id,Text="",Position=UDim2.fromOffset((index-1)*(width+10)+4,4),Size=UDim2.new(0,width,1,-12),BackgroundColor3=if chosen then Color3.fromRGB(74,52,25)else Color3.fromRGB(37,25,16),BorderSizePixel=0,AutoButtonColor=not frozen,Active=not frozen},row);border(b,if chosen then Color3.fromRGB(249,211,125)else Color3.fromRGB(116,89,49),if chosen then 2 else 1)
+  local b=make("TextButton",{Name=kind.."_"..id,Text="",Position=UDim2.fromOffset((index-1)*(width+10)+4,4),Size=UDim2.new(0,width,1,-12),BackgroundColor3=if chosen then Color3.fromRGB(74,52,25)else Color3.fromRGB(37,25,16),BorderSizePixel=0,AutoButtonColor=true,Active=true},row);border(b,if chosen then Color3.fromRGB(249,211,125)else Color3.fromRGB(116,89,49),if chosen then 2 else 1)
   if image then
    make("ImageLabel",{Image=image,Size=UDim2.fromOffset(54,81),Position=UDim2.new(.5,-27,0,7),BackgroundTransparency=1},b)
    text(b,title,UDim2.fromOffset(4,89),UDim2.new(1,-8,0,30),16)
@@ -34,7 +46,11 @@ function Inventory.Build(app,data,duelSetup,send)
    local label=text(b,title,UDim2.fromOffset(5,40),UDim2.new(1,-10,0,40),17);label.TextXAlignment=Enum.TextXAlignment.Center
   end
   if chosen then local tick=text(b,"✓",UDim2.fromOffset(5,2),UDim2.fromOffset(20,22),18,C.gold);tick.ZIndex=3 end
-  b.Activated:Connect(function()if not frozen then selectedDescription=title..": "..description;send(kind,{item=id})end end)
+  b.Activated:Connect(function()
+   local rect=Vector3.new(b.AbsolutePosition.X-app.AbsolutePosition.X,b.AbsolutePosition.Y-app.AbsolutePosition.Y,b.AbsoluteSize.Y)
+   tipState={title=title,description=description,rect=rect};showTip(title,description,rect)
+   if not frozen then send(kind,{item=id})end
+  end)
   row.CanvasSize=UDim2.fromOffset(index*(width+10)+4,0)
  end
  local classes=shelf("КЛАСС","1 / 1",104,132)
@@ -47,7 +63,7 @@ function Inventory.Build(app,data,duelSetup,send)
   if savedPositions[row.Parent.Name]then row.CanvasPosition=savedPositions[row.Parent.Name]end
   local key=row.Parent.Name;row:GetPropertyChangedSignal("CanvasPosition"):Connect(function()rowPositions[key]=row.CanvasPosition end)
  end
- text(body,selectedDescription,UDim2.fromOffset(16,598),UDim2.new(1,-32,0,76),18)
+ text(body,"Нажми на предмет — описание появится рядом. Выбранные предметы отмечены галочкой.",UDim2.fromOffset(16,598),UDim2.new(1,-32,0,76),18)
  text(body,"Колода: 52 + 3 таро. Таро одноразовые за матч. Броня действует на один обмен ударами. Нить и рукав пока отключены в PvP.",UDim2.fromOffset(16,684),UDim2.new(1,-32,0,66),16,C.muted)
  local dock=make("Frame",{Name="Dock",AnchorPoint=Vector2.new(0,1),Position=UDim2.fromScale(0,1),Size=UDim2.new(1,0,0,100),BackgroundColor3=C.dark,BorderSizePixel=0},app)
  local valid,why=Loadout.Validate(p.class,p.jokers,p.duelTarot)
@@ -55,5 +71,6 @@ function Inventory.Build(app,data,duelSetup,send)
  text(dock,if not valid then why elseif duelSetup and not ready then "Соперник собирает набор…"else "1 класс · 2 джокера · 3 таро",UDim2.fromOffset(16,0),UDim2.new(1,-32,0,28),16,C.muted)
  local go=make("TextButton",{Name="Primary",Text=if frozen then "ПРОДОЛЖИТЬ ДУЭЛЬ"elseif duelSetup then "ГОТОВ · НАЧАТЬ ДУЭЛЬ"else "К СТОЛУ PVP",Position=UDim2.fromOffset(16,34),Size=UDim2.new(1,-32,0,52),BackgroundColor3=C.gold,TextColor3=C.dark,Font=Enum.Font.Garamond,TextSize=22,BorderSizePixel=0,AutoButtonColor=ready==true,TextTransparency=if ready then 0 else .5},dock);border(go)
  go.Activated:Connect(function()if frozen or ready then if duelSetup then send("begin")else send("open",{mode="pvp"})end end end)
+ if tipState then showTip(tipState.title,tipState.description,tipState.rect)end
 end
 return Inventory
