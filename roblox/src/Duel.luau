@@ -155,6 +155,7 @@ function Duel.Play(state)
  local a,b=Duel.Evaluate(state.player),Duel.Evaluate(state.bot)
  if a.cards==0 then return false,'Сначала возьми карту'end
  local p,e=state.player,state.bot
+ local ownBefore,enemyHealBefore=p.hp,e.hp
  local playerHealed=math.min(state.config.DuelHP,p.hp+a.heal)
  local enemyHealed=math.min(state.config.DuelHP,e.hp+b.heal)
  local function defend(raw,effects)
@@ -170,8 +171,11 @@ function Duel.Play(state)
  Tarot.Commit(p,a.tarot);Tarot.Commit(e,b.tarot)
  p.hp=math.max(0,playerHealed-b.damage);e.hp=math.max(0,enemyHealed-a.damage)
  state.roundsLeft-=1
- state.receipt={round=state.round,damage=a.damage,heal=a.heal,received=b.damage,ownArmorBefore=ownArmorBefore,ownArmorAfter=ownArmorAfter,ownBlocked=ownBlocked,enemyArmorBefore=enemyArmorBefore,enemyArmorAfter=enemyArmorAfter,enemyBlocked=enemyBlocked,enemyBefore=enemyHealed,enemyAfter=e.hp,hits=hits(p,a,enemyHealed-e.hp),
-  incoming={enemyBefore=playerHealed,enemyAfter=p.hp,hits=hits(e,b,playerHealed-p.hp)}}
+ local function returns(side,result)
+  local out={};for i,z in side.zones do if result.zones[i].bust then for _,card in z.cards do table.insert(out,{card=table.clone(card),zone=i})end end end;return out
+ end
+ state.receipt={round=state.round,damage=a.damage,heal=a.heal,received=b.damage,ownBefore=ownBefore,ownHealed=playerHealed,enemyHealBefore=enemyHealBefore,returns=returns(p,a),ownArmorBefore=ownArmorBefore,ownArmorAfter=ownArmorAfter,ownBlocked=ownBlocked,enemyArmorBefore=enemyArmorBefore,enemyArmorAfter=enemyArmorAfter,enemyBlocked=enemyBlocked,enemyBefore=enemyHealed,enemyAfter=e.hp,hits=hits(p,a,enemyHealed-e.hp),
+  incoming={enemyBefore=playerHealed,enemyAfter=p.hp,hits=hits(e,b,playerHealed-p.hp),returns=returns(e,b)}}
  table.insert(state.journal,string.format('Раунд %d: нанесено %d · получено %d · броня поглотила %d:%d · HP %d:%d',state.round,a.damage,b.damage,ownBlocked,enemyBlocked,p.hp,e.hp))
  if p.hp==0 or e.hp==0 or state.roundsLeft==0 then
   state.phase=if p.hp==e.hp then 'draw'elseif p.hp>e.hp then 'won'else 'lost'

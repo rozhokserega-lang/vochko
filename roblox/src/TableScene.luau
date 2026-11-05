@@ -579,14 +579,22 @@ end
 function Scene.PlayAttack(s,onHit,onDone)
  if not model or not head or not s.receipt or not s.receipt.hits then task.defer(onDone);return end
  Scene.ImpactActive=true;Scene.Update(s)
+ local attackModel=model
  local function finish()impactJob=nil;Scene.ImpactActive=false;onDone()end
  local function incoming()
   if Scene.DuelMode and s.receipt.incoming then
-   impactJob=CardImpact.Play({parent=model,plane=surface.Adornee,head=playerTarget,nodes=enemyNodes,receipt=s.receipt.incoming,maxHp=s.maxHp,canvasHeight=Scene.CanvasHeight,
+   impactJob=CardImpact.Play({parent=model,plane=surface.Adornee,head=playerTarget,deck=model:FindFirstChild("EnemyDeckTop",true),nodes=enemyNodes,receipt=s.receipt.incoming,maxHp=s.maxHp,canvasHeight=Scene.CanvasHeight,
     hit=function(hp,maxHp,damage)onHit(hp,maxHp,damage,"player")end,done=finish})
   else finish()end
  end
- impactJob=CardImpact.Play({parent=model,plane=surface.Adornee,head=head,nodes=nodes,receipt=s.receipt,maxHp=s.enemyMaxHp,canvasHeight=Scene.CanvasHeight,
-  hit=onHit,done=incoming})
+ local function outgoing()
+  if not Scene.ImpactActive or model~=attackModel then return end
+  impactJob=CardImpact.Play({parent=model,plane=surface.Adornee,head=head,deck=model:FindFirstChild("DeckTop",true),nodes=nodes,receipt=s.receipt,maxHp=s.enemyMaxHp,canvasHeight=Scene.CanvasHeight,
+   hit=onHit,done=incoming})
+ end
+ local healed=false
+ if s.receipt.ownBefore and s.receipt.ownHealed>s.receipt.ownBefore then onHit(s.receipt.ownHealed,s.maxHp,-(s.receipt.ownHealed-s.receipt.ownBefore),"player");healed=true end
+ if s.receipt.enemyHealBefore and s.receipt.enemyBefore>s.receipt.enemyHealBefore then onHit(s.receipt.enemyBefore,s.enemyMaxHp,-(s.receipt.enemyBefore-s.receipt.enemyHealBefore),"enemy");healed=true end
+ if healed then task.delay(.55,outgoing)else outgoing()end
 end
 return Scene

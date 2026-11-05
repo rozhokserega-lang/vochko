@@ -239,8 +239,16 @@ local function buildBattle(s)
  end
  return {update=update,impact=function(value,maxHp,damage,side)
   local mobile=TableScene.IsMobileView(root.AbsoluteSize)
-  if side=="player"then hp.Text=if mobile then tostring(value)else "♥ "..value.." / "..maxHp;TweenService:Create(hpFill,TweenInfo.new(.08),{Size=fillSize(value/maxHp)}):Play()
-  else enemyHP.Text=if mobile then tostring(value)else value.." / "..maxHp;TweenService:Create(enemyFill,TweenInfo.new(.08),{Size=fillSize(value/maxHp)}):Play()end
+  if damage and damage<0 then
+   local panel=if side=="player"then own else enemy
+   local pop=make("TextLabel",{Name="HealEffect",Text="♥ +"..(-damage),Font=Enum.Font.GothamBold,TextSize=if mobile then 19 else 25,TextColor3=Color3.fromRGB(151,255,163),TextStrokeTransparency=.3,BackgroundTransparency=1,AnchorPoint=Vector2.new(.5,1),Position=UDim2.new(.5,0,0,0),Size=UDim2.fromOffset(120,36),ZIndex=80},panel)
+   if mobile then pop.AnchorPoint=Vector2.new(if side=="player"then 0 else 1,1);pop.Position=UDim2.new(if side=="player"then 1 else 0,0,0,0)end
+   TweenService:Create(pop,TweenInfo.new(.85,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=pop.Position-UDim2.fromOffset(0,32),TextTransparency=1,TextStrokeTransparency=1}):Play()
+   game:GetService("Debris"):AddItem(pop,.9)
+  end
+  local duration=if damage and damage<0 then .45 else .08
+  if side=="player"then hp.Text=if mobile then tostring(value)else "♥ "..value.." / "..maxHp;TweenService:Create(hpFill,TweenInfo.new(duration),{Size=fillSize(value/maxHp)}):Play()
+  else enemyHP.Text=if mobile then tostring(value)else value.." / "..maxHp;TweenService:Create(enemyFill,TweenInfo.new(duration),{Size=fillSize(value/maxHp)}):Play()end
  end}
 end
 local function lobbyUI()

@@ -9,7 +9,8 @@ function Impact.Play(args)
  local folder=make("Folder",{Name="CardImpact"},args.parent)
  local job={cancelled=false}
  local head=args.head;local home=head.CFrame;local skin=head.Color
- local hits=args.receipt.hits or {}
+ local hits=table.clone(args.receipt.hits or {})
+ for _,entry in args.receipt.returns or {}do local item=table.clone(entry);item.returning=true;table.insert(hits,item)end
  local remaining=#hits
  local hp=args.receipt.enemyBefore
  local function done()
@@ -38,7 +39,7 @@ function Impact.Play(args)
    local gui=make("SurfaceGui",{Face=Enum.NormalId.Top,CanvasSize=Vector2.new(144,200),LightInfluence=0},card)
    local face=node:Clone();face.Visible=true;face.Position=UDim2.new();face.Rotation=0;face.Size=UDim2.fromScale(1,1);face.Parent=gui
    node.Visible=false
-   local goal=head.Position+Vector3.new((i%3-1)*.32,-.35,.85)
+   local goal=if hit.returning and args.deck then args.deck.Position+Vector3.new(0,.08,0)else head.Position+Vector3.new((i%3-1)*.32,-.35,.85)
    local mid=(point+goal)/2+Vector3.new(0,1.65,0)
    local lift=TweenService:Create(card,TweenInfo.new(.18,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{CFrame=CFrame.new(mid)*plane.CFrame.Rotation*CFrame.Angles(0,.3,0)})
    lift:Play()
@@ -49,6 +50,10 @@ function Impact.Play(args)
     strike.Completed:Once(function(status)
      if job.cancelled or status~=Enum.PlaybackState.Completed then return end
      card:Destroy()
+     if hit.returning then
+      remaining-=1;if remaining==0 then task.delay(.22,done)end
+      return
+     end
      hp=math.max(args.receipt.enemyAfter,hp-hit.damage)
      args.hit(hp,args.maxHp,hit.damage)
      if hit.damage>0 then

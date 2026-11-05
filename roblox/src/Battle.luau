@@ -142,10 +142,12 @@ function Battle.Play(state)
  local r = Battle.Forecast(state); if r.cards == 0 then return false, "Сначала возьми карту" end
  Tarot.Commit(state,r.tarot)
  local enemyBefore=state.enemyHp
+ local ownBefore=state.hp
+ local ownHealed=math.min(state.config.PlayerHP,state.hp+r.heal)
  state.roundsLeft -= 1; state.enemyHp = math.max(0, state.enemyHp - r.damage)
  state.hp = math.min(state.config.PlayerHP, state.hp + r.heal); state.hp = math.max(0, state.hp - r.received)
  -- Attribute the actual HP loss to revealed cards. Rounded shares add up exactly,
- -- including global talent multipliers and lethal overkill. Bust zones never fly.
+ -- including global talent multipliers and lethal overkill.
  local hits,weightTotal={},0
  for i,zone in state.zones do
   local weight=r.zones[i].damage
@@ -161,7 +163,9 @@ function Battle.Play(state)
   local total=rounded((enemyBefore-state.enemyHp)*cumulative/weightTotal)
   hit.damage=total-assigned;hit.weight=nil;assigned=total
  end
- state.receipt = { damage = r.damage, heal = r.heal, received = r.received, round = state.round,
+ local returns={}
+ for i,zone in state.zones do if r.zones[i].bust then for _,card in zone.cards do table.insert(returns,{card=table.clone(card),zone=i})end end end
+ state.receipt = { damage = r.damage, heal = r.heal, received = r.received, round = state.round,returns=returns,ownBefore=ownBefore,ownHealed=ownHealed,
   enemyBefore=enemyBefore,enemyAfter=state.enemyHp,hits=hits }
  table.insert(state.journal, string.format("Ход %d: урон %d · лечение %d · получено %d", state.round, r.damage, r.heal, r.received))
  if #state.journal > 20 then table.remove(state.journal, 1) end
