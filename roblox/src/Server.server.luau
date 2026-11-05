@@ -8,6 +8,8 @@ local Duel = require(storage.Duel)
 local Tarot=require(RS.Tarot)
 local Loadout=require(RS.Loadout)
 local Seating=require(storage.Seating)
+local NetworkDuel=require(storage.NetworkDuel)
+local network
 local campaignSessions,duelSessions={},{}
 local function rules(state)return if state and state.mode=="duel"then Duel else Battle end
 local room = require(storage.RoomBuilder)()
@@ -34,10 +36,22 @@ local function push(player, message, notice)
  local state = sessions[player]
  local cachedDuel=duelSessions[player]
  local locked=cachedDuel and cachedDuel.phase~="intro"and cachedDuel.phase~="won"and cachedDuel.phase~="lost"and cachedDuel.phase~="draw"
+ local net=network and network:View(player)
+ if net then
+  net.profile=table.clone(profile(player));net.message=message;Snapshot:FireClient(player,net);return
+ end
  Snapshot:FireClient(player, { screen = screens[player] or "lobby", profile = table.clone(profile(player)),
   loadoutLocked=locked==true,
   battle = if state then rules(state).View(state) else nil, preparation=if state and state.mode=="duel"then {ready=state.botPrepared==true,count=state.botLoadout and #state.botLoadout or 0}else nil, message = message, notice = notice })
 end
+network=NetworkDuel.new({profile=profile,push=push,config=Config.ForBattle,id=function()return Http:GenerateGUID(false)end,now=function()return workspace:GetServerTimeNow()end,
+ sit=function(p,i)local ok,why=Seating.Enter(p,'pvp',i);if ok then screens[p]='pvp'end;return ok,why end,
+ leave=function(p)Seating.Leave(p);screens[p]='lobby'end,
+ chairs={room.Table_pvp.PvPSeat1,room.Table_pvp.PvPSeat2}})
+for i,seat in network.ctx.chairs do seat.PvPSeatPrompt.Triggered:Connect(function(player)
+ if not allowed(player)or not nearby(player,seat.Position,12)then return end
+ local ok,why=network:Join(player,i);if not ok then push(player,why)end
+end)end
 local function open(player, mode)
  if not nearby(player, Vector3.new(0,4,0), 65) then push(player,"Подойди к комнате поединков"); return end
  if mode == "campaign" or mode=="training" then
@@ -64,7 +78,7 @@ local function open(player, mode)
  elseif mode == "wardrobe" then Seating.Leave(player);screens[player] = "wardrobe"; push(player)
  elseif mode == "pvp" then
   Seating.Leave(player);screens[player]="notice"
-  push(player,nil,{title="PvP · центральный стол",body="Стол для двух игроков подготовлен: скопированы модель и размеры тренировочного стола. Сетевой подбор и бой с другим игроком пока не подключены. Потренироваться с ИИ можно за левым столом."})
+  push(player,nil,{title="PvP · садись на стул",body="Подойди к любому подсвеченному стулу центрального стола и нажми «Сесть». Второй игрок садится напротив — дуэль начнётся автоматически. Сборку выбери заранее в шкафу."})
  elseif mode == "endless" then
   screens[player] = "notice"; push(player,nil,{ title = if mode == "training" then "Дуэль" else "Бесконечный поход",
    body = if mode == "training" then "Этот стол предназначен для боя с другим игроком. Подбор и отдельный баланс PvP появятся после проверки основного боя."
@@ -87,6 +101,7 @@ Input.OnServerEvent:Connect(function(player, data)
  if type(rid) ~= "number" or rid ~= rid or rid % 1 ~= 0 or rid < 1 or rid > 1000000000 then return end
  if rid <= (requests[player] or 0) then push(player); return end
  requests[player] = rid
+ if network:Action(player,data)then return end
  if kind == "open" then
   if data.mode == "campaign" or data.mode == "wardrobe" or data.mode == "training" or data.mode == "pvp" or data.mode == "endless" then open(player,data.mode) end
   return
@@ -166,6 +181,7 @@ end)
 local function added(player)
  profile(player); screens[player] = "lobby"
  local function spawned(character)
+  if network.members[player]then network:Leave(player);push(player)end
   local root = character:WaitForChild("HumanoidRootPart",10)
   if root then character:PivotTo(CFrame.new(room:GetAttribute("SpawnPosition"))) end
   local state=sessions[player]
@@ -177,6 +193,7 @@ end
 Players.PlayerAdded:Connect(added)
 for _, player in Players:GetPlayers() do task.spawn(added,player) end
 Players.PlayerRemoving:Connect(function(player)
+ network:Leave(player)
  Seating.Leave(player)
  sessions[player]=nil;campaignSessions[player]=nil;duelSessions[player]=nil;profiles[player]=nil;screens[player]=nil;requests[player]=nil;buckets[player]=nil
 end)
@@ -184,6 +201,8 @@ end)
 if game:GetService("RunService"):IsStudio() then
  local debug = Instance.new("BindableFunction");debug.Name="StudioReadOnly";debug.Parent=storage
  debug.OnInvoke=function(player)
+  local net=network:View(player)
+  if net then return net end
   local state=sessions[player]
   return {screen=screens[player],profile=table.clone(profile(player)),battle=if state then rules(state).View(state)else nil,
    requestId=requests[player],hiddenCards=if state then (if state.mode=="duel"then #state.player.deck else #state.deck)else 0}
@@ -194,6 +213,7 @@ end
 task.spawn(function()
  while true do
   task.wait(.65)
+  network:Tick()
   for player,state in duelSessions do
    if player.Parent==Players and state.phase=="combat"and not state.botReady then
     Duel.StepBot(state)

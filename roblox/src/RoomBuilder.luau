@@ -74,8 +74,24 @@ return function()
    end
   end
  end
+ local function pvpChairs(root)
+  local station=root:FindFirstChild('Table_pvp');if not station then return end
+  for _,v in station:GetDescendants()do if v:IsA('ProximityPrompt')and v.Name=='VochkoPrompt'then v.Enabled=false end end
+  for i,z in {1.3,-15.3}do
+   local name='PvPSeat'..i;local seat=station:FindFirstChild(name)
+   if not seat then
+    seat=Instance.new('Seat');seat.Name=name;seat.Anchored=true;seat.CanCollide=false;seat.CanTouch=false;seat.Transparency=1;seat.Size=Vector3.new(2.5,.2,2.2)
+    seat.CFrame=CFrame.new(0,3.1,z)*CFrame.Angles(0,if i==2 then math.pi else 0,0);seat:SetAttribute('PvPSide',i);seat.Parent=station
+    local chair
+    for _,m in root:GetChildren()do local c=m:IsA('Model')and m.Name=='Chair'and m:FindFirstChild('Seat');if c and math.abs(c.Position.X)<.1 and ((i==1 and c.Position.Z>0)or(i==2 and c.Position.Z< -10))then chair=m;break end end
+    if chair and i==2 then chair:PivotTo(CFrame.new(0,0,-2.3)*chair:GetPivot())end
+    local h=Instance.new('Highlight');h.Name='AvailableSeat';h.Adornee=chair or seat;h.FillColor=Color3.fromRGB(216,183,93);h.FillTransparency=.75;h.OutlineColor=Color3.fromRGB(255,221,128);h.DepthMode=Enum.HighlightDepthMode.Occluded;h.Parent=seat
+    local p=Instance.new('ProximityPrompt');p.Name='PvPSeatPrompt';p.ActionText='Сесть';p.ObjectText='PvP · свободный стул';p.MaxActivationDistance=10;p.RequiresLineOfSight=false;p.Parent=seat
+   end
+  end
+ end
  local existing = workspace:FindFirstChild("VochkoPrototype")
- if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model");arrangeTables(existing);ensureLamp(existing);ensureTableVisual(existing);ensureSeats(existing);return existing end
+ if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model");arrangeTables(existing);ensureLamp(existing);ensureTableVisual(existing);ensureSeats(existing);pvpChairs(existing);return existing end
  local root = Instance.new("Model"); root.Name = "VochkoPrototype"; root:SetAttribute("Owner", "vochko.prototype.v1"); root.Parent = workspace
  local colors = { stone = Color3.fromRGB(36,42,36), wood = Color3.fromRGB(61,39,24), brass = Color3.fromRGB(159,124,61), felt = Color3.fromRGB(18,61,41) }
  local n = 0
@@ -160,5 +176,6 @@ return function()
  arrangeTables(root)
  ensureTableVisual(root)
  ensureSeats(root)
+ pvpChairs(root)
  return root
 end

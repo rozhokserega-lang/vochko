@@ -153,7 +153,7 @@ function Duel.Play(state)
  if state.phase~='combat'then return false,'Ход уже подтверждён'end
  if not state.botReady then return false,'Соперник ещё набирает карты'end
  local a,b=Duel.Evaluate(state.player),Duel.Evaluate(state.bot)
- if a.cards==0 then return false,'Сначала возьми карту'end
+ if a.cards==0 and not state.network then return false,'Сначала возьми карту'end
  local p,e=state.player,state.bot
  local ownBefore,enemyHealBefore=p.hp,e.hp
  local playerHealed=math.min(state.config.DuelHP,p.hp+a.heal)

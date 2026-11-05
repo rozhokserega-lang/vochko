@@ -172,8 +172,10 @@ local function props()
   coin.Shape=Enum.PartType.Cylinder;coin.Orientation=Vector3.new(0,0,90)
  end
 end
-function Scene.Create(playerGui,send,duel)
+function Scene.Create(playerGui,send,duel,presentation)
  Scene.Destroy();dispatch=send;Scene.DuelMode=duel==true;Scene.CanvasHeight=if duel then 1100 else 900
+ Scene.Network=presentation and presentation.network==true
+ Scene.WorldFrame=if Scene.Network then CFrame.new(0,0,-7)*CFrame.Angles(0,if presentation.seatIndex==2 then math.pi else 0,0)*CFrame.new(0,0,7)*CFrame.new(19,0,0)else CFrame.new()
  model=make("Model",{Name="VochkoLocalBattleScene"},workspace)
  local prompts=game:GetService("ProximityPromptService");promptEnabledBefore=prompts.Enabled;prompts.Enabled=false
  local player=game:GetService("Players").LocalPlayer
@@ -190,13 +192,14 @@ function Scene.Create(playerGui,send,duel)
   for _,obj in room:GetDescendants() do
    if obj:IsA("BillboardGui") or (obj:IsA("SurfaceGui") and obj.Parent.Name=="WelcomePlaque") or (obj:IsA("BasePart") and (obj.Name=="LaneEdge" or obj.Name=="CardDeck" or obj.Name=="DeckPaper" or obj.Name=="WelcomePlaque")) then hideRoomDetail(obj) end
    if obj:IsA("Light") then lightingRestore[obj]=obj.Brightness;obj.Brightness*=.45 end
-   if duel and obj:IsA("BasePart")and obj.Parent.Name=="DuelTableLamp"then hideRoomDetail(obj)end
+   if duel and obj:IsA("BasePart")and obj.Parent.Name==(if Scene.Network then 'CentralTableLamp'else 'DuelTableLamp')then hideRoomDetail(obj)end
    -- The fixed phone camera sits near the ceiling: beams must not hide the felt.
    if obj:IsA("BasePart")and obj.Name=="Beam"then hideRoomDetail(obj)end
   end
  end
  tone=make("ColorCorrectionEffect",{Name="VochkoBattleTone",Brightness=-.025,Contrast=.08,Saturation=-.14,TintColor=Color3.fromRGB(255,242,221)},game:GetService("Lighting"))
  opponent()
+ if Scene.Network then for _,p in model:GetDescendants()do if p:IsA('BasePart')then p.Transparency=1 end end end
  if duel then for _,p in model:GetDescendants()do if p:IsA("BasePart")then p.CFrame=CFrame.new(0,0,-1.6)*p.CFrame end end end
  placingOnTable=true;props();placingOnTable=false
  -- Blue night windows and hanging guild banners frame the opponent.
@@ -385,10 +388,14 @@ function Scene.Create(playerGui,send,duel)
  local tilt=if duel then CFrame.new(19,4.77,-1.95)*CFrame.Angles(math.rad(8),0,0)*CFrame.new(-19,-4.77,1.95)else tableTilt
  for _,p in tableParts do if p.Parent then p.CFrame=tilt*p.CFrame end end
  if duel then for _,p in model:GetDescendants()do if p:IsA("BasePart")then p.CFrame=offset*p.CFrame end end end
- local station=room and room:FindFirstChild(if duel then "Table_training"else "Table_campaign")
+ local station=room and room:FindFirstChild(if Scene.Network then 'Table_pvp'elseif duel then "Table_training"else "Table_campaign")
  local visual=station and station:FindFirstChild("TavernTable")
  tableMesh=visual and visual:FindFirstChildWhichIsA("MeshPart",true)
- if tableMesh then tableMeshHome=tableMesh.CFrame;tableMesh.CFrame=offset*tilt*offset:Inverse()*tableMeshHome end
+ if tableMesh then tableMeshHome=tableMesh.CFrame;tableMesh.CFrame=offset*tilt*offset:Inverse()*(if Scene.Network then CFrame.new(-19,0,0)*tableMeshHome else tableMeshHome)end
+ if Scene.Network then
+  for _,p in model:GetDescendants()do if p:IsA('BasePart')then p.CFrame=Scene.WorldFrame*p.CFrame end end
+  if tableMesh then tableMesh.CFrame=Scene.WorldFrame*tableMesh.CFrame end
+ end
  for _,p in tableParts do if p.Parent then layoutHomes[p]=p.CFrame end end
  if tableMesh then layoutHomes[tableMesh]=tableMesh.CFrame end
 end
@@ -396,9 +403,10 @@ function Scene.Camera(viewport,animate)
  local camera=workspace.CurrentCamera;if not camera then return end
  local settings=Scene.GetCameraSettings(viewport)
  -- Move the entire felt assembly together, preserving card/label hit coordinates.
- local shift=CFrame.new(0,0,if Scene.IsMobileView(viewport)then .55 else 0)
+ local delta=Vector3.new(0,0,if Scene.IsMobileView(viewport)then .55 else 0)
+ local shift=CFrame.new((Scene.WorldFrame or CFrame.new()):VectorToWorldSpace(delta))
  if not Scene.ImpactActive then for p,base in layoutHomes do if p.Parent then p.CFrame=shift*base end end end
- local frame=CFrame.new(if Scene.DuelMode then -19 else 19,settings.height,settings.distance)*CFrame.Angles(math.rad(-settings.pitch),0,0)
+ local frame=(Scene.WorldFrame or CFrame.new())*CFrame.new(if Scene.DuelMode then -19 else 19,settings.height,settings.distance)*CFrame.Angles(math.rad(-settings.pitch),0,0)
  camera.CameraType=Enum.CameraType.Scriptable
  -- 80 degrees is the portrait framing baseline. Preserve its readable table
  -- scale in landscape instead of exposing a very wide slice of the room.
@@ -508,12 +516,13 @@ function Scene.Update(s)
   end
  end
  for id,node in nodes do if not keep[id]then node:Destroy();nodes[id]=nil end end
- local combat=s.phase=="combat" and not Scene.ImpactActive
+ local combat=s.phase=="combat" and not Scene.ImpactActive and not s.ready
  local activeCards=s.active and s.zones[s.active].cards
  local lastCard=activeCards and activeCards[#activeCards]
  enable(buttons.hide,combat and lastCard~=nil and not lastCard.tarot and s.sleeveUsed<1 and s.sleeveCount==0)
  enable(buttons.release,combat and s.active~=nil and s.sleeveCount>0)
- enable(buttons.draw,combat and s.active~=nil);enable(buttons.stop,combat and s.active~=nil and #s.zones[s.active].cards>0);enable(buttons.play,combat and s.forecast.cards>0 and (not Scene.DuelMode or s.duel.enemyReady))
+ enable(buttons.draw,combat and s.active~=nil);enable(buttons.stop,combat and s.active~=nil and #s.zones[s.active].cards>0);enable(buttons.play,combat and (s.network or (s.forecast.cards>0 and (not Scene.DuelMode or s.duel.enemyReady))))
+ buttons.play.Text=if s.network then (if s.ready then 'ЖДЁМ ДРУГА'else 'Я ГОТОВ')else 'СЫГРАТЬ ХОД'
  for item,b in buttons do if item=="minus2" or item=="minus4" then
   b.Count.Text=tostring(s.supplies[item]or 0);enable(b,combat and(s.supplies[item]or 0)>0)
   b.BackgroundColor3=if selected==item then Color3.fromRGB(110,91,38)else C.green
@@ -538,6 +547,10 @@ function Scene.Update(s)
  if Scene.DuelMode and s.duel then Scene.UpdateEnemy(s)end
  targetLabel.Text=tostring(s.target);damageLabel.Text="УРОН  "..s.forecast.damage;deckLabel.Text=s.deckCount.." / "..s.deckTotal
  helpLabel.Text=if selected then "Выбран Срез "..(if selected=="minus4"then "−4"else "−2").." · выбери стол"elseif not combat then "Удар…"else (if Scene.DuelMode then (if s.duel.enemyReady then "ИИ готов · можно сыграть ход"else "Соперник набирает карты…")else "Space — карта     ·     F — стоп     ·     Enter — удар")
+ if s.network then
+  helpLabel.Text=if s.phase=='countdown'then 'Начало через '..s.remaining elseif s.phase=='combat'then (if s.ready then 'Ты готов · ждём друга'elseif s.duel.enemyReady then 'Друг готов · твой ход'else 'Подтверди ход, когда будешь готов')..' · '..s.remaining..' сек.'else 'Розыгрыш хода…'
+  board.EnemyJokersTitle.Text='ДЖОКЕРЫ ДРУГА';board.EnemySupplyTitle.Text='ПРЕДМЕТЫ ДРУГА';board.EnemyDeckTitle.Text='КОЛОДА ДРУГА'
+ end
  helpLabel.Text..=" · Таро "..s.tarotUsed.." / "..s.tarotLimit
  if s.peek and #s.peek>0 then local names={}for _,c in s.peek do table.insert(names,c.rank..c.suit)end;helpLabel.Text..=" · Далее: "..table.concat(names," / ")end
 end

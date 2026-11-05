@@ -67,7 +67,7 @@ local function cameraFor(screen)
   if controls then controls:Disable() end
  else
   TableScene.Destroy()
-  camera.CameraType=Enum.CameraType.Scriptable;camera.CFrame=if screen=="wardrobe"then CFrame.lookAt(Vector3.new(-23,7,4),Vector3.new(-23,6,15))else CFrame.lookAt(Vector3.new(19,12,3),Vector3.new(19,4,-7))
+  camera.CameraType=Enum.CameraType.Scriptable;camera.CFrame=if screen=='pvpwait'then CFrame.lookAt(Vector3.new(0,12,5),Vector3.new(0,4,-7))elseif screen=="wardrobe"then CFrame.lookAt(Vector3.new(-23,7,4),Vector3.new(-23,6,15))else CFrame.lookAt(Vector3.new(19,12,3),Vector3.new(19,4,-7))
   if controls then controls:Disable() end
  end
 end
@@ -114,18 +114,23 @@ local function result(data)
  local s=data.battle;local body=scrollBody(72);header(body,"ВОЧКО · ИТОГ БОЯ")
  text(body,"ResultTitle",if s.phase=="won"then "Противник повержен"elseif s.phase=="draw"then "Ничья"elseif s.mode=="duel"then "Дуэль проиграна"else "Побег прервался",32,UDim2.fromOffset(20,98),UDim2.new(1,-40,0,80))
  local desc=if s.phase=="won" then "За победу: +4 монеты\nПобед в этой сессии: "..data.profile.wins else "Не хватило "..(if s.hp<=0 then "здоровья." else "розыгрышей.").."\nПопробуй другую стратегию или талант."
- if s.mode=="duel"then desc="Тренировочная дуэль с ИИ\nЗдоровье: "..s.hp.." : "..s.enemyHp.."\nПобед над ИИ: "..(data.profile.duelWins or 0)end
+ if s.network then desc='Дуэль с '..s.enemyName..'\nЗдоровье: '..s.hp..' : '..s.enemyHp elseif s.mode=="duel"then desc="Тренировочная дуэль с ИИ\nЗдоровье: "..s.hp.." : "..s.enemyHp.."\nПобед над ИИ: "..(data.profile.duelWins or 0)end
  text(body,"ResultStats",desc.."\nМонеты этой сессии: "..data.profile.coins,21,UDim2.fromOffset(20,190),UDim2.new(1,-40,0,120),C.muted)
  text(body,"JournalTitle","Журнал боя",24,UDim2.fromOffset(20,330),UDim2.new(1,-40,0,35))
  text(body,"Journal",table.concat(s.journal,"\n"),16,UDim2.fromOffset(20,372),UDim2.new(1,-40,0,150),C.muted)
- actionDock(function()send("open",{mode=if s.mode=="duel"then "training"else "campaign"})end,"НОВАЯ ПОПЫТКА")
+ actionDock(function()if s.network then send('return')else send("open",{mode=if s.mode=="duel"then "training"else "campaign"})end end,if s.network then 'ВСТАТЬ ИЗ-ЗА СТОЛА'else "НОВАЯ ПОПЫТКА")
 end
 local function buildBattle(s)
  app.BackgroundTransparency=1
- TableScene.Create(player:WaitForChild("PlayerGui"),send,s.mode=="duel")
+ TableScene.Create(player:WaitForChild("PlayerGui"),send,s.mode=="duel",s)
  local top=make("Frame",{Name="BattleHUD",Size=UDim2.new(1,0,0,150),BackgroundTransparency=1},app)
- local title=text(top,"Title",if s.mode=="duel"then "ВОЧКО / ДУЭЛЬ С ИИ"else "ВОЧКО / ТЕМНИЦА",20,UDim2.fromOffset(16,7),UDim2.new(.55,0,0,30));title.TextStrokeTransparency=.5
- local returnButton=button(top,"Return","В комнату",UDim2.new(1,-116,0,7),UDim2.fromOffset(104,32),function()send("return")end);returnButton.TextSize=15
+ local title=text(top,"Title",if s.network then 'ВОЧКО / PVP'elseif s.mode=="duel"then "ВОЧКО / ДУЭЛЬ С ИИ"else "ВОЧКО / ТЕМНИЦА",20,UDim2.fromOffset(16,7),UDim2.new(.55,0,0,30));title.TextStrokeTransparency=.5
+ local surrenderArmed=false
+ local returnButton
+ returnButton=button(top,"Return","В комнату",UDim2.new(1,-116,0,7),UDim2.fromOffset(104,32),function()
+  if s.network and not surrenderArmed then surrenderArmed=true;returnButton.Text='Сдаться?';return end
+  send('return')
+ end);returnButton.TextSize=15
  local function panel(name,x,w)
   local p=make("Frame",{Name=name,Position=UDim2.new(x,if x==0 then 16 else -16,0,50),AnchorPoint=Vector2.new(x,0),Size=UDim2.new(w,0,0,88),BackgroundColor3=C.ink,BackgroundTransparency=.12,BorderSizePixel=0},top)
   make("UICorner",{CornerRadius=UDim.new(0,9)},p);stroke(p)
@@ -170,7 +175,7 @@ local function buildBattle(s)
   enemy.AnchorPoint=Vector2.new(1,0)
   enemy.Position=if mobile then UDim2.new(1,-56,0,3)else UDim2.new(1,-16,0,50)
   enemy.Size=if mobile then UDim2.new(if landscape then .25 else .66,if landscape then 0 else -62,0,36)else UDim2.new(if compact then .47 else .29,0,0,88)
-  returnButton.Text=if mobile then "×"else "В комнату"
+  returnButton.Text=if surrenderArmed then 'Сдаться?'elseif s.network then (if mobile then 'Выход'else 'Сдаться')elseif mobile then "×"else "В комнату"
   returnButton.Position=UDim2.new(1,if mobile then -50 else -116,0,if mobile then 5 else 7)
   returnButton.Size=UDim2.fromOffset(if mobile then 44 else 104,if mobile then 44 else 32)
   track.Visible=not mobile;enemyTrack.Visible=not mobile
@@ -186,7 +191,7 @@ local function buildBattle(s)
   hp.Text="♥ "..s.hp.." / "..s.maxHp;hpFill.Size=UDim2.fromScale(s.hp/s.maxHp,1)
   name.Text=s.enemyName
   enemyHP.Text=s.enemyHp.." / "..s.enemyMaxHp;enemyFill.Size=UDim2.fromScale(s.enemyHp/s.enemyMaxHp,1)
-  intent.Text=if s.mode=="duel"then "ИИ · Раунд "..s.round.."/"..s.roundsTotal else "Атака "..s.enemyAttack.." · Ходы "..s.roundsLeft.."/"..s.roundsTotal
+  intent.Text=if s.network then 'PvP · Раунд '..s.round..'/'..s.roundsTotal elseif s.mode=="duel"then "ИИ · Раунд "..s.round.."/"..s.roundsTotal else "Атака "..s.enemyAttack.." · Ходы "..s.roundsLeft.."/"..s.roundsTotal
   if mobile then intent.Text=if s.mode=="duel"then "Раунд "..s.round.."/"..s.roundsTotal else "Ходы "..s.roundsLeft.."/"..s.roundsTotal end
   intent.Visible=not mobile
   own.Size=UDim2.new(own.Size.X.Scale,own.Size.X.Offset,0,if mobile then 56 else 116)
@@ -233,7 +238,7 @@ local function buildBattle(s)
   if not mobile and s.mode=="duel"then
    local ownClass=Loadout.Class(s.class);local theirClass=Loadout.Class(s.duel.enemyClass)
    playerName.Text=player.DisplayName.." · "..(ownClass and ownClass.name or "")
-   name.Text="ИИ · "..(theirClass and theirClass.name or "")
+   name.Text=(if s.network then s.enemyName else 'ИИ').." · "..(theirClass and theirClass.name or "")
   end
   hudControls:Apply()
  end
@@ -267,7 +272,7 @@ local function render(data,force)
   clearApp();app.BackgroundTransparency=0;app.UISizeConstraint.MaxSize=Vector2.new(if screen=="battle" then 2400 else 640,2400);screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
   if screen=="intro" and s then intro(data)
   elseif screen=="wardrobe"or screen=="duelsetup"then wardrobe(data,screen=="duelsetup")
-  elseif screen=="notice"then simpleNotice(data)
+  elseif screen=="notice"or screen=="pvpwait"then simpleNotice(data)
   elseif screen=="battle"and s then
    if s.phase=="won"or s.phase=="lost"or s.phase=="draw"then result(data)else battleUI=buildBattle(s);TableScene.Camera(root.AbsoluteSize,false)end
   end

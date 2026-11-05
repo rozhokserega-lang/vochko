@@ -46,6 +46,7 @@
           "$path": "src/Config.luau"
         },
         "Seating": {"$path":"src/Seating.luau"},
+        "NetworkDuel": {"$path":"src/NetworkDuel.luau"},
         "Battle": {
           "$path": "src/Battle.luau"
         },
