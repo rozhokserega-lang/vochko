@@ -28,7 +28,7 @@ function Inventory.Build(app,data,duelSetup,send)
  end
  local body=make("ScrollingFrame",{Name="Body",Size=UDim2.new(1,0,1,-100),CanvasSize=UDim2.fromOffset(0,760),ScrollBarThickness=3,BackgroundColor3=C.dark,BorderSizePixel=0},app)
  text(body,"ШКАФ",UDim2.fromOffset(16,8),UDim2.new(1,-132,0,42),32,C.gold)
- local back=make("TextButton",{Name="Return",Text="В комнату",Position=UDim2.new(1,-116,0,10),Size=UDim2.fromOffset(100,44),TextSize=16,Font=Enum.Font.Garamond,TextColor3=C.paper,BackgroundColor3=C.wood,BorderSizePixel=0},body);border(back);back.Activated:Connect(function()send("return")end)
+ local back=make("TextButton",{Name="Return",Text=if data.seated then 'К столу'else "В комнату",Position=UDim2.new(1,-116,0,10),Size=UDim2.fromOffset(100,44),TextSize=16,Font=Enum.Font.Garamond,TextColor3=C.paper,BackgroundColor3=C.wood,BorderSizePixel=0},body);border(back);back.Activated:Connect(function()send(if data.seated then 'closeBuild'else "return")end)
  text(body,if frozen then "Сборка зафиксирована до конца дуэли"else "Подготовка к дуэли · одинаковые возможности для обеих сторон",UDim2.fromOffset(16,56),UDim2.new(1,-32,0,38),16,C.muted)
  local function shelf(title,count,y,height)
   local frame=make("Frame",{Name=if title=="КЛАСС"then "ClassShelf"elseif title=="ДЖОКЕРЫ"then "JokerShelf"else "TarotShelf",Position=UDim2.fromOffset(12,y),Size=UDim2.new(1,-24,0,height),BackgroundColor3=C.wood,BorderSizePixel=0},body);border(frame,C.wood,3)
@@ -72,7 +72,8 @@ function Inventory.Build(app,data,duelSetup,send)
  local ready=valid and (not duelSetup or data.preparation and data.preparation.ready)
  text(dock,if not valid then why elseif duelSetup and not ready then "Соперник собирает набор…"else "1 класс · 2 джокера · 3 таро",UDim2.fromOffset(16,0),UDim2.new(1,-32,0,28),16,C.muted)
  local go=make("TextButton",{Name="Primary",Text=if frozen then "ПРОДОЛЖИТЬ ДУЭЛЬ"elseif duelSetup then "ГОТОВ · НАЧАТЬ ДУЭЛЬ"else "К ТРЕНИРОВОЧНОМУ СТОЛУ",Position=UDim2.fromOffset(16,34),Size=UDim2.new(1,-32,0,52),BackgroundColor3=C.gold,TextColor3=C.dark,Font=Enum.Font.Garamond,TextSize=22,BorderSizePixel=0,AutoButtonColor=ready==true,TextTransparency=if ready then 0 else .5},dock);border(go)
- go.Activated:Connect(function()if frozen or ready then if duelSetup then send("begin")else send("open",{mode="training"})end end end)
+ if data.seated then go.Text='ГОТОВО · К СТОЛУ'end
+ go.Activated:Connect(function()if frozen or ready then if data.seated then send('closeBuild')elseif duelSetup then send("begin")else send("open",{mode="training"})end end end)
  if tipState then showTip(tipState.title,tipState.description,tipState.rect)end
 end
 return Inventory

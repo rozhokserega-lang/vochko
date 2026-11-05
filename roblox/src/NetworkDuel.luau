@@ -9,6 +9,19 @@ function Net.new(context)
 end
 function Net:Locked(p)local e=self.members[p];return e and self.match and not self.match.finished end
 function Net:Notify()for p in self.members do self.ctx.push(p)end end
+function Net:TryStart()
+ if self.match or not self.slots[1]or not self.slots[2]then return end
+ for _,p in self.slots do
+  local e=self.members[p];if not e or e.editing then return end
+  local b=self.ctx.profile(p);if not Loadout.Validate(b.class,b.jokers,b.duelTarot)then return end
+  e.build={class=b.class,jokers=table.clone(b.jokers),tarot=table.clone(b.duelTarot)}
+ end
+ local a,b=self.members[self.slots[1]].build,self.members[self.slots[2]].build
+ local c=self.ctx.config();local seed=Random.new():NextInteger(1,1000000000)
+ local s=Duel.New(c,seed,a.class,self.ctx.id(),a.tarot,b.tarot,a.jokers,{class=b.class,jokers=b.jokers})
+ s.network=true;s.botReady=true;s.phase='countdown'
+ self.match={state=s,ready={false,false},deadline=self.ctx.now()+3,players={self.slots[1],self.slots[2]}}
+end
 function Net:Join(p,index)
  if index~=1 and index~=2 then return false,'Выбери свободный стул'end
  if self.pending[p]then return false,'Посадка уже выполняется'end
@@ -16,19 +29,12 @@ function Net:Join(p,index)
  if self.match and self.match.finished then return false,'Дождись, пока игроки освободят стол'end
  if self.slots[index]and self.slots[index]~=p then return false,'Стул уже занят'end
  if self.members[p]then return true end
- local build=self.ctx.profile(p);local valid,why=Loadout.Validate(build.class,build.jokers,build.duelTarot)
- if not valid then return false,why end
+ local build=self.ctx.profile(p)
  self.slots[index]=p;self.pending[p]=true
  local ok,msg=self.ctx.sit(p,index);self.pending[p]=nil
  if not ok or not p.Parent then if self.slots[index]==p then self.slots[index]=nil end;self:RefreshChairs();return false,msg end
  self.slots[index]=p;self.members[p]={index=index,build={class=build.class,jokers=table.clone(build.jokers),tarot=table.clone(build.duelTarot)}}
- if self.slots[1]and self.slots[2]and self.members[self.slots[1]]and self.members[self.slots[2]]then
-  local a,b=self.members[self.slots[1]].build,self.members[self.slots[2]].build
-  local c=self.ctx.config();local seed=Random.new():NextInteger(1,1000000000)
-  local s=Duel.New(c,seed,a.class,self.ctx.id(),a.tarot,b.tarot,a.jokers,{class=b.class,jokers=b.jokers})
-  s.network=true;s.botReady=true;s.phase='countdown'
-  self.match={state=s,ready={false,false},deadline=self.ctx.now()+3,players={self.slots[1],self.slots[2]}}
- end
+ self:TryStart()
  self:RefreshChairs();self:Notify();return true
 end
 function Net:RefreshChairs()
@@ -63,7 +69,11 @@ end
 function Net:View(p)
  local e=self.members[p];if not e then return nil end
  local m=self.match
- if not m then return {screen='pvpwait',notice={title='Ждём соперника',body='Ты занял стул. Друг может сесть на подсвеченный стул напротив. Можно встать и вернуться позже.'}}end
+ if not m then
+  local b=self.ctx.profile(p);local valid,why=Loadout.Validate(b.class,b.jokers,b.duelTarot)
+  return {screen=if e.editing then 'pvpwardrobe'else 'pvpwait',seated=true,seatIndex=e.index,loadoutLocked=false,
+   notice={title='PvP · за столом',body=if not valid then why elseif self.slots[3-e.index]then 'Друг за столом · завершаем выбор сборок'else 'Можно посидеть или выбрать сборку · ждём друга'}}
+ end
  local s=m.state;local perspective=table.clone(s)
  if e.index==2 then perspective.player=s.bot;perspective.bot=s.player;perspective.receipt=mirrorReceipt(s.receipt)end
  local view=Duel.View(perspective);view.network=true;view.seatIndex=e.index
@@ -87,7 +97,23 @@ function Net:Action(p,data)
  local e=self.members[p];if not e then return false end
  if data.kind=='return'then self:Leave(p);self.ctx.push(p);return true end
  local m=self.match
- if not m then self.ctx.push(p,'Ждём соперника');return true end
+ if not m then
+  if data.kind=='openBuild'then e.editing=true
+  elseif data.kind=='closeBuild'then e.editing=false;self:TryStart()
+  elseif data.kind=='buildClass'or data.kind=='buildJoker'or data.kind=='buildTarot'then
+   local b=self.ctx.profile(p);local id=data.item
+   if type(id)~='string'then return true end
+   if data.kind=='buildClass'then if Loadout.Class(id)then b.class=id end
+   else
+    local list=if data.kind=='buildJoker'then b.jokers else b.duelTarot
+    local valid=if data.kind=='buildJoker'then Loadout.Joker(id)else table.find(Loadout.TarotIds,id)
+    if not valid then return true end
+    local at=table.find(list,id);local limit=if data.kind=='buildJoker'then 2 else 3
+    if at then table.remove(list,at)elseif #list<limit then table.insert(list,id)else self.ctx.push(p,'Сначала убери один выбранный предмет');return true end
+   end
+  else self.ctx.push(p,'Ты сидишь за PvP-столом');return true end
+  self:Notify();return true
+ end
  if data.sessionId~=m.state.id then self.ctx.push(p,'Сессия дуэли изменилась');return true end
  if m.finished or m.state.phase~='combat'or m.ready[e.index]then self.ctx.push(p,'Дождись следующего раунда');return true end
  local side=if e.index==1 then m.state.player else m.state.bot

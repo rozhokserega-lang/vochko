@@ -57,11 +57,11 @@ local controls
 task.spawn(function()local module=player.PlayerScripts:WaitForChild("PlayerModule",10);if module then local ok,value=pcall(function()return require(module):GetControls()end);if ok then controls=value end end end)
 local function cameraFor(screen)
  local camera=workspace.CurrentCamera;if not camera then return end
- if screen=="lobby" then
+ if screen=="lobby"or screen=='pvpwait'or screen=='pvpwardrobe'then
   TableScene.Destroy();camera.FieldOfView=70
   camera.CameraType=Enum.CameraType.Custom
   local humanoid=player.Character and player.Character:FindFirstChildOfClass("Humanoid");if humanoid then camera.CameraSubject=humanoid end
-  if controls then controls:Enable() end
+  if controls then if screen=='lobby'then controls:Enable()else controls:Disable()end end
  elseif screen=="battle" then
   TableScene.Camera(root.AbsoluteSize,true)
   if controls then controls:Disable() end
@@ -99,6 +99,13 @@ local function simpleNotice(data)
  text(body,"NoticeTitle",data.notice and data.notice.title or "Комната поединков",30,UDim2.fromOffset(20,90),UDim2.new(1,-40,0,80))
  text(body,"NoticeBody",data.notice and data.notice.body or "",19,UDim2.fromOffset(20,180),UDim2.new(1,-40,0,190),C.muted)
  actionDock(function()send("return")end,"Вернуться в комнату")
+end
+local function seatedWaiting(data)
+ local dock=make('Frame',{Name='WaitingPanel',AnchorPoint=Vector2.new(.5,1),Position=UDim2.new(.5,0,1,-8),Size=UDim2.new(1,-24,0,100),BackgroundColor3=C.ink,BackgroundTransparency=.08},app)
+ make('UISizeConstraint',{MaxSize=Vector2.new(520,100)},dock);stroke(dock)
+ text(dock,'Status',data.notice.body,16,UDim2.fromOffset(10,4),UDim2.new(1,-20,0,36),C.paper)
+ button(dock,'Build','Выбрать сборку',UDim2.new(0,8,0,48),UDim2.new(.67,-12,0,44),function()send('openBuild')end)
+ button(dock,'Stand','Встать',UDim2.new(.67,0,0,48),UDim2.new(.33,-8,0,44),function()send('return')end,C.red)
 end
 local function intro(data)
  local s=data.battle;local body=scrollBody(72);header(body,if s.mode=="duel"then "ДУЭЛЬ · ТРЕНИРОВКА С ИИ"else "ТЕМНИЦА · ПЕРВЫЙ БОЙ")
@@ -269,14 +276,16 @@ local function render(data,force)
  local key=screen..(if s then ":"..s.id else "")
  if screen=="battle" and s and(s.phase=="won" or s.phase=="lost" or s.phase=="draw")then key..=":"..s.phase end
  if key~=screenKey or force then
-  clearApp();app.BackgroundTransparency=0;app.UISizeConstraint.MaxSize=Vector2.new(if screen=="battle" then 2400 else 640,2400);screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
+  clearApp();app.BackgroundTransparency=if screen=='pvpwait'then 1 else 0;app.UISizeConstraint.MaxSize=Vector2.new(if screen=="battle"or screen=='pvpwait'then 2400 else 640,2400);screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
   if screen=="intro" and s then intro(data)
-  elseif screen=="wardrobe"or screen=="duelsetup"then wardrobe(data,screen=="duelsetup")
-  elseif screen=="notice"or screen=="pvpwait"then simpleNotice(data)
+  elseif screen=="wardrobe"or screen=="duelsetup"or screen=='pvpwardrobe'then wardrobe(data,screen=="duelsetup")
+  elseif screen=='pvpwait'then seatedWaiting(data)
+  elseif screen=="notice"then simpleNotice(data)
   elseif screen=="battle"and s then
    if s.phase=="won"or s.phase=="lost"or s.phase=="draw"then result(data)else battleUI=buildBattle(s);TableScene.Camera(root.AbsoluteSize,false)end
   end
- elseif screen=="wardrobe"or screen=="duelsetup"then local old=app:FindFirstChild("Body");local pos=old and old.CanvasPosition;clearApp();wardrobe(data,screen=="duelsetup");if pos then app.Body.CanvasPosition=pos end end
+ elseif screen=="wardrobe"or screen=="duelsetup"or screen=='pvpwardrobe'then local old=app:FindFirstChild("Body");local pos=old and old.CanvasPosition;clearApp();wardrobe(data,screen=="duelsetup");if pos then app.Body.CanvasPosition=pos end end
+ if screen=='pvpwait'and app:FindFirstChild('WaitingPanel')then app.WaitingPanel.Status.Text=data.notice.body end
  if battleUI and s then battleUI.update(s)end
  message(data.message)
 end

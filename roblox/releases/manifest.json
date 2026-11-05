@@ -116,8 +116,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 88238,
-      "sha256": "5f26eb3fd2fd1d4fc117efcf432773640f7cfbe621e82ca7c7d1fcd72835ba03"
+      "bytes": 89239,
+      "sha256": "feb56f60f1a90591434c097b4362cbda847223728065bacf963726e69dcb41c4"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -141,8 +141,8 @@
     },
     {
       "path": "roblox/src/Client.client.luau",
-      "bytes": 26518,
-      "sha256": "dab08f1d50dec75b637ff20517834bd63c25aaf6bad69233f974771627b08d71"
+      "bytes": 27504,
+      "sha256": "cafcec5c808ea8cbec63b1e4444d65bce138281f5911da9a19ef1525d2507636"
     },
     {
       "path": "roblox/src/Config.luau",
@@ -166,8 +166,8 @@
     },
     {
       "path": "roblox/src/Inventory.luau",
-      "bytes": 8053,
-      "sha256": "cb23ffef91eb333411338a8dbf6972bc8e40ee0fc1b10cd6a387dc05ba700ca4"
+      "bytes": 8237,
+      "sha256": "58a066a05178de01e64fa8d05cbf31fa0be8f6932ab8e8534d52f4a287b0d5bc"
     },
     {
       "path": "roblox/src/Loadout.luau",
@@ -176,8 +176,8 @@
     },
     {
       "path": "roblox/src/NetworkDuel.luau",
-      "bytes": 7294,
-      "sha256": "d3073b6ff0407cbeacde10b787631a7e9dac42a42938f2590ba695be3b2a6620"
+      "bytes": 8623,
+      "sha256": "afacb12e7f2096d85e2d1c7a8e1d1c54ffe86b36098e16ee6c5f74d43caaa132"
     },
     {
       "path": "roblox/src/RoomBuilder.luau",

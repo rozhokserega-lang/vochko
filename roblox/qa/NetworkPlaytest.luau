@@ -56,4 +56,18 @@ task.spawn(function()joined1=concurrent:Join(a,1)end)
 task.spawn(function()joined2=concurrent:Join(b,2)end)
 task.wait(.2)
 check(joined1 and joined2 and concurrent.match~=nil,'Simultaneous seating reserves both chairs safely')
+local profiles={}
+for _,p in {a,b}do profiles[p]={class='sharp',jokers={'crimson','blot'},duelTarot={'rose','guardian','sun'}}end
+local editing=Net.new({profile=function(p)return profiles[p]end,push=function()end,config=function()return table.clone(C.Defaults)end,id=function()return 'seated-build'end,now=function()return now end,sit=function()return true end,leave=function()end})
+check(editing:Join(a,1),'Sit before choosing build')
+editing:Action(a,{kind='openBuild'});check(editing:View(a).screen=='pvpwardrobe','Open build while seated')
+check(editing:Join(b,2)and editing.match==nil,'Friend arrival does not interrupt build selection')
+editing:Action(a,{kind='buildClass',item='healer'})
+editing:Action(a,{kind='buildTarot',item='rose'})
+editing:Action(a,{kind='closeBuild'})
+check(editing.match==nil and editing:View(a).screen=='pvpwait','Incomplete build can wait without starting')
+editing:Action(a,{kind='openBuild'});editing:Action(a,{kind='buildTarot',item='rose'});editing:Action(a,{kind='closeBuild'})
+check(editing.match and editing.match.state.player.talent=='healer','Latest seated build used in match')
+editing:Action(a,{kind='buildClass',item='sharp'})
+check(profiles[a].class=='healer','Countdown locks seated build')
 return {checks=checks,fullMatches=1,sides='both',timeout=true,departure=true}
