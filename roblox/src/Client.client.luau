@@ -276,7 +276,7 @@ local function render(data,force)
  local key=screen..(if s then ":"..s.id else "")
  if screen=="battle" and s and(s.phase=="won" or s.phase=="lost" or s.phase=="draw")then key..=":"..s.phase end
  if key~=screenKey or force then
-  clearApp();app.BackgroundTransparency=if screen=='pvpwait'then 1 else 0;app.UISizeConstraint.MaxSize=Vector2.new(if screen=="battle"or screen=='pvpwait'then 2400 else 640,2400);screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
+  clearApp();app.BackgroundTransparency=if screen=='pvpwait'then 1 else 0;app.UISizeConstraint.MaxSize=Vector2.new(if screen=="battle"or screen=='pvpwait'then 2400 elseif screen=='wardrobe'or screen=='duelsetup'or screen=='pvpwardrobe'then 1160 else 640,2400);screenKey=key;lobby.Visible=screen=="lobby";app.Visible=screen~="lobby";cameraFor(screen)
   if screen=="intro" and s then intro(data)
   elseif screen=="wardrobe"or screen=="duelsetup"or screen=='pvpwardrobe'then wardrobe(data,screen=="duelsetup")
   elseif screen=='pvpwait'then seatedWaiting(data)

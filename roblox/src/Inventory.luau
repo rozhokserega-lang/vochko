@@ -1,79 +1,100 @@
-local Loadout=require(script.Parent.Loadout)
-local Tarot=require(script.Parent.Tarot)
-local Assets=require(script.Parent.Assets)
+local L=require(script.Parent.Loadout)
+local T=require(script.Parent.Tarot)
+local A=require(script.Parent.Assets)
 local Inventory={}
-local tipState
-local rowPositions={}
-local C={wood=Color3.fromRGB(57,35,22),dark=Color3.fromRGB(18,12,9),gold=Color3.fromRGB(207,168,91),paper=Color3.fromRGB(241,225,187),muted=Color3.fromRGB(192,174,137)}
-local function make(class,props,parent)local p=Instance.new(class);for k,v in props do p[k]=v end;p.Parent=parent;return p end
-local function text(parent,value,pos,size,fontSize,color)
- return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=fontSize or 17,TextColor3=color or C.paper,Font=Enum.Font.Garamond,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left,BackgroundTransparency=1},parent)
+local tab='tarot';local focus={kind='tarot',id='rose'};local positions={}
+local C={ink=Color3.fromRGB(9,24,20),panel=Color3.fromRGB(18,42,33),raised=Color3.fromRGB(29,57,44),gold=Color3.fromRGB(220,183,105),paper=Color3.fromRGB(248,232,194),muted=Color3.fromRGB(175,192,173),edge=Color3.fromRGB(73,99,77)}
+local function make(class,props,parent)local o=Instance.new(class);for k,v in props do o[k]=v end;o.Parent=parent;return o end
+local function border(o,color,width)make('UICorner',{CornerRadius=UDim.new(0,9)},o);make('UIStroke',{Color=color or C.edge,Thickness=width or 1,Transparency=.15},o)end
+local function text(p,n,s,x,y,w,h,size,color)return make('TextLabel',{Name=n,Text=s,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1,TextColor3=color or C.paper,Font=Enum.Font.GothamMedium,TextSize=size or 16,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Left},p)end
+local function button(p,n,s,x,y,w,h,fn,color)
+ local o=make('TextButton',{Name=n,Text=s,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundColor3=color or C.raised,TextColor3=C.paper,Font=Enum.Font.GothamBold,TextSize=16,BorderSizePixel=0,AutoButtonColor=true},p);border(o);o.Activated:Connect(fn);return o
 end
-local function border(p,color,width)make("UIStroke",{Color=color or C.gold,Thickness=width or 1,Transparency=.15},p);make("UICorner",{CornerRadius=UDim.new(0,7)},p)end
+local function list(kind)
+ if kind=='class'then return L.Classes elseif kind=='joker'then return L.Jokers end
+ local out={};for _,id in L.TarotIds do local d=T.Def(id);table.insert(out,{id=id,name=d.name,symbol=d.symbol,desc=T.Caption(id,true)})end;return out
+end
+local function def(kind,id)for _,d in list(kind)do if d.id==id then return d end end end
+local function selected(p,kind,id)return if kind=='class'then p.class==id else table.find(if kind=='joker'then p.jokers else p.duelTarot,id)~=nil end
+local function art(parent,kind,d,mini)
+ local holder=make('Frame',{Name='Art',Position=UDim2.fromOffset(6,6),Size=UDim2.new(1,-12,1,-12),BackgroundColor3=Color3.fromRGB(225,205,156),BorderSizePixel=0,ClipsDescendants=true},parent);border(holder,C.gold)
+ if kind=='tarot'then local image=A.CreateTarotArt(holder,d.id);image.ScaleType=Enum.ScaleType.Fit
+ else
+  make('UIGradient',{Color=ColorSequence.new(Color3.fromRGB(249,230,180),Color3.fromRGB(157,126,72)),Rotation=45},holder)
+  local symbol=text(holder,'Symbol',d.symbol,0,0,0,0,24,if d.id=='crimson'or d.id=='healer'then Color3.fromRGB(157,44,42)else C.ink);symbol.Size=UDim2.fromScale(1,1);symbol.TextScaled=true;symbol.TextXAlignment=Enum.TextXAlignment.Center
+  make('UITextSizeConstraint',{MaxTextSize=if mini then 34 else 86,MinTextSize=16},symbol)
+  if not mini then local label=text(holder,'Type',if kind=='class'then 'КЛАСС'else 'ДЖОКЕР',4,4,0,18,11,C.ink);label.Size=UDim2.new(1,-8,0,18);label.TextXAlignment=Enum.TextXAlignment.Center end
+ end
+end
 function Inventory.Build(app,data,duelSetup,send)
- Assets.WarmTarot()
- local savedPositions=table.clone(rowPositions)
- local p=data.profile;local frozen=data.loadoutLocked==true
- local function showTip(title,description,rect)
-  local old=app:FindFirstChild("ItemTip");if old then old:Destroy()end
-  local width=math.min(300,app.AbsoluteSize.X-20);local height=146
-  local maxY=math.max(8,app.AbsoluteSize.Y-100-height-8)
-  local x=math.clamp(rect.X,10,math.max(10,app.AbsoluteSize.X-width-10))
-  local y=rect.Y+rect.Z+8;if y>maxY then y=rect.Y-height-8 end;y=math.clamp(y,8,maxY)
-  local frame=make("Frame",{Name="ItemTip",Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(width,height),BackgroundColor3=C.dark,BorderSizePixel=0,ZIndex=60,Active=true},app);border(frame,C.gold,2)
-  local heading=text(frame,title,UDim2.fromOffset(12,8),UDim2.new(1,-64,0,30),21,C.gold);heading.ZIndex=61
-  local desc=text(frame,description,UDim2.fromOffset(12,46),UDim2.new(1,-24,0,88),17);desc.ZIndex=61;desc.TextYAlignment=Enum.TextYAlignment.Top
-  local close=make("TextButton",{Name="Close",Text="×",Position=UDim2.new(1,-48,0,2),Size=UDim2.fromOffset(44,44),TextSize=25,Font=Enum.Font.Garamond,BackgroundTransparency=1,TextColor3=C.gold,ZIndex=62},frame)
-  close.Activated:Connect(function()tipState=nil;frame:Destroy()end)
+ A.PreloadAll();local p=data.profile;local frozen=data.loadoutLocked==true
+ local root=make('Frame',{Name='TacticalMenu',Size=UDim2.fromScale(1,1),BackgroundColor3=C.ink,BorderSizePixel=0},app)
+ make('UIGradient',{Color=ColorSequence.new(C.panel,C.ink),Rotation=90},root)
+ local draw
+ local function choose(kind,id)
+  focus={kind=kind,id=id}
+  if not frozen then send(if kind=='class'then 'buildClass'elseif kind=='joker'then 'buildJoker'else 'buildTarot',{item=id})end
+  draw()
  end
- local body=make("ScrollingFrame",{Name="Body",Size=UDim2.new(1,0,1,-100),CanvasSize=UDim2.fromOffset(0,760),ScrollBarThickness=3,BackgroundColor3=C.dark,BorderSizePixel=0},app)
- text(body,"ШКАФ",UDim2.fromOffset(16,8),UDim2.new(1,-132,0,42),32,C.gold)
- local back=make("TextButton",{Name="Return",Text=if data.seated then 'К столу'else "В комнату",Position=UDim2.new(1,-116,0,10),Size=UDim2.fromOffset(100,44),TextSize=16,Font=Enum.Font.Garamond,TextColor3=C.paper,BackgroundColor3=C.wood,BorderSizePixel=0},body);border(back);back.Activated:Connect(function()send(if data.seated then 'closeBuild'else "return")end)
- text(body,if frozen then "Сборка зафиксирована до конца дуэли"else "Подготовка к дуэли · одинаковые возможности для обеих сторон",UDim2.fromOffset(16,56),UDim2.new(1,-32,0,38),16,C.muted)
- local function shelf(title,count,y,height)
-  local frame=make("Frame",{Name=if title=="КЛАСС"then "ClassShelf"elseif title=="ДЖОКЕРЫ"then "JokerShelf"else "TarotShelf",Position=UDim2.fromOffset(12,y),Size=UDim2.new(1,-24,0,height),BackgroundColor3=C.wood,BorderSizePixel=0},body);border(frame,C.wood,3)
-  text(frame,title,UDim2.fromOffset(10,2),UDim2.new(.65,0,0,28),20,C.gold)
-  local counter=text(frame,count,UDim2.new(.65,0,0,2),UDim2.new(.35,-10,0,28),16,C.muted);counter.TextXAlignment=Enum.TextXAlignment.Right
-  return make("ScrollingFrame",{Name="Items",Position=UDim2.fromOffset(8,34),Size=UDim2.new(1,-16,1,-42),CanvasSize=UDim2.new(),ScrollBarThickness=3,ScrollingDirection=Enum.ScrollingDirection.X,BackgroundColor3=C.dark,BorderSizePixel=0},frame)
- end
- local function card(row,index,id,title,symbol,description,chosen,kind,image)
-  local width=if image then 106 else 116
-  local b=make("TextButton",{Name=kind.."_"..id,Text="",Position=UDim2.fromOffset((index-1)*(width+10)+4,4),Size=UDim2.new(0,width,1,-12),BackgroundColor3=if chosen then Color3.fromRGB(74,52,25)else Color3.fromRGB(37,25,16),BorderSizePixel=0,AutoButtonColor=true,Active=true},row);border(b,if chosen then Color3.fromRGB(249,211,125)else Color3.fromRGB(116,89,49),if chosen then 2 else 1)
-  if image then
-   local holder=make("Frame",{Name="Art",Size=UDim2.fromOffset(54,81),Position=UDim2.new(.5,-27,0,7),BackgroundTransparency=1},b)
-   Assets.CreateTarotArt(holder,id)
-   text(b,title,UDim2.fromOffset(4,89),UDim2.new(1,-8,0,30),16)
-  else
-   local icon=text(b,symbol,UDim2.fromOffset(5,2),UDim2.new(1,-10,0,38),30,C.gold);icon.TextXAlignment=Enum.TextXAlignment.Center
-   local label=text(b,title,UDim2.fromOffset(5,40),UDim2.new(1,-10,0,40),17);label.TextXAlignment=Enum.TextXAlignment.Center
+ draw=function()
+  if not root.Parent then return end
+  for _,o in root:GetChildren()do if not o:IsA('UIGradient')then o:Destroy()end end
+  local w,h=math.floor(app.AbsoluteSize.X),math.floor(app.AbsoluteSize.Y);if w<100 or h<100 then return end
+  local portrait=w<600 and h>w;local short=h<400;local footer=if portrait then 146 else 96
+  local mainY=if short then 58 else 104;local mainH=math.max(112,h-mainY-footer-18)
+  local infoW=if portrait then w-24 else math.clamp(math.floor(w*.26),204,290)
+  local browserW=if portrait then w-24 else w-infoW-36
+  local contentH=if portrait then math.max(mainH,340)else mainH
+  local browserH=if portrait then math.floor(contentH*.58)else mainH
+  local mainParent=root
+  if portrait then mainParent=make('ScrollingFrame',{Name='MobileContent',Position=UDim2.fromOffset(0,mainY),Size=UDim2.fromOffset(w,mainH),CanvasSize=UDim2.fromOffset(0,contentH),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,ScrollingDirection=Enum.ScrollingDirection.Y},root)end
+  text(root,'Title','♠  ВОЧКО',14,if short then 8 else 2,if short then 110 else w-140,32,if short then 19 else 25,C.gold).Font=Enum.Font.GothamBold
+  button(root,'Return',if data.seated then 'К столу'else 'В комнату',w-122,2,108,44,function()send(if data.seated then 'closeBuild'else 'return')end)
+  local tabX=if short then 138 else 14;local tabW=(w-(if short then 264 else 28))/3
+  for i,e in {{'class','Класс  1/1'},{'joker','Джокеры  '..#p.jokers..'/2'},{'tarot','Таро  '..#p.duelTarot..'/3'}}do
+   local b=button(root,'Tab_'..e[1],e[2],tabX+(i-1)*tabW,if short then 2 else 52,tabW-8,44,function()tab=e[1];focus={kind=tab,id=list(tab)[1].id};draw()end,if tab==e[1]then C.raised else C.ink)
+   if tab==e[1]then b.UIStroke.Color=C.gold;b.UIStroke.Thickness=2;b.TextColor3=C.gold end
   end
-  if chosen then local tick=text(b,"✓",UDim2.fromOffset(5,2),UDim2.fromOffset(20,22),18,C.gold);tick.ZIndex=3 end
-  b.Activated:Connect(function()
-   local rect=Vector3.new(b.AbsolutePosition.X-app.AbsolutePosition.X,b.AbsolutePosition.Y-app.AbsolutePosition.Y,b.AbsoluteSize.Y)
-   tipState={title=title,description=description,rect=rect};showTip(title,description,rect)
-   if not frozen then send(kind,{item=id})end
-  end)
-  row.CanvasSize=UDim2.fromOffset(index*(width+10)+4,0)
+  local browser=make('ScrollingFrame',{Name='CardBrowser',Position=UDim2.fromOffset(12,if portrait then 0 else mainY),Size=UDim2.fromOffset(browserW,browserH),BackgroundColor3=C.panel,BorderSizePixel=0,ScrollBarThickness=4,ScrollBarImageColor3=C.gold,ScrollingDirection=Enum.ScrollingDirection.X,CanvasSize=UDim2.new()},mainParent);border(browser)
+  local cardH=browserH-16;local cardW=math.clamp(math.floor(cardH*.68),94,170);local cards=list(tab)
+  for i,d in cards do
+   local chosen=selected(p,tab,d.id)
+   local card=button(browser,'Card_'..d.id,'',8+(i-1)*(cardW+12),6,cardW,cardH,function()choose(tab,d.id)end,if chosen then Color3.fromRGB(73,66,37)else C.raised)
+   card.UIStroke.Color=if chosen then C.gold else C.edge;card.UIStroke.Thickness=if chosen then 2 else 1;art(card,tab,d,false)
+   local name=text(card,'CardName',d.name,5,cardH-40,cardW-10,36,if short then 15 else 16);name.TextXAlignment=Enum.TextXAlignment.Center;name.BackgroundColor3=C.ink;name.BackgroundTransparency=.1;name.ZIndex=3
+   if chosen then local tick=text(card,'Selected','✓',cardW-29,2,26,26,23,C.gold);tick.ZIndex=5;tick.TextXAlignment=Enum.TextXAlignment.Center;tick.BackgroundColor3=C.ink;tick.BackgroundTransparency=.1;border(tick,C.gold)end
+  end
+  browser.CanvasSize=UDim2.fromOffset(16+#cards*(cardW+12),0)
+  browser.CanvasPosition=Vector2.new(math.clamp(positions[tab]or 0,0,math.max(0,browser.CanvasSize.X.Offset-browserW)),0)
+  local tabKey=tab;browser:GetPropertyChangedSignal('CanvasPosition'):Connect(function()positions[tabKey]=browser.CanvasPosition.X end)
+  local d=def(focus.kind,focus.id)or cards[1]
+  local infoY=if portrait then browserH+10 else mainY;local infoH=if portrait then contentH-browserH-10 else mainH
+  local info=make('Frame',{Name='Details',Position=UDim2.fromOffset(if portrait then 12 else w-infoW-12,infoY),Size=UDim2.fromOffset(infoW,infoH),BackgroundColor3=C.panel,BorderSizePixel=0},mainParent);border(info)
+  text(info,'Heading',d.name,12,6,infoW-24,28,if short then 18 else 23,C.gold).Font=Enum.Font.GothamBold
+  local desc=make('ScrollingFrame',{Name='DescriptionScroll',Position=UDim2.fromOffset(12,40),Size=UDim2.new(1,-24,1,-76),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y},info)
+  local label=text(desc,'Description',d.desc,0,0,infoW-30,0,if short then 16 else 17);label.AutomaticSize=Enum.AutomaticSize.Y;label.TextYAlignment=Enum.TextYAlignment.Top
+  local chosen=selected(p,focus.kind,d.id)
+  text(info,'Hint',if frozen then 'Сборка зафиксирована'elseif chosen then '✓ В твоём наборе'else 'Нажми карту, чтобы выбрать',12,infoH-31,infoW-24,26,13,if chosen then C.gold else C.muted)
+  local dock=make('Frame',{Name='Dock',AnchorPoint=Vector2.new(0,1),Position=UDim2.new(0,12,1,-8),Size=UDim2.fromOffset(w-24,footer),BackgroundColor3=C.panel,BorderSizePixel=0},root);border(dock)
+  local valid,why=L.Validate(p.class,p.jokers,p.duelTarot);local ready=valid and (not duelSetup or data.preparation and data.preparation.ready)
+  local status=if frozen then 'Сборка зафиксирована'elseif not valid then why elseif duelSetup and not ready then 'Соперник собирает набор…'else 'ТВОЙ НАБОР · 1 класс / 2 джокера / 3 таро'
+  text(dock,'Status',status,10,3,w-46,22,14,C.muted)
+  local goW=if portrait then w-44 else math.clamp(math.floor(w*.22),142,210)
+  local miniH=if portrait then 60 else 58;local miniW=if portrait then math.max(44,math.floor((w-92)/6))else math.clamp(math.floor((w-goW-92)/6),44,50)
+  local strip=make('ScrollingFrame',{Name='SelectedCards',Position=UDim2.fromOffset(10,28),Size=UDim2.fromOffset(if portrait then w-44 else w-goW-54,miniH),CanvasSize=UDim2.fromOffset(6*(miniW+8)+10,0),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,ScrollingDirection=Enum.ScrollingDirection.X},dock)
+  local items={{kind='class',id=p.class},{kind='joker',id=p.jokers[1]},{kind='joker',id=p.jokers[2]},{kind='tarot',id=p.duelTarot[1]},{kind='tarot',id=p.duelTarot[2]},{kind='tarot',id=p.duelTarot[3]}}
+  for i,item in items do
+   local x=(i-1)*(miniW+8)+(if i>1 then 5 else 0)+(if i>3 then 5 else 0)
+   local slot=button(strip,'Slot_'..i,'+',x,0,miniW,miniH,function()tab=item.kind;focus={kind=item.kind,id=item.id or list(item.kind)[1].id};draw()end,C.ink)
+   if item.id then local entry=def(item.kind,item.id);if entry then slot.Text='';art(slot,item.kind,entry,true)end end
+  end
+  local go=button(dock,'Primary',if frozen then 'ПРОДОЛЖИТЬ'elseif data.seated then 'ГОТОВО'elseif duelSetup then 'НАЧАТЬ ДУЭЛЬ'else 'К ТРЕНИРОВКЕ',if portrait then 10 else w-24-goW-10,if portrait then 94 else 35,goW,44,function()
+   if not frozen and not ready then return end
+   if data.seated then send('closeBuild')elseif duelSetup then send('begin')else send('open',{mode='training'})end
+  end,C.gold)
+  go.TextColor3=C.ink;go.TextSize=if short then 15 else 17;go.AutoButtonColor=ready==true;go.TextTransparency=if frozen or ready then 0 else .5
  end
- local classes=shelf("КЛАСС","1 / 1",104,132)
- for i,d in Loadout.Classes do card(classes,i,d.id,d.name,d.symbol,d.desc,p.class==d.id,"buildClass")end
- local jokers=shelf("ДЖОКЕРЫ",#p.jokers.." / 2",248,146)
- for i,d in Loadout.Jokers do card(jokers,i,d.id,d.name,d.symbol,d.desc,table.find(p.jokers,d.id)~=nil,"buildJoker")end
- local tarot=shelf("ТАРО В КОЛОДЕ",#p.duelTarot.." / 3",406,178)
- for i,id in Loadout.TarotIds do local d=Tarot.Def(id);card(tarot,i,id,d.name,d.symbol,Tarot.Caption(id,true),table.find(p.duelTarot,id)~=nil,"buildTarot",Assets.Tarot[id])end
- for _,row in {classes,jokers,tarot}do
-  if savedPositions[row.Parent.Name]then row.CanvasPosition=savedPositions[row.Parent.Name]end
-  local key=row.Parent.Name;row:GetPropertyChangedSignal("CanvasPosition"):Connect(function()rowPositions[key]=row.CanvasPosition end)
- end
- text(body,"Нажми на предмет — описание появится рядом. Выбранные предметы отмечены галочкой.",UDim2.fromOffset(16,598),UDim2.new(1,-32,0,76),18)
- text(body,"Колода: 52 + 3 таро. Таро одноразовые за матч. Броня действует на один обмен ударами. Нить и рукав пока отключены в PvP.",UDim2.fromOffset(16,684),UDim2.new(1,-32,0,66),16,C.muted)
- local dock=make("Frame",{Name="Dock",AnchorPoint=Vector2.new(0,1),Position=UDim2.fromScale(0,1),Size=UDim2.new(1,0,0,100),BackgroundColor3=C.dark,BorderSizePixel=0},app)
- local valid,why=Loadout.Validate(p.class,p.jokers,p.duelTarot)
- local ready=valid and (not duelSetup or data.preparation and data.preparation.ready)
- text(dock,if not valid then why elseif duelSetup and not ready then "Соперник собирает набор…"else "1 класс · 2 джокера · 3 таро",UDim2.fromOffset(16,0),UDim2.new(1,-32,0,28),16,C.muted)
- local go=make("TextButton",{Name="Primary",Text=if frozen then "ПРОДОЛЖИТЬ ДУЭЛЬ"elseif duelSetup then "ГОТОВ · НАЧАТЬ ДУЭЛЬ"else "К ТРЕНИРОВОЧНОМУ СТОЛУ",Position=UDim2.fromOffset(16,34),Size=UDim2.new(1,-32,0,52),BackgroundColor3=C.gold,TextColor3=C.dark,Font=Enum.Font.Garamond,TextSize=22,BorderSizePixel=0,AutoButtonColor=ready==true,TextTransparency=if ready then 0 else .5},dock);border(go)
- if data.seated then go.Text='ГОТОВО · К СТОЛУ'end
- go.Activated:Connect(function()if frozen or ready then if data.seated then send('closeBuild')elseif duelSetup then send("begin")else send("open",{mode="training"})end end end)
- if tipState then showTip(tipState.title,tipState.description,tipState.rect)end
+ draw();local resize=app:GetPropertyChangedSignal('AbsoluteSize'):Connect(draw)
+ root.Destroying:Once(function()resize:Disconnect()end)
 end
 return Inventory
