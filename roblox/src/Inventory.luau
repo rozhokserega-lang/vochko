@@ -11,6 +11,7 @@ local function text(parent,value,pos,size,fontSize,color)
 end
 local function border(p,color,width)make("UIStroke",{Color=color or C.gold,Thickness=width or 1,Transparency=.15},p);make("UICorner",{CornerRadius=UDim.new(0,7)},p)end
 function Inventory.Build(app,data,duelSetup,send)
+ Assets.WarmTarot()
  local savedPositions=table.clone(rowPositions)
  local p=data.profile;local frozen=data.loadoutLocked==true
  local function showTip(title,description,rect)
@@ -39,7 +40,8 @@ function Inventory.Build(app,data,duelSetup,send)
   local width=if image then 106 else 116
   local b=make("TextButton",{Name=kind.."_"..id,Text="",Position=UDim2.fromOffset((index-1)*(width+10)+4,4),Size=UDim2.new(0,width,1,-12),BackgroundColor3=if chosen then Color3.fromRGB(74,52,25)else Color3.fromRGB(37,25,16),BorderSizePixel=0,AutoButtonColor=true,Active=true},row);border(b,if chosen then Color3.fromRGB(249,211,125)else Color3.fromRGB(116,89,49),if chosen then 2 else 1)
   if image then
-   make("ImageLabel",{Image=image,Size=UDim2.fromOffset(54,81),Position=UDim2.new(.5,-27,0,7),BackgroundTransparency=1},b)
+   local holder=make("Frame",{Name="Art",Size=UDim2.fromOffset(54,81),Position=UDim2.new(.5,-27,0,7),BackgroundTransparency=1},b)
+   Assets.CreateTarotArt(holder,id)
    text(b,title,UDim2.fromOffset(4,89),UDim2.new(1,-8,0,30),16)
   else
    local icon=text(b,symbol,UDim2.fromOffset(5,2),UDim2.new(1,-10,0,38),30,C.gold);icon.TextXAlignment=Enum.TextXAlignment.Center

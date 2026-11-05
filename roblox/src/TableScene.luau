@@ -375,6 +375,9 @@ function Scene.Create(playerGui,send,duel)
   end
   playerTarget=part("PlayerImpactTarget",Vector3.new(.3,.3,.3),Vector3.new(19,5.5,-.2),C.paper);playerTarget.Transparency=1
  end
+ -- The imported felt is uneven; ZOffset alone cannot prevent mesh occlusion.
+ -- Apply after both campaign and duel layouts have placed their interface.
+ plane.CFrame=plane.CFrame+Vector3.new(0,.14,0)
  -- Apply the same transform to the mesh, plaques, felt and decorations.
  -- Hit testing above uses the tilted plane normal rather than a horizontal Y.
  local offset=if duel then CFrame.new(-38,0,0)else CFrame.new()
@@ -409,7 +412,7 @@ local function cardFace(card)
  make("UICorner",{CornerRadius=UDim.new(0,9)},node);outline(node,Color3.fromRGB(167,139,86),2)
  if card.tarot then
   local fallback=label(node,"LoadingTitle",card.rank,5,12,80,105,18,C.ink);fallback.Size=UDim2.new(1,-10,1,-24);fallback.TextXAlignment=Enum.TextXAlignment.Center
-  make("ImageLabel",{Name="TarotArt",Image=Assets.Tarot[card.tarot],BackgroundTransparency=1,Size=UDim2.fromScale(1,1)},node)
+  Assets.CreateTarotArt(node,card.tarot)
   if not Scene.DuelMode then local title=label(node,"TarotName",card.rank,3,159,138,38,19,C.paper);title.BackgroundColor3=C.ink;title.BackgroundTransparency=.1 end
   return node
  end
