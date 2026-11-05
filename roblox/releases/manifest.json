@@ -116,8 +116,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 78471,
-      "sha256": "e2c049810b8259d8820337bb46e957ae6309c89d972c7db4cf6d27a3fa8ea5ff"
+      "bytes": 78606,
+      "sha256": "eb543164ed49f22018da2a1741f066bb34f14d8d1310769c7b0948d6914f86f9"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -131,8 +131,8 @@
     },
     {
       "path": "roblox/src/CameraControls.luau",
-      "bytes": 9151,
-      "sha256": "232edfc4180f432d73e1cfa1a9b2b43f24fb40ff380a81b4190d0f660188876e"
+      "bytes": 9294,
+      "sha256": "c0bac464ed23cc998f4e2d2868a937f668c100e1dd330b9b6b507a5410549b20"
     },
     {
       "path": "roblox/src/CardImpact.luau",
@@ -141,8 +141,8 @@
     },
     {
       "path": "roblox/src/Client.client.luau",
-      "bytes": 24862,
-      "sha256": "496f682300c0a95d44db8b632b93a7271e7c675e3e0cfcd76081c6020fd1adb8"
+      "bytes": 24857,
+      "sha256": "146c4ee48944f22dd14aeafe45799371e321b53ecf183b6444c50f98bb8e96c8"
     },
     {
       "path": "roblox/src/Config.luau",
@@ -156,8 +156,8 @@
     },
     {
       "path": "roblox/src/HUDControls.luau",
-      "bytes": 6943,
-      "sha256": "a6f08c5059f0e608f9be8fb9f7d57bc4b1a47161577f9845d5319e19de46c377"
+      "bytes": 7269,
+      "sha256": "bf15540b70861acbef37de459a30f2cf19388a0eafab6d7ec180f20d46575621"
     },
     {
       "path": "roblox/src/Inventory.luau",
@@ -186,8 +186,8 @@
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 44245,
-      "sha256": "2ae44268fd7cedf7d761ac3583a8a7586cde39939fb50614b8cb6271fec014ac"
+      "bytes": 44364,
+      "sha256": "960a22d0127aea3749c51e642118d08e35703695298ca8d5fae147b05311c736"
     },
     {
       "path": "roblox/src/Tarot.luau",

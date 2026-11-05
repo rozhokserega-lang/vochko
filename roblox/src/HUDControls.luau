@@ -63,6 +63,15 @@ function HUD.Create(app,panels,scene,viewport,relayout,returnButton)
  end)
  connect(UIS.InputEnded,function(input)if active and (input==active.input or input.UserInputType==Enum.UserInputType.MouseButton1)then active=nil end end)
  function self:Apply()
+  if scene.IsMobileView(viewport())then
+   self.editing=false;scene.HUDTuning=false;draft=nil;active=nil
+   toolbar.Visible=false;returnButton.Visible=true
+   for _,h in handles do h.Visible=false end
+   for _,s in scales do s.Scale=1 end
+   for _,t in trays do t.root.Visible=false end
+   return
+  end
+  toolbar.Visible=true
   local key=mode();if lastMode and key~=lastMode then self.editing=false;scene.HUDTuning=false;active=nil;draft=nil end;lastMode=key
   local mobile=scene.IsMobileView(viewport());toolbar.Position=if mobile then UDim2.fromOffset(6,4)else UDim2.new(1,-342,0,7)
   toolbar.Size=UDim2.fromOffset(if self.editing then 318 else 112,44)

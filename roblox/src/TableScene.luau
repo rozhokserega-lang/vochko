@@ -24,6 +24,7 @@ function Scene.IsMobileView(viewport)
 end
 local function cameraMode(viewport)return (if Scene.DuelMode then "duel-"else "")..(if Scene.IsMobileView(viewport)then "phone-"else "desktop-")..(if viewport.X<viewport.Y then "portrait" else "landscape")end
 function Scene.GetCameraSettings(viewport)
+ if Scene.IsMobileView(viewport)then return {distance=.5,height=24,pitch=70,fov=77}end
  local mode=cameraMode(viewport)
  if not cameraPreferences[mode]then
   cameraPreferences[mode]=if Scene.IsMobileView(viewport)then {distance=8,height=18,pitch=42,fov=80}elseif Scene.DuelMode then {distance=-1.65,height=12.54,pitch=50.31,fov=71.92}else {distance=-2.38,height=10.15,pitch=44.14,fov=74.90}
@@ -31,7 +32,7 @@ function Scene.GetCameraSettings(viewport)
  return table.clone(cameraPreferences[mode])
 end
 function Scene.SetCameraSetting(viewport,key,value)
- if Scene.CameraLocked then return false end
+ if Scene.CameraLocked or Scene.IsMobileView(viewport)then return false end
  local bounds=cameraLimits[key]
  if not bounds or type(value)~="number" or value~=value or math.abs(value)==math.huge then return false end
  Scene.GetCameraSettings(viewport)

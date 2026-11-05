@@ -200,8 +200,8 @@ local function buildBattle(s)
   ownArmor.Text="◇ Броня "..armor;enemyArmor.Text="◇ Броня "..theirs
   ownMax.Visible=mobile;enemyMax.Visible=mobile
   if mobile then
-   local height=math.clamp(app.AbsoluteSize.Y*.55,140,260)
-   local railY=math.max(82,(app.AbsoluteSize.Y-height)/2+10)
+   local height=math.clamp(app.AbsoluteSize.Y*.45,140,260)
+   local railY=math.max(48,app.AbsoluteSize.Y-height-4)
    height=math.max(110,math.min(height,app.AbsoluteSize.Y-railY-8))
    top.Size=UDim2.fromScale(1,1)
    own.AnchorPoint=Vector2.new(0,0);own.Position=UDim2.fromOffset(5,railY);own.Size=UDim2.fromOffset(48,height)

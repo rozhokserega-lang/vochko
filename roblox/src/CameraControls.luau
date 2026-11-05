@@ -88,6 +88,7 @@ function Controls.Create(parent,scene,viewport)
  -- No world action should pass through the camera panel while framing a shot.
  for _,o in panel:GetDescendants()do if o:IsA("GuiObject")then o.ZIndex=41 end end
  function self:Refresh()
+  if scene.IsMobileView(viewport())then panel.Visible=false;toggle.Visible=false;scene.CameraTuning=false;active=nil;dragInput=nil;return end
   if scene.HUDTuning then panel.Visible=false;toggle.Visible=false;scene.CameraTuning=false;active=nil;dragInput=nil;return end
   toggle.Visible=true
   local v=viewport();local mobile=scene.IsMobileView(v);local wide=mobile and v.X>v.Y
