@@ -20,6 +20,7 @@
     "rbxassetid://72227471886347",
     "rbxassetid://80860405035004",
     "rbxassetid://86423731367269",
+    "rbxassetid://86798104751689",
     "rbxassetid://88778262837898",
     "rbxassetid://90050084021940"
   ],
@@ -90,6 +91,11 @@
       "sha256": "0aae3e888ad420e415637146b240f7e275399679438bc12a98c4afc881d1e5fd"
     },
     {
+      "path": "roblox/assets/loadout/loadout-atlas-v1.png",
+      "bytes": 3653086,
+      "sha256": "b156eddee13e88c4a0741dd4fb155a7e171cbe4cdda55144c499a5f6a5cd4a22"
+    },
+    {
       "path": "roblox/assets/models/TavernTable.rbxmx",
       "bytes": 1190,
       "sha256": "21d01db787e387afce4f4dabc35d2eb3ac1458ba31eb73437c1ee42e44cbeedd"
@@ -116,13 +122,13 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 90851,
-      "sha256": "c0f9e0580599a8db821ab72e7db793f2f8d3d6fbbf487afff9b437900735bbbe"
+      "bytes": 91618,
+      "sha256": "ffa5ff48c6dc3b41589199a4c14d8ab7a0fddbcd743b626cfa786803170054aa"
     },
     {
       "path": "roblox/src/Assets.luau",
-      "bytes": 3102,
-      "sha256": "ee25a8005ea4c581d0ea57d34908064cf92aef9a207ddc2fd90fdf8d134ae369"
+      "bytes": 4051,
+      "sha256": "9be1abf88a652acb2fa37d203e7ae56f79c994e5efae3f32bc4fa99e10cb7eca"
     },
     {
       "path": "roblox/src/Battle.luau",
@@ -166,8 +172,8 @@
     },
     {
       "path": "roblox/src/Inventory.luau",
-      "bytes": 10559,
-      "sha256": "682d36a2c2c36cb8fa9e79eadf04f6300da2b48af59d9300b142c233d743ac1a"
+      "bytes": 10598,
+      "sha256": "92231a62372da627ee0059543177b83e4cbfbfbdc84f37f0ac993918c2e3932c"
     },
     {
       "path": "roblox/src/Loadout.luau",
@@ -196,8 +202,8 @@
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 47172,
-      "sha256": "000f4651893f790877d012d277fea4f52e5ed6ef3a51df992c28e15c8e3b2f4e"
+      "bytes": 47598,
+      "sha256": "44559f7743e17d65b9283640fa235b73aeeff916f788715c05323a24dc32f72d"
     },
     {
       "path": "roblox/src/Tarot.luau",

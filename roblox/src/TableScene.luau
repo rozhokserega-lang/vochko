@@ -368,7 +368,8 @@ function Scene.Create(playerGui,send,duel,presentation)
     local symbol=label(frame,"Symbol","✦",6,3,40,40,32,C.gold)
     local title=label(frame,"Title","Джокер",8,42,120,48,23,C.paper)
     local charges=label(frame,"Charges","",48,5,80,30,20,C.gold)
-    jokerCards[side][i]={frame=frame,title=title,symbol=symbol,charges=charges}
+    local art=make('Frame',{Name='Artwork',Position=UDim2.fromOffset(5,5),Size=UDim2.fromOffset(48,85),BackgroundTransparency=1},frame)
+    jokerCards[side][i]={frame=frame,title=title,symbol=symbol,charges=charges,art=art}
    end
   end
   local originals={}
@@ -542,9 +543,11 @@ function Scene.Update(s)
    local list=if side=="own"then s.jokers else s.duel.enemyJokers
    for i,card in jokerCards[side]do
     local id=list and list[i];local def=id and Loadout.Joker(id);card.id=id
+    if card.artId~=id then card.art:ClearAllChildren();if id then Assets.CreateLoadoutArt(card.art,'joker',id)end;card.artId=id end
+    card.symbol.Visible=id==nil
     card.title.Text=if def then def.name else "Пусто";card.symbol.Text=if def then def.symbol else "—"
-    card.title.TextSize=if mobile then 27 else 23;card.title.Position=UDim2.fromOffset(8,37);card.title.Size=UDim2.fromOffset(120,54)
-    card.charges.TextSize=if mobile then 24 else 20
+    card.title.TextSize=if mobile then 20 else 18;card.title.Position=UDim2.fromOffset(58,if id=='xray'then 28 else 5);card.title.Size=UDim2.fromOffset(72,if id=='xray'then 62 else 85)
+    card.charges.TextSize=16;card.charges.Position=UDim2.fromOffset(58,3);card.charges.Size=UDim2.fromOffset(72,24)
     card.charges.Text=if id=="xray"then tostring(if side=="own"then s.scanCharges else s.duel.enemyScanCharges).." / 2"else ""
     enable(card.frame,side=="own"and id=="xray"and combat and (s.scanCharges or 0)>0 and s.active~=nil and #s.peek==0)
     -- Passive opponent/own cards remain fully legible even without an action.

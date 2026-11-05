@@ -24,6 +24,7 @@ local function art(parent,kind,d,mini)
   local symbol=text(holder,'Symbol',d.symbol,0,0,0,0,24,if d.id=='crimson'or d.id=='healer'then Color3.fromRGB(157,44,42)else C.ink);symbol.Size=UDim2.fromScale(1,1);symbol.TextScaled=true;symbol.TextXAlignment=Enum.TextXAlignment.Center
   make('UITextSizeConstraint',{MaxTextSize=if mini then 34 else 86,MinTextSize=16},symbol)
   if not mini then local label=text(holder,'Type',if kind=='class'then 'КЛАСС'else 'ДЖОКЕР',4,4,0,18,11,C.ink);label.Size=UDim2.new(1,-8,0,18);label.TextXAlignment=Enum.TextXAlignment.Center end
+  A.CreateLoadoutArt(holder,kind,d.id)
  end
 end
 function Inventory.Build(app,data,duelSetup,send)

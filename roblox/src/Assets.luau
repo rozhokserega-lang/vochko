@@ -1,8 +1,19 @@
 local Assets={ Cards = "rbxassetid://116910231927744", CardWidth = 72, CardHeight = 100,
  Portraits = "rbxassetid://134082763828827", PortraitWidth = 200, PortraitHeight = 200,
+ LoadoutAtlas="rbxassetid://86798104751689",LoadoutWidth=683,LoadoutHeight=1024,
  Tarot={candle="rbxassetid://137978481106034",tower="rbxassetid://119812479439200",scales="rbxassetid://110912142893854",seal="rbxassetid://88778262837898",echo="rbxassetid://109217339038049",sun="rbxassetid://114121721951074",coin="rbxassetid://128665993134527",rose="rbxassetid://72227471886347",thread="rbxassetid://71467474698283",hourglass="rbxassetid://112005936945493",guardian="rbxassetid://128673203253779",moon="rbxassetid://90050084021940"},
  Source = "Original VOCHKO artwork exported from the repository; see assets/README.md" }
 local symbols={rose="♥",guardian="◇",sun="☀",moon="☽",tower="♜",coin="$",echo="×",seal="⬡",scales="⚖",candle="✦",thread="∞",hourglass="⌛"}
+local loadoutCells={class={sharp=0,healer=1,guardian=2},joker={crimson=3,blot=4,triple=5,tandem=6,ladder=7,xray=8}}
+function Assets.CreateLoadoutArt(parent,kind,id)
+ local index=loadoutCells[kind]and loadoutCells[kind][id];if index==nil then return nil end
+ local x=index%3;local y=math.floor(index/3)
+ local left,right=math.floor(x*Assets.LoadoutWidth/3),math.floor((x+1)*Assets.LoadoutWidth/3)
+ local top,bottom=math.floor(y*Assets.LoadoutHeight/3),math.floor((y+1)*Assets.LoadoutHeight/3)
+ local image=Instance.new('ImageLabel');image.Name='LoadoutArt';image.BackgroundTransparency=1;image.Size=UDim2.fromScale(1,1)
+ image.Image=Assets.LoadoutAtlas;image.ImageRectOffset=Vector2.new(left+2,top+2);image.ImageRectSize=Vector2.new(right-left-4,bottom-top-4);image.ScaleType=Enum.ScaleType.Fit;image.Parent=parent
+ return image
+end
 -- Keep the card identifiable even when moderation, permissions or a slow fetch
 -- prevent the illustration from loading in the published experience.
 function Assets.CreateTarotArt(parent,id)
@@ -31,7 +42,7 @@ function Assets.PreloadAll()
   -- Give ContentProvider typed image dependencies, including on cold startup.
   local images={}
   local function add(id)local image=Instance.new('ImageLabel');image.Image=id;table.insert(images,image)end
-  add(Assets.Cards);add(Assets.Portraits);for _,id in Assets.Tarot do add(id)end
+  add(Assets.Cards);add(Assets.Portraits);add(Assets.LoadoutAtlas);for _,id in Assets.Tarot do add(id)end
   local ok,err=pcall(function()
    game:GetService("ContentProvider"):PreloadAsync(images,function(id,status)
     fetchReport[id]=tostring(status)

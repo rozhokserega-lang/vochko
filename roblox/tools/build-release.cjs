@@ -9,7 +9,7 @@ fs.mkdirSync(path.join(root,'roblox/releases'),{recursive:true});
 const result=spawnSync('rojo',['build','roblox/default.project.json','-o',output],{cwd:root,stdio:'inherit'});
 if(result.error)throw result.error;
 if(result.status!==0)process.exit(result.status||1);
-const paths=[output,'roblox/default.project.json','roblox/assets/cards-atlas.png','roblox/assets/opponents.png',
+const paths=[output,'roblox/default.project.json','roblox/assets/cards-atlas.png','roblox/assets/opponents.png','roblox/assets/loadout/loadout-atlas-v1.png',
  'roblox/assets/models/TavernTable.rbxmx','roblox/assets/models/tavern-table.glb','roblox/assets/models/source-tripo-meshopt.glb',
  ...fs.readdirSync(path.join(root,'roblox/src')).filter(x=>x.endsWith('.luau')).map(x=>'roblox/src/'+x),
  ...fs.readdirSync(path.join(root,'assets/tarot')).filter(x=>x.endsWith('.webp')).map(x=>'assets/tarot/'+x)];
