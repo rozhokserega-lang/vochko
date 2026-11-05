@@ -3,25 +3,25 @@
   "place": "roblox/releases/VochkoPrototype.rbxl",
   "note": "Source GLBs contain embedded geometry and PBR textures. The place loads published Roblox assets by ID; use the same Roblox account or grant access/reimport for a different owner.",
   "robloxAssets": [
-    "rbxassetid://114005423696242",
-    "rbxassetid://114405523897722",
-    "rbxassetid://116448422523262",
-    "rbxassetid://118357318946115",
+    "rbxassetid://109217339038049",
+    "rbxassetid://110912142893854",
+    "rbxassetid://112005936945493",
+    "rbxassetid://114121721951074",
+    "rbxassetid://116910231927744",
+    "rbxassetid://119812479439200",
     "rbxassetid://120113061227864",
-    "rbxassetid://125128067761419",
-    "rbxassetid://126504298884435",
+    "rbxassetid://128665993134527",
+    "rbxassetid://128673203253779",
     "rbxassetid://130051660213969",
     "rbxassetid://131877755470676",
-    "rbxassetid://139242092721503",
-    "rbxassetid://70495481355526",
-    "rbxassetid://72809768313497",
-    "rbxassetid://76658903035159",
-    "rbxassetid://78955767921126",
-    "rbxassetid://79379639898464",
+    "rbxassetid://134082763828827",
+    "rbxassetid://137978481106034",
+    "rbxassetid://71467474698283",
+    "rbxassetid://72227471886347",
     "rbxassetid://80860405035004",
-    "rbxassetid://82826802074242",
     "rbxassetid://86423731367269",
-    "rbxassetid://89834733292942"
+    "rbxassetid://88778262837898",
+    "rbxassetid://90050084021940"
   ],
   "files": [
     {
@@ -116,13 +116,13 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 61603,
-      "sha256": "b26e9765244f7abdb26fac0964a1cf25387d5d6e53fd652cfd1b2226280112ac"
+      "bytes": 61735,
+      "sha256": "d64010b590c3e7863269e7c12f8e78e0bc06a86b9560b964f0779a74ba18d68b"
     },
     {
       "path": "roblox/src/Assets.luau",
-      "bytes": 728,
-      "sha256": "782befc0a68c392a42f51c9c056ec83e949ce42d80b40d8e612624cdcca694d6"
+      "bytes": 731,
+      "sha256": "944094a16f679cc293c400a9344bbb7bebcf3e118c6b34ed6ae8b968859de595"
     },
     {
       "path": "roblox/src/Battle.luau",
@@ -141,8 +141,8 @@
     },
     {
       "path": "roblox/src/Client.client.luau",
-      "bytes": 22768,
-      "sha256": "986e3fc01c1e61892312c85e3cb11819b22d4fa8364d9340fd5ad3489cce60ea"
+      "bytes": 22850,
+      "sha256": "300d2e0fd63605dbb29d97af5da6dfb7da80e312bdfa3fac81b9c338c6202ad8"
     },
     {
       "path": "roblox/src/Config.luau",
@@ -166,8 +166,8 @@
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 38407,
-      "sha256": "9907a1ca645e4c107a41cc5a00a19c6b544fc9a26574a9d24f2fccf3edb90256"
+      "bytes": 38571,
+      "sha256": "098da3b2143ae91923aa4b95a5bc3e9e99661773d6554622533f0ceb88e75289"
     },
     {
       "path": "roblox/src/Tarot.luau",

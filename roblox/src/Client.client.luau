@@ -259,5 +259,8 @@ UIS.InputBegan:Connect(function(input,processed)
  if TableScene.CameraTuning or TableScene.ImpactActive or processed or not current or current.screen~="battle"or not current.battle or current.battle.phase~="combat"then return end
  if input.KeyCode==Enum.KeyCode.Space then send("draw")elseif input.KeyCode==Enum.KeyCode.F then send("stop")elseif input.KeyCode==Enum.KeyCode.Return then send("play")end
 end)
-task.spawn(function()pcall(function()game:GetService("ContentProvider"):PreloadAsync({Assets.Cards,Assets.Portraits})end)end)
+task.spawn(function()
+ local images={Assets.Cards,Assets.Portraits};for _,id in Assets.Tarot do table.insert(images,id)end
+ pcall(function()game:GetService("ContentProvider"):PreloadAsync(images)end)
+end)
 send("snapshot")

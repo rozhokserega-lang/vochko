@@ -367,6 +367,7 @@ local function cardFace(card)
  local node=make("Frame",{Name="Card_"..card.id,Size=UDim2.fromOffset(144,200),BackgroundColor3=Color3.fromRGB(245,232,202),BorderSizePixel=0},board)
  make("UICorner",{CornerRadius=UDim.new(0,9)},node);outline(node,Color3.fromRGB(167,139,86),2)
  if card.tarot then
+  local fallback=label(node,"LoadingTitle",card.rank,5,12,80,105,18,C.ink);fallback.Size=UDim2.new(1,-10,1,-24);fallback.TextXAlignment=Enum.TextXAlignment.Center
   make("ImageLabel",{Name="TarotArt",Image=Assets.Tarot[card.tarot],BackgroundTransparency=1,Size=UDim2.fromScale(1,1)},node)
   if not Scene.DuelMode then local title=label(node,"TarotName",card.rank,3,159,138,38,19,C.paper);title.BackgroundColor3=C.ink;title.BackgroundTransparency=.1 end
   return node
