@@ -14,6 +14,15 @@ return function()
     local seat=Instance.new("Seat");seat.Name="PlayerSeat";seat.Size=Vector3.new(2.5,.2,2.2);seat.CFrame=CFrame.new(entry.x,3.1,1.3)
     seat.Anchored=true;seat.Transparency=1;seat.CanCollide=false;seat.CanTouch=false;seat.Parent=station
     end
+    local seat=station.PlayerSeat
+    for _,chair in root:GetChildren()do
+     local cushion=chair:IsA('Model')and chair.Name=='Chair'and chair:FindFirstChild('Cushion')
+     if cushion and math.abs(cushion.Position.X-entry.x)<.1 and math.abs(cushion.Position.Z-1.3)<.1 then
+      local position=cushion.Position+Vector3.new(0,cushion.Size.Y/2-seat.Size.Y/2+.01,0)
+      seat.CFrame=CFrame.lookAt(position,Vector3.new(entry.x,position.Y,-7))
+      local binding=seat:FindFirstChild('ChairModel')or Instance.new('ObjectValue');binding.Name='ChairModel';binding.Value=chair;binding.Parent=seat
+     end
+    end
    end
   end
  end
@@ -87,6 +96,23 @@ return function()
     if chair and i==2 then chair:PivotTo(CFrame.new(0,0,-2.3)*chair:GetPivot())end
     local h=Instance.new('Highlight');h.Name='AvailableSeat';h.Adornee=chair or seat;h.FillColor=Color3.fromRGB(216,183,93);h.FillTransparency=.75;h.OutlineColor=Color3.fromRGB(255,221,128);h.DepthMode=Enum.HighlightDepthMode.Occluded;h.Parent=seat
     local p=Instance.new('ProximityPrompt');p.Name='PvPSeatPrompt';p.ActionText='Сесть';p.ObjectText='PvP · свободный стул';p.MaxActivationDistance=10;p.RequiresLineOfSight=false;p.Parent=seat
+   end
+  end
+  -- Bind the real server seats to the visible cushions, including migrated places.
+  for _,seat in {station.PvPSeat1,station.PvPSeat2}do
+   local nearest,distance
+   for _,m in root:GetChildren()do
+    local cushion=m:IsA('Model')and m.Name=='Chair'and m:FindFirstChild('Cushion')
+    if cushion then local d=(Vector2.new(cushion.Position.X,cushion.Position.Z)-Vector2.new(seat.Position.X,seat.Position.Z)).Magnitude
+     if not distance or d<distance then nearest=m;distance=d end
+    end
+   end
+   if nearest and distance<1 then
+    local cushion=nearest.Cushion
+    local position=cushion.Position+Vector3.new(0,cushion.Size.Y/2-seat.Size.Y/2+.01,0)
+    seat.CFrame=CFrame.lookAt(position,Vector3.new(0,position.Y,-7))
+    local binding=seat:FindFirstChild('ChairModel')or Instance.new('ObjectValue');binding.Name='ChairModel';binding.Value=nearest;binding.Parent=seat
+    seat.AvailableSeat.Adornee=nearest
    end
   end
  end

@@ -5,21 +5,24 @@ local Loadout=require(game.ReplicatedStorage.VochkoPrototype.Loadout)
 local Net={};Net.__index=Net
 local function terminal(phase)return phase=='won'or phase=='lost'or phase=='draw'end
 function Net.new(context)
- return setmetatable({ctx=context,slots={},members={},match=nil},Net)
+ return setmetatable({ctx=context,slots={},members={},pending={},match=nil},Net)
 end
 function Net:Locked(p)local e=self.members[p];return e and self.match and not self.match.finished end
 function Net:Notify()for p in self.members do self.ctx.push(p)end end
 function Net:Join(p,index)
  if index~=1 and index~=2 then return false,'Выбери свободный стул'end
+ if self.pending[p]then return false,'Посадка уже выполняется'end
  if self.match and not self.match.finished then return false,'За столом идёт дуэль'end
  if self.match and self.match.finished then return false,'Дождись, пока игроки освободят стол'end
  if self.slots[index]and self.slots[index]~=p then return false,'Стул уже занят'end
  if self.members[p]then return true end
  local build=self.ctx.profile(p);local valid,why=Loadout.Validate(build.class,build.jokers,build.duelTarot)
  if not valid then return false,why end
- local ok,msg=self.ctx.sit(p,index);if not ok then return false,msg end
+ self.slots[index]=p;self.pending[p]=true
+ local ok,msg=self.ctx.sit(p,index);self.pending[p]=nil
+ if not ok or not p.Parent then if self.slots[index]==p then self.slots[index]=nil end;self:RefreshChairs();return false,msg end
  self.slots[index]=p;self.members[p]={index=index,build={class=build.class,jokers=table.clone(build.jokers),tarot=table.clone(build.duelTarot)}}
- if self.slots[1]and self.slots[2]then
+ if self.slots[1]and self.slots[2]and self.members[self.slots[1]]and self.members[self.slots[2]]then
   local a,b=self.members[self.slots[1]].build,self.members[self.slots[2]].build
   local c=self.ctx.config();local seed=Random.new():NextInteger(1,1000000000)
   local s=Duel.New(c,seed,a.class,self.ctx.id(),a.tarot,b.tarot,a.jokers,{class=b.class,jokers=b.jokers})

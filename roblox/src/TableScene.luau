@@ -10,6 +10,8 @@ end
 local TweenService = game:GetService("TweenService")
 local Assets = require(script.Parent.Assets)
 local CardImpact = require(script.Parent.CardImpact)
+local HeadLook=require(script.Parent.HeadLook)
+local headLook
 local Loadout=require(script.Parent.Loadout)
 local Scene = {CameraTuning=false,CameraLocked=true,ImpactActive=false}
 local impactJob
@@ -111,6 +113,7 @@ local function hideRoomDetail(obj)
  elseif obj:IsA("LayerCollector") then hidden[obj]=obj.Enabled;obj.Enabled=false end
 end
 function Scene.Destroy()
+ if headLook then headLook:Destroy();headLook=nil end
  for _,connection in characterConnections do connection:Disconnect()end;characterConnections={}
  if selfHumanoid and selfHumanoid.Parent then selfHumanoid.DisplayDistanceType=selfDisplay end;selfHumanoid=nil;selfDisplay=nil
  if promptEnabledBefore~=nil then game:GetService("ProximityPromptService").Enabled=promptEnabledBefore;promptEnabledBefore=nil end
@@ -174,6 +177,7 @@ local function props()
 end
 function Scene.Create(playerGui,send,duel,presentation)
  Scene.Destroy();dispatch=send;Scene.DuelMode=duel==true;Scene.CanvasHeight=if duel then 1100 else 900
+ headLook=HeadLook.Create(Scene)
  Scene.Network=presentation and presentation.network==true
  Scene.WorldFrame=if Scene.Network then CFrame.new(0,0,-7)*CFrame.Angles(0,if presentation.seatIndex==2 then math.pi else 0,0)*CFrame.new(0,0,7)*CFrame.new(19,0,0)else CFrame.new()
  model=make("Model",{Name="VochkoLocalBattleScene"},workspace)
@@ -288,12 +292,15 @@ function Scene.Create(playerGui,send,duel,presentation)
  -- avoids ScreenGui/SurfaceGui hit-test differences in Studio and on devices.
  inputConnection=game:GetService("UserInputService").InputBegan:Connect(function(input)
   if Scene.CameraTuning or Scene.HUDTuning or Scene.ImpactActive then return end
+  local UIS=game:GetService('UserInputService')
+  local pointer=if input.UserInputType==Enum.UserInputType.Touch then Vector2.new(input.Position.X,input.Position.Y)+game:GetService('GuiService'):GetGuiInset()else UIS:GetMouseLocation()
+  for _,object in playerGui:GetGuiObjectsAtPosition(pointer.X,pointer.Y)do if object:IsA('GuiButton')and object:FindFirstAncestorOfClass('ScreenGui')then return end end
+  if input.UserInputType==Enum.UserInputType.MouseButton2 then headLook:Begin(input);return end
   if input.UserInputType~=Enum.UserInputType.MouseButton1 and input.UserInputType~=Enum.UserInputType.Touch then return end
   if game:GetService("UserInputService"):GetFocusedTextBox() then return end
   local camera=workspace.CurrentCamera;if not camera or not plane.Parent then return end
   -- InputObject.Position omits the top GUI inset; viewport rays do not.
   -- MouseLocation includes it. Touch needs the inset restored explicitly.
-  local pointer=if input.UserInputType==Enum.UserInputType.MouseButton1 then game:GetService("UserInputService"):GetMouseLocation()else Vector2.new(input.Position.X,input.Position.Y)+game:GetService("GuiService"):GetGuiInset()
   local ray=camera:ViewportPointToRay(pointer.X,pointer.Y)
   local normal=plane.CFrame.UpVector
   local denominator=ray.Direction:Dot(normal)
@@ -309,6 +316,7 @@ function Scene.Create(playerGui,send,duel,presentation)
     if x>=pos.X and x<=pos.X+size.X and y>=pos.Y and y<=pos.Y+size.Y then callback();return end
    end
   end
+  if input.UserInputType==Enum.UserInputType.Touch then headLook:Begin(input)end
  end)
  if duel then
   plane.Size=Vector3.new(10.3,.01,16.6);plane.CFrame=CFrame.new(19,4.77,-7.1)*CFrame.Angles(0,-math.pi/2,0)
@@ -407,6 +415,7 @@ function Scene.Camera(viewport,animate)
  local shift=CFrame.new((Scene.WorldFrame or CFrame.new()):VectorToWorldSpace(delta))
  if not Scene.ImpactActive then for p,base in layoutHomes do if p.Parent then p.CFrame=shift*base end end end
  local frame=(Scene.WorldFrame or CFrame.new())*CFrame.new(if Scene.DuelMode then -19 else 19,settings.height,settings.distance)*CFrame.Angles(math.rad(-settings.pitch),0,0)
+ Scene.CameraBase=frame
  camera.CameraType=Enum.CameraType.Scriptable
  -- 80 degrees is the portrait framing baseline. Preserve its readable table
  -- scale in landscape instead of exposing a very wide slice of the room.

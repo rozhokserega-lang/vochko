@@ -50,4 +50,10 @@ check(net:Join(a,2),'Waiting chair reusable');net:Leave(a);check(not next(net.me
 check(net:Join(a,2)and net:Join(b,1),'Countdown can restart');net:Leave(b)
 check(net:View(a).screen=='pvpwait','Leaving during countdown returns other player to waiting')
 net:Leave(a)
+local concurrent=Net.new({profile=function()return build end,push=function()end,config=function()return table.clone(C.Defaults)end,id=function()return 'concurrent-seating'end,now=function()return now end,sit=function()task.wait(.05);return true end,leave=function()end})
+local joined1,joined2
+task.spawn(function()joined1=concurrent:Join(a,1)end)
+task.spawn(function()joined2=concurrent:Join(b,2)end)
+task.wait(.2)
+check(joined1 and joined2 and concurrent.match~=nil,'Simultaneous seating reserves both chairs safely')
 return {checks=checks,fullMatches=1,sides='both',timeout=true,departure=true}

@@ -11,7 +11,7 @@ function Seating.Leave(player)
   local character=h.Parent
   task.defer(function()
    task.wait(.05)
-   if character.Parent and not occupied[player]then character:PivotTo(CFrame.lookAt(Vector3.new(entry.x,4.5,5),Vector3.new(entry.x,4.5,-7)))end
+   if character.Parent and not occupied[player]then character:PivotTo(entry.exitFrame)end
   end)
  end
 end
@@ -26,9 +26,14 @@ function Seating.Enter(player,mode,side)
  local existing=occupied[player]
  if existing and existing.seat==seat and h.SeatPart==seat then return true end
  Seating.Leave(player)
- occupied[player]={seat=seat,humanoid=h,x=seat.Position.X,speed=h.WalkSpeed,rotate=h.AutoRotate,jumpPower=h.JumpPower,jumpHeight=h.JumpHeight,jumping=h:GetStateEnabled(Enum.HumanoidStateType.Jumping)}
+ occupied[player]={seat=seat,humanoid=h,exitFrame=seat.CFrame*CFrame.new(0,1.5,3),speed=h.WalkSpeed,rotate=h.AutoRotate,jumpPower=h.JumpPower,jumpHeight=h.JumpHeight,jumping=h:GetStateEnabled(Enum.HumanoidStateType.Jumping)}
  h.WalkSpeed=0;h.AutoRotate=false;h.JumpPower=0;h.JumpHeight=0;h:SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
- character:PivotTo(seat.CFrame*CFrame.new(0,2,0));seat:Sit(h)
- return true
+ character:PivotTo(seat.CFrame*CFrame.new(0,2,0))
+ for _=1,3 do
+  if not character.Parent or h.Health<=0 then Seating.Leave(player);return false,'Персонаж больше не доступен'end
+  seat:Sit(h);task.wait(.05)
+  if seat.Occupant==h and h.SeatPart==seat then return true end
+ end
+ Seating.Leave(player);return false,'Не удалось сесть. Попробуй занять стул ещё раз'
 end
 return Seating
