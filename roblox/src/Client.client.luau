@@ -131,13 +131,13 @@ local function buildBattle(s)
  local own=panel("Player",0,.24)
  local playerName=text(own,"Name",player.DisplayName,18,UDim2.fromOffset(10,4),UDim2.new(1,-20,0,24))
  local hp=text(own,"HP","",21,UDim2.fromOffset(10,31),UDim2.new(1,-20,0,24),Color3.fromRGB(177,216,146))
- local track=make("Frame",{Position=UDim2.fromOffset(10,64),Size=UDim2.new(1,-20,0,8),BackgroundColor3=C.green,BorderSizePixel=0},own)
- local hpFill=make("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(102,177,93),BorderSizePixel=0},track)
+ local track=make("Frame",{Name="HPTrack",Position=UDim2.fromOffset(10,64),Size=UDim2.new(1,-20,0,8),BackgroundColor3=C.green,BorderSizePixel=0},own)
+ local hpFill=make("Frame",{Name="Fill",Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(102,177,93),BorderSizePixel=0},track)
  local enemy=panel("Enemy",1,.29)
  local name=text(enemy,"Name","КРЫСОЛОВ",20,UDim2.fromOffset(10,3),UDim2.new(1,-20,0,23))
  local enemyHP=text(enemy,"HP","",18,UDim2.fromOffset(10,28),UDim2.new(1,-20,0,23),Color3.fromRGB(234,162,138))
- local enemyTrack=make("Frame",{Position=UDim2.fromOffset(10,51),Size=UDim2.new(1,-20,0,6),BackgroundColor3=C.green,BorderSizePixel=0},enemy)
- local enemyFill=make("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.red,BorderSizePixel=0},enemyTrack)
+ local enemyTrack=make("Frame",{Name="HPTrack",Position=UDim2.fromOffset(10,51),Size=UDim2.new(1,-20,0,6),BackgroundColor3=C.green,BorderSizePixel=0},enemy)
+ local enemyFill=make("Frame",{Name="Fill",Size=UDim2.fromScale(1,1),BackgroundColor3=C.red,BorderSizePixel=0},enemyTrack)
  local intent=text(enemy,"Intent","",15,UDim2.fromOffset(10,57),UDim2.new(1,-20,0,24),C.muted)
  local armorColor=Color3.fromRGB(103,196,218)
  local ownArmor=text(own,"Armor","◇ Броня 0",15,UDim2.fromOffset(10,82),UDim2.new(1,-20,0,20),armorColor)
@@ -146,6 +146,12 @@ local function buildBattle(s)
  local enemyArmor=text(enemy,"Armor","◇ Броня 0",15,UDim2.fromOffset(10,82),UDim2.new(1,-20,0,20),armorColor)
  local enemyArmorTrack=make("Frame",{Name="ArmorTrack",Position=UDim2.fromOffset(10,105),Size=UDim2.new(1,-20,0,5),BackgroundColor3=C.green,BorderSizePixel=0},enemy)
  local enemyArmorFill=make("Frame",{Name="Fill",Size=UDim2.fromScale(0,1),BackgroundColor3=armorColor,BorderSizePixel=0},enemyArmorTrack)
+ local ownMax=text(own,"MaxHP","",12,UDim2.new(),UDim2.new(),C.muted)
+ local enemyMax=text(enemy,"MaxHP","",12,UDim2.new(),UDim2.new(),C.muted)
+ local function fillSize(value)
+  value=math.clamp(value,0,1)
+  return if TableScene.IsMobileView(root.AbsoluteSize)then UDim2.fromScale(1,value)else UDim2.fromScale(value,1)
+ end
  cameraControls=CameraControls.Create(app,TableScene,function()return root.AbsoluteSize end)
  local function update(s)
   cameraControls:Refresh()
@@ -187,8 +193,38 @@ local function buildBattle(s)
   local armor=s.armor or (s.forecast.tarot and s.forecast.tarot.shield)or 0
   local theirs=s.enemyArmor or 0;local cap=s.armorMax or 15
   ownArmor.Text="◇ Броня "..armor;enemyArmor.Text="◇ Броня "..theirs
-  TweenService:Create(ownArmorFill,TweenInfo.new(.2),{Size=UDim2.fromScale(math.clamp(armor/cap,0,1),1)}):Play()
-  TweenService:Create(enemyArmorFill,TweenInfo.new(.2),{Size=UDim2.fromScale(math.clamp(theirs/cap,0,1),1)}):Play()
+  ownMax.Visible=mobile;enemyMax.Visible=mobile
+  if mobile then
+   local height=math.clamp(app.AbsoluteSize.Y*.55,140,260)
+   local railY=math.max(82,(app.AbsoluteSize.Y-height)/2+10)
+   height=math.max(110,math.min(height,app.AbsoluteSize.Y-railY-8))
+   top.Size=UDim2.fromScale(1,1)
+   own.AnchorPoint=Vector2.new(0,0);own.Position=UDim2.fromOffset(5,railY);own.Size=UDim2.fromOffset(48,height)
+   enemy.AnchorPoint=Vector2.new(1,0);enemy.Position=UDim2.new(1,-5,0,railY);enemy.Size=UDim2.fromOffset(48,height)
+   playerName.Visible=true;name.Visible=true;playerName.Text="ТЫ";name.Text="ВРАГ"
+   for _,label in {playerName,name}do label.Position=UDim2.fromOffset(1,4);label.Size=UDim2.new(1,-2,0,16);label.TextSize=11;label.TextXAlignment=Enum.TextXAlignment.Center end
+   hp.Text=tostring(s.hp);enemyHP.Text=tostring(s.enemyHp)
+   for _,label in {hp,enemyHP}do label.Position=UDim2.fromOffset(1,22);label.Size=UDim2.new(1,-2,0,23);label.TextSize=18;label.TextXAlignment=Enum.TextXAlignment.Center end
+   ownMax.Text="/ "..s.maxHp;enemyMax.Text="/ "..s.enemyMaxHp
+   for _,label in {ownMax,enemyMax}do label.Position=UDim2.fromOffset(1,43);label.Size=UDim2.new(1,-2,0,16);label.TextXAlignment=Enum.TextXAlignment.Center end
+   for _,bar in {track,enemyTrack}do bar.Visible=true;bar.Position=UDim2.fromOffset(8,64);bar.Size=UDim2.new(0,18,1,-92)end
+   for _,bar in {ownArmorTrack,enemyArmorTrack}do bar.Position=UDim2.fromOffset(32,64);bar.Size=UDim2.new(0,7,1,-92)end
+   for _,fill in {hpFill,enemyFill,ownArmorFill,enemyArmorFill}do fill.AnchorPoint=Vector2.new(0,1);fill.Position=UDim2.fromScale(0,1)end
+   ownArmor.Text="◇ "..armor;enemyArmor.Text="◇ "..theirs
+   for _,label in {ownArmor,enemyArmor}do label.Position=UDim2.new(0,1,1,-23);label.Size=UDim2.new(1,-2,0,20);label.TextSize=13;label.TextXAlignment=Enum.TextXAlignment.Center end
+   intent.Parent=top;intent.AnchorPoint=Vector2.new(1,0);intent.Position=UDim2.new(1,-5,0,50);intent.Size=UDim2.fromOffset(48,28);intent.TextSize=12;intent.TextXAlignment=Enum.TextXAlignment.Center;intent.BackgroundColor3=C.ink;intent.BackgroundTransparency=.15
+  else
+   own.AnchorPoint=Vector2.new(0,0)
+   for _,fill in {hpFill,enemyFill,ownArmorFill,enemyArmorFill}do fill.AnchorPoint=Vector2.new();fill.Position=UDim2.new()end
+   for _,label in {playerName,name,hp,enemyHP,ownArmor,enemyArmor}do label.TextXAlignment=Enum.TextXAlignment.Left end
+   hp.Size=UDim2.new(1,-20,0,24)
+   track.Position=UDim2.fromOffset(10,64);track.Size=UDim2.new(1,-20,0,8)
+   enemyTrack.Position=UDim2.fromOffset(10,51);enemyTrack.Size=UDim2.new(1,-20,0,6)
+   intent.Parent=enemy;intent.AnchorPoint=Vector2.new();intent.BackgroundTransparency=1;intent.TextXAlignment=Enum.TextXAlignment.Left
+  end
+  hpFill.Size=fillSize(s.hp/s.maxHp);enemyFill.Size=fillSize(s.enemyHp/s.enemyMaxHp)
+  TweenService:Create(ownArmorFill,TweenInfo.new(.2),{Size=fillSize(armor/cap)}):Play()
+  TweenService:Create(enemyArmorFill,TweenInfo.new(.2),{Size=fillSize(theirs/cap)}):Play()
   if not mobile and s.mode=="duel"then
    local ownClass=Loadout.Class(s.class);local theirClass=Loadout.Class(s.duel.enemyClass)
    playerName.Text=player.DisplayName.." · "..(ownClass and ownClass.name or "")
@@ -196,8 +232,9 @@ local function buildBattle(s)
   end
  end
  return {update=update,impact=function(value,maxHp,damage,side)
-  if side=="player"then hp.Text="♥ "..value.." / "..maxHp;TweenService:Create(hpFill,TweenInfo.new(.08),{Size=UDim2.fromScale(value/maxHp,1)}):Play()
-  else enemyHP.Text=value.." / "..maxHp;TweenService:Create(enemyFill,TweenInfo.new(.08),{Size=UDim2.fromScale(value/maxHp,1)}):Play()end
+  local mobile=TableScene.IsMobileView(root.AbsoluteSize)
+  if side=="player"then hp.Text=if mobile then tostring(value)else "♥ "..value.." / "..maxHp;TweenService:Create(hpFill,TweenInfo.new(.08),{Size=fillSize(value/maxHp)}):Play()
+  else enemyHP.Text=if mobile then tostring(value)else value.." / "..maxHp;TweenService:Create(enemyFill,TweenInfo.new(.08),{Size=fillSize(value/maxHp)}):Play()end
  end}
 end
 local function lobbyUI()

@@ -116,8 +116,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 71185,
-      "sha256": "102138f991ee3c03461cd52907f411839d4572b726153eb3e2298633024c8dae"
+      "bytes": 72320,
+      "sha256": "2e4fa146a1fde0905eb424fcb85a2cb1d9a42858a84ff044c7d12c7b379042a5"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -141,8 +141,8 @@
     },
     {
       "path": "roblox/src/Client.client.luau",
-      "bytes": 21131,
-      "sha256": "e0eaa99f29366f70c4df4c8d93ffb067eb659b802d516f73f71a38b878d663df"
+      "bytes": 24431,
+      "sha256": "454da6ba5a252d26598a649c27c42f76e713f782555dfd1474d9d50d180ca9d5"
     },
     {
       "path": "roblox/src/Config.luau",
