@@ -1,5 +1,6 @@
 -- Shared inventory definitions; the server validates and snapshots builds.
-local L={ArmorMax=12}
+local L={ArmorMax=12,RaceTarotGood=2,RaceTarotBad=2}
+local RaceTarot=require(script.Parent:WaitForChild("RaceTarot"))
 L.Classes={
  {id="sharp",name="Картёжник",symbol="♠",desc="Точный стол: +1 урон."},
  {id="healer",name="Лекарь",symbol="♥",desc="Красное сочетание: +1 HP. До +3 за раунд."},
@@ -32,6 +33,15 @@ function L.Validate(class,jokers,tarot)
  if not validList(tarot,3,function(id)return table.find(L.TarotIds,id)end)then return false,"Выбери три разных таро для PvP"end
  return true
 end
+function L.ValidateRace(class,jokers,tarot)
+ if not L.Class(class)then return false,"Выбери класс"end
+ if not validList(jokers,2,L.Joker)then return false,"Выбери двух разных джокеров"end
+ return RaceTarot.ValidateLoadout(tarot,L.RaceTarotGood,L.RaceTarotBad)
+end
+function L.DefaultRaceTarot(seed)
+ return RaceTarot.NormalizeBuild(nil,Random.new(seed or 1),L.RaceTarotGood,L.RaceTarotBad).tarot
+end
+function L.RaceTarotDef(id)return RaceTarot.Def(id)end
 function L.Apply(side,result)
  local red,black={},{};local sums={};local validSums={}
  for i,z in side.zones do

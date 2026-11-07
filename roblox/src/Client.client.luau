@@ -10,6 +10,7 @@ local CameraControls = require(remote:WaitForChild("CameraControls"))
 local Inventory=require(remote:WaitForChild("Inventory"))
 local Loadout=require(remote:WaitForChild("Loadout"))
 local HUDControls=require(remote:WaitForChild("HUDControls"))
+local RaceUI=require(remote:WaitForChild("RaceUI"))
 local hudControls
 local cameraControls
 local Input, Snapshot = remote:WaitForChild("Input"), remote:WaitForChild("Snapshot")
@@ -108,30 +109,34 @@ local function seatedWaiting(data)
  button(dock,'Stand','Встать',UDim2.new(.67,0,0,48),UDim2.new(.33,-8,0,44),function()send('return')end,C.red)
 end
 local function intro(data)
- local s=data.battle;local body=scrollBody(72);header(body,if s.mode=="duel"then "ДУЭЛЬ · ТРЕНИРОВКА С ИИ"else "ТЕМНИЦА · ПЕРВЫЙ БОЙ")
+ local s=data.battle;local body=scrollBody(72);header(body,if s.mode=="race"then "ВОЧКО · ТРЕНИРОВКА В РЕАЛЬНОМ ВРЕМЕНИ"elseif s.mode=="duel"then "ДУЭЛЬ · ТРЕНИРОВКА С ИИ"else "ТЕМНИЦА · ПЕРВЫЙ БОЙ")
  make("ImageLabel",{Name="Opponent",Image=Assets.Portraits,ImageRectSize=Vector2.new(200,200),ImageRectOffset=Vector2.new(0,0),BackgroundTransparency=1,
   AnchorPoint=Vector2.new(.5,0),Position=UDim2.new(.5,0,0,60),Size=UDim2.fromOffset(250,250)},body)
  text(body,"EnemyTitle",s.enemyName,31,UDim2.fromOffset(18,316),UDim2.new(1,-36,0,40))
  text(body,"EnemyStats",string.format("Здоровье: %d  ·  Атака: %d\nЦель: %d  ·  Мест на зоне: %d\nРозыгрышей на бой: %d",s.enemyMaxHp,s.enemyAttack,s.target,s.slots,s.roundsTotal),20,UDim2.fromOffset(18,365),UDim2.new(1,-36,0,105),C.muted)
- text(body,"Hint",if s.mode=="duel"then "У каждой стороны своя колода. ИИ набирает карты на твоих глазах: видны суммы, остановки и переборы. Цель растёт каждый раунд: 21, 22, 23… Удары одновременные; после восьми раундов сравнивается здоровье."else "Добирай карты к цели. Точное попадание усиливает удар. Перебор можно исправить срезом до розыгрыша.",17,UDim2.fromOffset(18,480),UDim2.new(1,-36,0,90))
+ text(body,"Hint",if s.mode=="race"then "Общая колода в центре. За 20 секунд набери три зоны: открытую карту можно взять или сбросить. Сбросы дают броню, таро вскрываются при взятии. Побеждает тот, у кого больше HP после раунда."elseif s.mode=="duel"then "У каждой стороны своя колода. ИИ набирает карты на твоих глазах: видны суммы, остановки и переборы. Цель растёт каждый раунд: 21, 22, 23… Удары одновременные; после восьми раундов сравнивается здоровье."else "Добирай карты к цели. Точное попадание усиливает удар. Перебор можно исправить срезом до розыгрыша.",17,UDim2.fromOffset(18,480),UDim2.new(1,-36,0,90))
  actionDock(function()send("begin")end,"ВОЙТИ В БОЙ")
 end
-local function wardrobe(data,duelSetup)Inventory.Build(app,data,duelSetup,send)end
+local function wardrobe(data,duelSetup)
+ local race=(duelSetup and data.battle and data.battle.mode=="race")or data.screen=="pvpwardrobe"
+ Inventory.Build(app,data,duelSetup,send,race)
+end
 local function result(data)
  local s=data.battle;local body=scrollBody(72);header(body,"ВОЧКО · ИТОГ БОЯ")
- text(body,"ResultTitle",if s.phase=="won"then "Противник повержен"elseif s.phase=="draw"then "Ничья"elseif s.mode=="duel"then "Дуэль проиграна"else "Побег прервался",32,UDim2.fromOffset(20,98),UDim2.new(1,-40,0,80))
+ text(body,"ResultTitle",if s.phase=="won"then (if s.mode=="race"then "Забег выигран"else "Противник повержен")elseif s.phase=="draw"then "Ничья"elseif s.mode=="race"then "Забег проигран"elseif s.mode=="duel"then "Дуэль проиграна"else "Побег прервался",32,UDim2.fromOffset(20,98),UDim2.new(1,-40,0,80))
  local desc=if s.phase=="won" then "За победу: +4 монеты\nПобед в этой сессии: "..data.profile.wins else "Не хватило "..(if s.hp<=0 then "здоровья." else "розыгрышей.").."\nПопробуй другую стратегию или талант."
- if s.network then desc='Дуэль с '..s.enemyName..'\nЗдоровье: '..s.hp..' : '..s.enemyHp elseif s.mode=="duel"then desc="Тренировочная дуэль с ИИ\nЗдоровье: "..s.hp.." : "..s.enemyHp.."\nПобед над ИИ: "..(data.profile.duelWins or 0)end
+ if s.network then desc='Дуэль с '..s.enemyName..'\nЗдоровье: '..s.hp..' : '..s.enemyHp elseif s.mode=="race"then desc="Тренировочный забег с ИИ\nЗдоровье: "..s.hp.." : "..s.enemyHp.."\nПобед над ИИ: "..(data.profile.duelWins or 0) elseif s.mode=="duel"then desc="Тренировочная дуэль с ИИ\nЗдоровье: "..s.hp.." : "..s.enemyHp.."\nПобед над ИИ: "..(data.profile.duelWins or 0)end
  text(body,"ResultStats",desc.."\nМонеты этой сессии: "..data.profile.coins,21,UDim2.fromOffset(20,190),UDim2.new(1,-40,0,120),C.muted)
  text(body,"JournalTitle","Журнал боя",24,UDim2.fromOffset(20,330),UDim2.new(1,-40,0,35))
  text(body,"Journal",table.concat(s.journal,"\n"),16,UDim2.fromOffset(20,372),UDim2.new(1,-40,0,150),C.muted)
- actionDock(function()if s.network then send('return')else send("open",{mode=if s.mode=="duel"then "training"else "campaign"})end end,if s.network then 'ВСТАТЬ ИЗ-ЗА СТОЛА'else "НОВАЯ ПОПЫТКА")
+ actionDock(function()if s.network then send('return')else send("open",{mode=if s.mode=="race"then "training"elseif s.mode=="duel"then "training"else "campaign"})end end,if s.network then 'ВСТАТЬ ИЗ-ЗА СТОЛА'else "НОВАЯ ПОПЫТКА")
 end
 local function buildBattle(s)
  app.BackgroundTransparency=1
- TableScene.Create(player:WaitForChild("PlayerGui"),send,s.mode=="duel",s)
+ TableScene.Create(player:WaitForChild("PlayerGui"),send,s.mode=="duel"or s.mode=="race",s)
+ local raceUI=if s.mode=="race"then RaceUI.Create(app,send)else nil
  local top=make("Frame",{Name="BattleHUD",Size=UDim2.new(1,0,0,150),BackgroundTransparency=1},app)
- local title=text(top,"Title",if s.network then 'ВОЧКО / PVP'elseif s.mode=="duel"then "ВОЧКО / ДУЭЛЬ С ИИ"else "ВОЧКО / ТЕМНИЦА",20,UDim2.fromOffset(16,7),UDim2.new(.55,0,0,30));title.TextStrokeTransparency=.5
+ local title=text(top,"Title",if s.mode=="race"then "ВОЧКО / ЗАБЕГ"elseif s.network then 'ВОЧКО / PVP'elseif s.mode=="duel"then "ВОЧКО / ДУЭЛЬ С ИИ"else "ВОЧКО / ТЕМНИЦА",20,UDim2.fromOffset(16,7),UDim2.new(.55,0,0,30));title.TextStrokeTransparency=.5
  local surrenderArmed=false
  local returnButton
  returnButton=button(top,"Return","В комнату",UDim2.new(1,-116,0,7),UDim2.fromOffset(104,32),function()
@@ -248,6 +253,7 @@ local function buildBattle(s)
    name.Text=(if s.network then s.enemyName else 'ИИ').." · "..(theirClass and theirClass.name or "")
   end
   hudControls:Apply()
+  if raceUI then raceUI.Update(s) end
  end
  return {update=update,impact=function(value,maxHp,damage,side)
   local mobile=TableScene.IsMobileView(root.AbsoluteSize)
@@ -314,7 +320,9 @@ app:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 end)
 UIS.InputBegan:Connect(function(input,processed)
  if TableScene.CameraTuning or TableScene.HUDTuning or TableScene.ImpactActive or processed or not current or current.screen~="battle"or not current.battle or current.battle.phase~="combat"then return end
- if input.KeyCode==Enum.KeyCode.Space then send("draw")elseif input.KeyCode==Enum.KeyCode.F then send("stop")elseif input.KeyCode==Enum.KeyCode.Return then send("play")end
+ if current.battle.mode=="race"then
+  if input.KeyCode==Enum.KeyCode.Space then send("grab")elseif input.KeyCode==Enum.KeyCode.F then send("discard")elseif input.KeyCode==Enum.KeyCode.Return then send("stand")end
+ elseif input.KeyCode==Enum.KeyCode.Space then send("draw")elseif input.KeyCode==Enum.KeyCode.F then send("stop")elseif input.KeyCode==Enum.KeyCode.Return then send("play")end
 end)
 Assets.PreloadAll()
 send("snapshot")

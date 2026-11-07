@@ -45,6 +45,19 @@ return function()
     for _,p in station:GetChildren()do
      if p:IsA("BasePart")and p.Name~="CardDeck"and p.Name~="DeckPaper"and p.Name~="LaneEdge"then p.Transparency=1 end
     end
+    -- PvP is the only shared-table race: deck lives in the center next to an
+    -- empty slot for the currently open card.
+    if definition.key=="pvp"then
+     local deck=station:FindFirstChild("CardDeck")
+     if deck and math.abs(deck.Position.X)>0.05 then deck.CFrame=CFrame.new(0,4.77,-7) end
+     local paper=station:FindFirstChild("DeckPaper")
+     if paper and deck then paper.CFrame=deck.Position-Vector3.new(0,.02,0) end
+     if not station:FindFirstChild("OpenCardSlot")then
+      local slot=Instance.new("Part");slot.Name="OpenCardSlot";slot.Anchored=true;slot.CanCollide=false;slot.CanTouch=false
+      slot.Size=Vector3.new(1.2,.05,1.7);slot.Color=Color3.fromRGB(205,186,140);slot.Material=Enum.Material.SmoothPlastic
+      slot.CFrame=CFrame.new(1.7,4.62,-7);slot.Parent=station
+     end
+    end
    end
   end
  end

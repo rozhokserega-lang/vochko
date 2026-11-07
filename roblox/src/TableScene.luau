@@ -1,5 +1,6 @@
 -- Table-local presentation. Every action is still validated by the server.
 local Tarot=require(game.ReplicatedStorage.VochkoPrototype.Tarot)
+local RaceTarot=require(game.ReplicatedStorage.VochkoPrototype.RaceTarot)
 local ownTarotLabel,opponentTarotLabel
 local function tarotBox(parent,x,y,w,h)
  local box=Instance.new("TextLabel");box.Name="TarotEffect";box.Position=UDim2.fromOffset(x,y);box.Size=UDim2.fromOffset(w,h);box.BackgroundColor3=Color3.fromRGB(8,24,17);box.BackgroundTransparency=1;box.TextColor3=Color3.fromRGB(246,227,176);box.TextSize=22;box.Font=Enum.Font.GothamMedium;box.RichText=true;box.TextWrapped=true;box.TextYAlignment=Enum.TextYAlignment.Center;box.TextXAlignment=Enum.TextXAlignment.Left;box.TextStrokeTransparency=.65;box.ZIndex=40;box.Visible=false;box.Parent=parent
@@ -430,6 +431,14 @@ local function cardFace(card)
  local node=make("Frame",{Name="Card_"..card.id,Size=UDim2.fromOffset(144,200),BackgroundColor3=Color3.fromRGB(245,232,202),BorderSizePixel=0},board)
  make("UICorner",{CornerRadius=UDim.new(0,9)},node);outline(node,Color3.fromRGB(167,139,86),2)
  if card.tarot then
+  if card.kind=="tarot"then
+   local def=RaceTarot.Def(card.tarot);local good=def and def.good
+   local base=if good then Color3.fromRGB(35,80,55)else Color3.fromRGB(82,38,35)
+   node.BackgroundColor3=base;make("UIGradient",{Color=ColorSequence.new(base,Color3.fromRGB(15,25,20)),Rotation=55},node)
+   label(node,"RaceSymbol",if def then def.symbol else "?",18,28,108,84,40,if good then C.paper else Color3.fromRGB(239,180,164))
+   local title=label(node,"RaceTitle",if def then def.name else "ТАРО",4,143,136,50,17,C.paper);title.BackgroundColor3=C.ink;title.BackgroundTransparency=.15
+   return node
+  end
   local fallback=label(node,"LoadingTitle",card.rank,5,12,80,105,18,C.ink);fallback.Size=UDim2.new(1,-10,1,-24);fallback.TextXAlignment=Enum.TextXAlignment.Center
   Assets.CreateTarotArt(node,card.tarot)
   if not Scene.DuelMode then local title=label(node,"TarotName",card.rank,3,159,138,38,19,C.paper);title.BackgroundColor3=C.ink;title.BackgroundTransparency=.1 end
@@ -443,6 +452,16 @@ local function cardFace(card)
  ImageRectSize=Vector2.new(Assets.CardWidth,Assets.CardHeight),BackgroundTransparency=1,Size=UDim2.fromScale(1,1)},node)
  -- Keep the image visible so Roblox starts loading it; the native face stays underneath.
  return node
+end
+local function raceZoneText(z)
+ local lines={}
+ for _,card in z.cards do
+  if card.kind=="tarot"then
+   local def=RaceTarot.Def(card.tarot)
+   table.insert(lines,(if def and def.good then "✦ "else "✧ ")..(if def then def.name else "Таро"))
+  end
+ end
+ return table.concat(lines,"\n")
 end
 local function zoneTarotText(z,r,duel,target)
  local lines={}
@@ -476,6 +495,7 @@ local function tarotFeedback(zones,results,duel,title)
 end
 function Scene.Update(s)
  if not model then return end;latest=s
+ local race=s.mode=="race"
  local mobile=Scene.IsMobileView(workspace.CurrentCamera.ViewportSize)
  roundLabel.Text=(if Scene.DuelMode then s.round else s.roundsLeft).." / "..s.roundsTotal
  roundLabel.TextSize=if mobile then 56 else 46
@@ -484,6 +504,10 @@ function Scene.Update(s)
  board.SuppliesTitle.TextSize=if mobile then 36 else 29;board.DeckTitle.TextSize=if mobile then 34 else 28
  deckLabel.TextSize=if mobile then 44 else 36
  for _,id in {"draw","stop","play"}do buttons[id].TextSize=if mobile then 40 else 34 end
+ if race then
+  for _,b in buttons do b.Visible=false end
+  board.SuppliesTitle.Visible=false;board.DeckTitle.Visible=false
+ end
  for _,id in {"minus2","minus4"}do
   local b=buttons[id];local name=b:FindFirstChild("Name")
   name.Position=UDim2.fromOffset(80,40);name.Size=UDim2.fromOffset(140,50);name.TextSize=if mobile then 32 else 27
@@ -494,7 +518,7 @@ function Scene.Update(s)
  local keep={}
  for i,z in s.zones do
   local r=s.forecast.zones[i];local lane=lanes[i];local active=s.active==i
-  lane.tarot.Text=zoneTarotText(z,r,Scene.DuelMode,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if mobile then 26 elseif #z.cards>=3 then 20 else 22
+  lane.tarot.Text=if race then raceZoneText(z)else zoneTarotText(z,r,Scene.DuelMode,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if mobile then 26 elseif #z.cards>=3 then 20 else 22
   lane.sum.Text=(if Scene.DuelMode then "Сумма "else "")..(if #z.cards>0 then tostring(r.sum)else "—")
   lane.sum.TextSize=if Scene.DuelMode then (if mobile then 78 else 67)else (if mobile then 120 else 110)
   lane.status.TextSize=if mobile then (if Scene.DuelMode then 26 else 30)else (if Scene.DuelMode then 20 else 24)
@@ -549,32 +573,36 @@ function Scene.Update(s)
     card.title.TextSize=if mobile then 20 else 18;card.title.Position=UDim2.fromOffset(58,if id=='xray'then 28 else 5);card.title.Size=UDim2.fromOffset(72,if id=='xray'then 62 else 85)
     card.charges.TextSize=16;card.charges.Position=UDim2.fromOffset(58,3);card.charges.Size=UDim2.fromOffset(72,24)
     card.charges.Text=if id=="xray"then tostring(if side=="own"then s.scanCharges else s.duel.enemyScanCharges).." / 2"else ""
-    enable(card.frame,side=="own"and id=="xray"and combat and (s.scanCharges or 0)>0 and s.active~=nil and #s.peek==0)
+    enable(card.frame,side=="own"and id=="xray"and combat and (s.scanCharges or 0)>0 and s.active~=nil and (not s.peek or #s.peek==0))
     -- Passive opponent/own cards remain fully legible even without an action.
     if id~="xray"or side=="enemy"then card.frame.TextTransparency=0;card.frame.BackgroundTransparency=0 end
    end
   end
  end
- ownTarotLabel.Text=tarotFeedback(s.zones,s.forecast.zones,Scene.DuelMode,"ТВОИ ТАРО")
+ ownTarotLabel.Text=if race then "" else tarotFeedback(s.zones,s.forecast.zones,Scene.DuelMode,"ТВОИ ТАРО")
  if Scene.DuelMode and s.duel then Scene.UpdateEnemy(s)end
  targetLabel.Text=tostring(s.target);damageLabel.Text="УРОН  "..s.forecast.damage;deckLabel.Text=s.deckCount.." / "..s.deckTotal
- helpLabel.Text=if selected then "Выбран Срез "..(if selected=="minus4"then "−4"else "−2").." · выбери стол"elseif not combat then "Удар…"else (if Scene.DuelMode then (if s.duel.enemyReady then "ИИ готов · можно сыграть ход"else "Соперник набирает карты…")else "Space — карта     ·     F — стоп     ·     Enter — удар")
- if s.network then
+ helpLabel.Text=if race then "Space — взять   ·   F — сброс   ·   Enter — стоп"elseif selected then "Выбран Срез "..(if selected=="minus4"then "−4"else "−2").." · выбери стол"elseif not combat then "Удар…"else (if Scene.DuelMode then (if s.duel.enemyReady then "ИИ готов · можно сыграть ход"else "Соперник набирает карты…")else "Space — карта     ·     F — стоп     ·     Enter — удар")
+ if race then
+  local me=s.race and s.race.seats and s.race.seats[s.race.you]
+  helpLabel.Text=string.format("Цель %d · %.1f с · броня %d · сбросы %d/%d",s.target,s.timeLeft or 0,s.armor or 0,me and me.discardsLeft or 0,s.discardLimit or 2)
+ elseif s.network then
   helpLabel.Text=if s.phase=='countdown'then 'Начало через '..s.remaining elseif s.phase=='combat'then (if s.ready then 'Ты готов · ждём друга'elseif s.duel.enemyReady then 'Друг готов · твой ход'else 'Подтверди ход, когда будешь готов')..' · '..s.remaining..' сек.'else 'Розыгрыш хода…'
   board.EnemyJokersTitle.Text='ДЖОКЕРЫ ДРУГА';board.EnemySupplyTitle.Text='ПРЕДМЕТЫ ДРУГА';board.EnemyDeckTitle.Text='КОЛОДА ДРУГА'
  end
- helpLabel.Text..=" · Таро "..s.tarotUsed.." / "..s.tarotLimit
+ if not race then helpLabel.Text..=" · Таро "..s.tarotUsed.." / "..s.tarotLimit end
  if s.peek and #s.peek>0 then local names={}for _,c in s.peek do table.insert(names,c.rank..c.suit)end;helpLabel.Text..=" · Далее: "..table.concat(names," / ")end
 end
 function Scene.UpdateEnemy(s)
+ local race=s.mode=="race"
  local mobile=Scene.IsMobileView(workspace.CurrentCamera.ViewportSize)
  local results={}for i,z in s.duel.enemyZones do results[i]=z.result end
  opponentTarotLabel.Visible=false
- opponentTarotLabel.Text=tarotFeedback(s.duel.enemyZones,results,true,"ТАРО ИИ")
+ opponentTarotLabel.Text=if race then "" else tarotFeedback(s.duel.enemyZones,results,true,"ТАРО ИИ")
  local keep={}
  for i,z in s.duel.enemyZones do
   local lane=enemyLanes[i];local r=z.result
-  lane.tarot.Text=zoneTarotText(z,r,true,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if mobile then 26 elseif #z.cards>=3 then 20 else 22
+  lane.tarot.Text=if race then raceZoneText(z)else zoneTarotText(z,r,true,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if mobile then 26 elseif #z.cards>=3 then 20 else 22
   lane.sum.Text="Сумма "..(if #z.cards>0 and r then tostring(r.sum)else "—");lane.sum.TextSize=if mobile then 78 else 67
   lane.status.TextSize=if mobile then 26 else 22;lane.root:FindFirstChild("Name").TextSize=if mobile then 34 else 27
   lane.status.Text=(if r and r.bust then "ПЕРЕБОР"elseif r and r.exact then "ТОЧНО"elseif z.stood then "СТОП"elseif #z.cards==0 then "ЖДЁТ"else "НАБОР").." "..#z.cards.."/"..s.slots
@@ -599,7 +627,9 @@ function Scene.UpdateEnemy(s)
  for id,node in enemyNodes do if not keep[id]then node:Destroy();enemyNodes[id]=nil end end
  enemyDeckLabel.Text=s.duel.enemyDeckCount.." / "..s.duel.enemyDeckTotal
  enemyDeckLabel.TextSize=if mobile then 38 else 30
- for item,value in enemySupplyLabels do value.Text=(if item=="minus2"then "✂ −2"else "✂ −4").." ×"..s.duel.enemySupplies[item]end
+ for item,value in enemySupplyLabels do
+  if race then value.Visible=false else value.Text=(if item=="minus2"then "✂ −2"else "✂ −4").." ×"..s.duel.enemySupplies[item] end
+ end
 end
 function Scene.PlayAttack(s,onHit,onDone)
  if not model or not head or not s.receipt or not s.receipt.hits then task.defer(onDone);return end

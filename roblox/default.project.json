@@ -34,6 +34,12 @@
         },
         "Tarot": {
           "$path": "src/Tarot.luau"
+        },
+        "RaceTarot": {
+          "$path": "src/RaceTarot.luau"
+        },
+        "RaceUI": {
+          "$path": "src/RaceUI.luau"
         }
       }
     },
@@ -53,6 +59,12 @@
         },
         "Duel": {
           "$path": "src/Duel.luau"
+        },
+        "SharedDuel": {
+          "$path": "src/SharedDuel.luau"
+        },
+        "RaceBot": {
+          "$path": "src/RaceBot.luau"
         },
         "RoomBuilder": {
           "$path": "src/RoomBuilder.luau"
