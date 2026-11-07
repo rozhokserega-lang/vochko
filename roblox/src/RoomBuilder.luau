@@ -49,14 +49,17 @@ return function()
     -- empty slot for the currently open card.
     if definition.key=="pvp"then
      local deck=station:FindFirstChild("CardDeck")
-     if deck and math.abs(deck.Position.X)>0.05 then deck.CFrame=CFrame.new(0,4.77,-7) end
-     local paper=station:FindFirstChild("DeckPaper")
-     if paper and deck then paper.Position=deck.Position-Vector3.new(0,.02,0) end
-     if not station:FindFirstChild("OpenCardSlot")then
-      local slot=Instance.new("Part");slot.Name="OpenCardSlot";slot.Anchored=true;slot.CanCollide=false;slot.CanTouch=false
-      slot.Size=Vector3.new(1.2,.05,1.7);slot.Color=Color3.fromRGB(205,186,140);slot.Material=Enum.Material.SmoothPlastic
-      slot.CFrame=CFrame.new(1.7,4.62,-7);slot.Parent=station
+     if deck then
+      deck.Size=Vector3.new(2.4,.4,1.7)
+      deck.CFrame=CFrame.new(0,4.77,-7)
      end
+     local paper=station:FindFirstChild("DeckPaper")
+     if paper and deck then
+      paper.Size=Vector3.new(2.35,.28,1.65)
+      paper.Position=deck.Position-Vector3.new(0,.02,0)
+     end
+     local slot=station:FindFirstChild("OpenCardSlot")
+     if slot then slot:Destroy() end
     end
    end
   end

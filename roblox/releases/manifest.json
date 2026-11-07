@@ -122,8 +122,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 120715,
-      "sha256": "3014b1e652918eee59b0ecd1817ca945aa23989001d99b366baf55dc188e9f93"
+      "bytes": 123373,
+      "sha256": "0fe2a7dc25bf601f760e0ebc903316067b218b347872cbac2d12167a9b6459fb"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -202,8 +202,8 @@
     },
     {
       "path": "roblox/src/RoomBuilder.luau",
-      "bytes": 17591,
-      "sha256": "32590be2d77bb42a0fdf6765bd29e188d503b8e772ce9153706289ac0969a1ee"
+      "bytes": 17382,
+      "sha256": "b88f6b669328c746ba716be7e57a35b91df9647fdfb574e24b518e672e3a612d"
     },
     {
       "path": "roblox/src/Seating.luau",
@@ -222,8 +222,8 @@
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 48682,
-      "sha256": "4a5b89695f951014cd1da54b7ebaa585cd2885c6b6ea0b0dc8d8ed1985ce7c4d"
+      "bytes": 54929,
+      "sha256": "584779127af32a157bd15f45f5771b8263790b746332e4a8a678474a0d12abf0"
     },
     {
       "path": "roblox/src/Tarot.luau",
