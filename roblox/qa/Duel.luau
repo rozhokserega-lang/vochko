@@ -29,7 +29,7 @@ end
 finishBot(sample)
 local view=Duel.View(sample)
 check(view.mode=='duel' and view.enemyHp==100 and view.maxHp==100,'Fair duel HP')
-check(view.roundsTotal==8 and view.target==21 and view.slots==4,'Configured format')
+check(view.roundsTotal==10 and view.target==21 and view.slots==4,'Configured format')
 check(view.deck==nil and view.bot==nil,'No private deck in snapshot')
 for _,z in view.duel.enemyZones do
  check(z.result~=nil,'Live sum is public')
@@ -42,7 +42,7 @@ check(Duel.Evaluate(sample.player).damage==9,'Exact sharp zone uses PvP damage s
 local playerHp,botHp=sample.player.hp,sample.bot.hp
 check(Duel.Play(sample),'Resolve duel')
 check(not Duel.Play(sample),'No duplicate round resolution')
-check(sample.roundsLeft==7,'Exactly one round spent')
+check(sample.roundsLeft==9,'Exactly one round spent')
 local sum=0 for _,hit in sample.receipt.hits do sum+=hit.damage end
 check(sum==sample.receipt.enemyBefore-sample.bot.hp,'Outgoing shares equal actual loss')
 sum=0 for _,hit in sample.receipt.incoming.hits do sum+=hit.damage end
@@ -69,7 +69,7 @@ check(Duel.Evaluate(red.player).heal==3,'Healing adapted to duel scale')
 local outcomes={won=0,lost=0,draw=0}
 for seed=1,24 do
  local s=Duel.New(config,seed,'sharp','run-'..seed);Duel.Begin(s)
- for round=1,8 do
+ for round=1,config.DuelRounds do
   local guard=0
   while Battle.Active(s.player)and guard<80 do
    guard+=1;local index=Battle.Active(s.player);local r=Battle.Zone(s.player.zones[index],s.player.config.Target)
@@ -83,6 +83,6 @@ for seed=1,24 do
  end
  check(s.phase=='won'or s.phase=='lost'or s.phase=='draw','Match always terminates')
  outcomes[s.phase]+=1
- check(s.round<=8,'Round cap respected')
+ check(s.round<=config.DuelRounds,'Round cap respected')
 end
 return {passed=count,outcomes=outcomes}

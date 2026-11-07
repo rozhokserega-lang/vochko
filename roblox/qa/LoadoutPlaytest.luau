@@ -44,7 +44,7 @@ for _,class in L.Classes do for i=1,#L.Jokers-1 do for j=i+1,#L.Jokers do
  local seed=1000+games*97
  local gameState=D.New(c,seed,class.id,'game-'..games,D.ChooseTarot(seed),D.ChooseTarot(seed+1),{L.Jokers[i].id,L.Jokers[j].id})
  D.Begin(gameState)
- for turn=1,8 do
+ for turn=1,c.DuelRounds do
   D.PlanBot(gameState.player);D.PlanBot(gameState.bot);gameState.botReady=true
   local prev=gameState.roundsLeft
   check(D.Play(gameState),'Full-match turn accepted');check(gameState.roundsLeft==prev-1,'One turn spent')

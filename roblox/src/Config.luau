@@ -2,7 +2,7 @@
 local Config = {}
 Config.Defaults = table.freeze({ Target = 21, Slots = 4, Zones = 3, Rounds = 4,
  PlayerHP = 100, EnemyHP = 2400, EnemyAttack = 7, BustPenalty = 2, PvPRoundSeconds=60,
- RequestBurst = 30, RequestsPerSecond = 15, ResolveSeconds = 0.65, WinCoins = 4, DuelRoseHeal=8,DuelGuardianShield=6,DuelHP=100, DuelRounds=8, DuelHealScale=20, DuelResolveMs=3400,
+ RequestBurst = 30, RequestsPerSecond = 15, ResolveSeconds = 0.65, WinCoins = 4, DuelRoseHeal=8,DuelGuardianShield=6,DuelHP=100, DuelRounds=10, DuelHealScale=20, DuelResolveMs=3400,
  DuelRaceSeconds=20, DuelRaceHP=100, DuelRaceTarget=21, DuelRaceTargetStep=1, DuelRaceTargetCap=30,
  DuelRaceZones=3, DuelRaceSlots=4, DuelRaceDiscards=2, DuelRaceDiscardCooldownMs=800,
  DuelRaceGrabCooldownMs=600, DuelRaceGuardMs=400, DuelRaceArbMs=180, DuelRaceTarotTimeoutMs=1500,
@@ -10,7 +10,7 @@ Config.Defaults = table.freeze({ Target = 21, Slots = 4, Zones = 3, Rounds = 4,
  DuelRaceArmorCap=4, DuelRaceSuddenRound=8, DuelRaceSuddenPct=150, DuelRaceTiebreak=1,
  DuelRaceMaxRounds=24, DuelRaceHealScale=20 })
  local limits = { PvPRoundSeconds={20,180},Target = { 15, 40 }, Slots = { 3, 7 }, Rounds = { 1, 12 },
- DuelRoseHeal={0,20},DuelGuardianShield={0,15},DuelHP={30,200},DuelRounds={3,16},DuelHealScale={0,50},DuelResolveMs={1000,8000},
+ DuelRoseHeal={0,20},DuelGuardianShield={0,15},DuelHP={30,200},DuelRounds={3,10},DuelHealScale={0,50},DuelResolveMs={1000,8000},
  DuelRaceSeconds={10,60},DuelRaceHP={30,200},DuelRaceTarget={15,40},DuelRaceTargetStep={0,3},DuelRaceTargetCap={15,40},
  DuelRaceZones={1,5},DuelRaceSlots={2,7},DuelRaceDiscards={0,5},DuelRaceDiscardCooldownMs={0,3000},
  DuelRaceGrabCooldownMs={0,3000},DuelRaceGuardMs={0,2000},DuelRaceArbMs={0,1000},DuelRaceTarotTimeoutMs={0,10000},

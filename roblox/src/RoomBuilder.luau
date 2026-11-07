@@ -77,6 +77,22 @@ return function()
  end
  end
  end
+ local function recenterRoom(root)
+  -- Persisted rooms can keep an offset while spawn, cameras and the rest of
+  -- the prototype still assume the canonical origin.
+  local anchor=root:FindFirstChild("Foundation")
+  local targetX,targetZ=0,0
+  if not(anchor and anchor:IsA("BasePart"))then
+   local campaign=root:FindFirstChild("Table_campaign")
+   local visual=campaign and campaign:FindFirstChild("TavernTable")
+   anchor=visual and visual:FindFirstChildWhichIsA("MeshPart",true)
+   targetX,targetZ=19,-7
+  end
+  if not anchor then return end
+  local shift=Vector3.new(targetX-anchor.Position.X,0,targetZ-anchor.Position.Z)
+  if shift.Magnitude<.001 then return end
+  root:PivotTo(root:GetPivot()+shift)
+ end
  local function arrangeTables(root)
   -- Migrate already-built places as well as fresh Rojo builds, once.
   local training=root:FindFirstChild("Table_training")
@@ -130,7 +146,7 @@ return function()
   end
  end
  local existing = workspace:FindFirstChild("VochkoPrototype")
- if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model");arrangeTables(existing);ensureLamp(existing);ensureTableVisual(existing);ensureSeats(existing);pvpChairs(existing);return existing end
+ if existing then assert(existing:GetAttribute("Owner") == "vochko.prototype.v1", "Name occupied by another model");recenterRoom(existing);arrangeTables(existing);ensureLamp(existing);ensureTableVisual(existing);ensureSeats(existing);pvpChairs(existing);return existing end
  local root = Instance.new("Model"); root.Name = "VochkoPrototype"; root:SetAttribute("Owner", "vochko.prototype.v1"); root.Parent = workspace
  local colors = { stone = Color3.fromRGB(36,42,36), wood = Color3.fromRGB(61,39,24), brass = Color3.fromRGB(159,124,61), felt = Color3.fromRGB(18,61,41) }
  local n = 0
