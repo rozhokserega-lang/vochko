@@ -51,7 +51,7 @@ return function()
      local deck=station:FindFirstChild("CardDeck")
      if deck and math.abs(deck.Position.X)>0.05 then deck.CFrame=CFrame.new(0,4.77,-7) end
      local paper=station:FindFirstChild("DeckPaper")
-     if paper and deck then paper.CFrame=deck.Position-Vector3.new(0,.02,0) end
+     if paper and deck then paper.Position=deck.Position-Vector3.new(0,.02,0) end
      if not station:FindFirstChild("OpenCardSlot")then
       local slot=Instance.new("Part");slot.Name="OpenCardSlot";slot.Anchored=true;slot.CanCollide=false;slot.CanTouch=false
       slot.Size=Vector3.new(1.2,.05,1.7);slot.Color=Color3.fromRGB(205,186,140);slot.Material=Enum.Material.SmoothPlastic
