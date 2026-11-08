@@ -164,7 +164,7 @@ for i=1,3 do
  local card=part("OpponentCard",Vector3.new(.75,1.1,.045),Vector3.new(19+(i-2)*.4,6.65,-11.15),C.red)
  card.Orientation=Vector3.new(-14,0,(i-2)*-12)
  local trim=make("SurfaceGui",{Face=Enum.NormalId.Front,CanvasSize=Vector2.new(120,170),LightInfluence=0},card)
- local face=make("Frame",{Size=UDim2.new(1,-8,1,-8),Position=UDim2.fromOffset(4,4),BackgroundColor3=C.red,BorderSizePixel=0},trim);outline(face,C.paper,3)
+ local face=make("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.red,BorderSizePixel=0},trim);outline(face,C.paper,2)
  label(face,"Suit","♠",0,25,112,110,60,C.paper)
 end
 end
@@ -480,7 +480,10 @@ if card.tarot then
   local base=if good then Color3.fromRGB(35,80,55)else Color3.fromRGB(82,38,35)
   node.BackgroundColor3=base;make("UIGradient",{Color=ColorSequence.new(base,Color3.fromRGB(15,25,20)),Rotation=55},node)
   label(node,"RaceSymbol",if def then def.symbol else "?",18,28,108,84,40,if good then C.paper else Color3.fromRGB(239,180,164))
-  local title=label(node,"RaceTitle",if def then def.name else "ТАРО",4,143,136,50,17,C.paper);title.BackgroundColor3=C.ink;title.BackgroundTransparency=.15
+  -- Race atlas skin over the fallback symbol. Holder is 5/6 of card width -> aspect always 0.6, matching the atlas cell exactly.
+  local holder=make("Frame",{Name="RaceArt",AnchorPoint=Vector2.new(.5,0),Position=UDim2.fromScale(.5,0),Size=UDim2.fromScale(5/6,1),BackgroundTransparency=1,ClipsDescendants=true},node)
+  Assets.CreateTarotArt(holder,card.tarot)
+  local title=label(node,"RaceTitle",if def then def.name else "ТАРО",4,168,136,32,15,C.paper);title.BackgroundColor3=C.ink;title.BackgroundTransparency=.15
   return node
  end
  local fallback=label(node,"LoadingTitle",card.rank,5,12,80,105,18,C.ink);fallback.Size=UDim2.new(1,-10,1,-24);fallback.TextXAlignment=Enum.TextXAlignment.Center
@@ -528,9 +531,14 @@ if open.kind=="tarot"then
   local sym=if open.symbol then open.symbol else RaceTarot.Symbol(open.id)
   local name=if open.name then open.name else RaceTarot.Name(open.id)
   local good=if open.good~=nil then open.good else RaceTarot.IsGood(open.id)
+  raceOpenFrame.BackgroundColor3=if good then Color3.fromRGB(35,80,55)else Color3.fromRGB(82,38,35)
+  make("UIGradient",{Color=ColorSequence.new(raceOpenFrame.BackgroundColor3,Color3.fromRGB(15,25,20)),Rotation=55},raceOpenFrame)
   label(raceOpenFrame,"Symbol",sym,0,15,328,80,54,C.gold)
-  label(raceOpenFrame,"Title",name,0,100,328,36,24,C.paper)
-  label(raceOpenFrame,"Kind",if good then "✦ ХОРОШЕЕ"else "✧ ПЛОХОЕ",0,145,328,32,20,if good then C.good else C.bad)
+  -- Revealed tarot shows the race-atlas skin (aspect 0.6: height 223 -> width ~134) over the fallback text.
+  local holder=make("Frame",{Name="OpenArt",AnchorPoint=Vector2.new(.5,0),Position=UDim2.fromScale(.5,0),Size=UDim2.fromOffset(134,223),BackgroundTransparency=1},raceOpenFrame)
+  Assets.CreateTarotArt(holder,open.id)
+  local chip=make("Frame",{Name="TitleChip",Position=UDim2.fromOffset(24,178),Size=UDim2.fromOffset(280,38),BackgroundColor3=C.ink,BackgroundTransparency=.15,BorderSizePixel=0},raceOpenFrame)
+  label(chip,"RevealTitle",name.."  ·  "..(if good then "✦ ХОРОШЕЕ"else "✧ ПЛОХОЕ"),6,1,268,36,17,if good then C.good else Color3.fromRGB(239,180,164)).TextXAlignment=Enum.TextXAlignment.Center
  end
 elseif open.hidden or open.back then
  raceOpenFrame.BackgroundColor3=Color3.fromRGB(110,24,28)

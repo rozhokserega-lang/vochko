@@ -32,6 +32,8 @@ local function art(parent,kind,d,mini,race)
   make('UIGradient',{Color=ColorSequence.new(if d.good then Color3.fromRGB(44,89,62)else Color3.fromRGB(92,43,39),C.ink),Rotation=55},holder)
   local symbol=text(holder,'Symbol',d.symbol,0,0,0,0,24,if d.good then C.gold else Color3.fromRGB(239,180,164));symbol.Size=UDim2.fromScale(1,1);symbol.TextScaled=true;symbol.TextXAlignment=Enum.TextXAlignment.Center
   make('UITextSizeConstraint',{MaxTextSize=if mini then 34 else 70,MinTextSize=14},symbol)
+  -- Race atlas cell over the readable fallback (symbol/type stay visible while art loads).
+  A.CreateTarotArt(holder,d.id)
   if not mini then local label=text(holder,'Type',if d.good then 'ХОРОШЕЕ'else 'ПЛОХОЕ',4,4,0,18,11,if d.good then C.gold else Color3.fromRGB(239,180,164));label.Size=UDim2.new(1,-8,0,18);label.TextXAlignment=Enum.TextXAlignment.Center end
  elseif kind=='tarot'then local image=A.CreateTarotArt(holder,d.id);image.ScaleType=Enum.ScaleType.Fit
  else
