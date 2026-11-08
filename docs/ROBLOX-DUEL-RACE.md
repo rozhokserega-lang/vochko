@@ -184,8 +184,36 @@ their own decks.
 - 60% of tarot appearances are discarded by the bots. This is a real tradeoff (tempo vs
   2 armor), not a bug. If tarot should resolve more often, raise the good effects or
   reduce the discard armor; do not lower the timeout below 1.5 s.
-- Class/joker effects in the sim are mirrored and simplified. The real loadout layer
-  still needs to be applied to `SharedDuel` (sharp/healer/guardian + the existing jokers).
+- Class/joker effects are applied inside `SharedDuel` (`sharp/triple/blot`, `healer/crimson`,
+  `guardian`, `tandem`, `ladder`, `xray`), so the listed example is resolved.
 - The double-KO tiebreak is a new rule and needs a design sign-off.
-- Next: `SharedDuel.luau` (server core + QA), then `NetworkDuel` events
-  (`grab`, `discard`, `stand`), then `TableScene` (center deck, 3+3 zones, tarot backs).
+- Bot difficulty: `DuelRaceBotSkill` (0 easy / 1 normal / 2 strong) applies per session;
+  the race setup screen exposes ЛАЙТ/НОРМА/СИЛЬНО chips which send `{kind="skill"}`.
+- Candle (peek) renders a `RacePeek` strip near the central deck; tarot identities are
+  included in the peek payload.
+- Camera stays fixed during battle: the client re-applies the Scriptable fixed view if
+  anything reclaims it (self-healing guard in `render`).
+- Damage feedback: red screen flash + FOV punch on HP drop, soft green flash on heal
+  (`TableScene.ScreenFlash` / `HitPunch`); tarot identity reveal spawns a one-shot
+  particle burst above the deck (gold for good, dark red for bad).
+
+## 9. Asset pipeline (Nov 2026)
+
+All texture atlases are owned by `RozhokSer` and uploaded through the built-in Studio MCP
+(`roblox/tools/studio-mcp.cjs list|call|upload`, needs running Studio):
+
+| key | file | asset |
+|---|---|---|
+| `Assets.Cards` | `cards-atlas.png` 936×400 | `rbxassetid://126504298884435` |
+| `Assets.Portraits` | `opponents.png` 1000×400 | `rbxassetid://125128067761419` |
+| `Assets.LoadoutAtlas` | `loadout/loadout-atlas-v1.png` 1024×1536 | `rbxassetid://89222272583816` |
+| `Assets.Tarot` (12) | `tarot/*-v1.png` | fresh IDs, see `src/Assets.luau` |
+| `Assets.RaceAtlas` | `tarot/race-tarot-atlas.png` 720×960 (5×4 cells 144×240) | `rbxassetid://87719532143821` |
+
+Race tarot cell order is fixed in `Assets.raceArtIndex`; the source decks are the two
+user-supplied sheets («Винтажная колода зелёных таро-карт», «Мрачная колода негативных карт Таро»)
+with the intentional mirrored bottom halves (top/bottom table views).
+
+`roblox/tools/studio-push.cjs` injects current repo sources into the open Studio session
+(eliás a manual File→Revert), and `get_console_output` / `screen_capture`/`start_stop_play`
+give headless verification. Publish to `vo4ko_test` is still a manual Studio action.
