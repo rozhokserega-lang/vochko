@@ -2,7 +2,7 @@ local Assets={ Cards = "rbxassetid://126504298884435", CardWidth = 72, CardHeigh
  Portraits = "rbxassetid://125128067761419", PortraitWidth = 200, PortraitHeight = 200,
  LoadoutAtlas="rbxassetid://89222272583816",LoadoutWidth=1024,LoadoutHeight=1536,
  Tarot={candle="rbxassetid://79379639898464",tower="rbxassetid://70495481355526",scales="rbxassetid://89834733292942",seal="rbxassetid://114405523897722",echo="rbxassetid://139242092721503",sun="rbxassetid://72809768313497",coin="rbxassetid://114005423696242",rose="rbxassetid://116448422523262",thread="rbxassetid://118357318946115",hourglass="rbxassetid://127237404362279",guardian="rbxassetid://82826802074242",moon="rbxassetid://78955767921126"},
- RaceAtlas="rbxassetid://87719532143821",RaceAtlasW=720,RaceAtlasH=960,RaceAtlasCols=5,RaceCellW=144,RaceCellH=240,
+ RaceAtlas="rbxassetid://109658757322012",RaceAtlasW=720,RaceAtlasH=960,RaceAtlasCols=5,RaceCellW=144,RaceCellH=240,
  Source = "Original VOCHKO artwork exported from the repository; see assets/README.md" }
 -- Race arcana atlas order (top-left to bottom-right in race-tarot-atlas.png).
 local raceArtIndex={rose=0,guardian=1,sun=2,moon=3,scales=4,candle=5,clock=6,focus=7,wheel=8,justice=9,

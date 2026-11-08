@@ -5,6 +5,7 @@
   "robloxAssets": [
     "rbxassetid://0",
     "rbxassetid://105939024325017",
+    "rbxassetid://109658757322012",
     "rbxassetid://114005423696242",
     "rbxassetid://114405523897722",
     "rbxassetid://116448422523262",
@@ -22,7 +23,6 @@
     "rbxassetid://78955767921126",
     "rbxassetid://79379639898464",
     "rbxassetid://82826802074242",
-    "rbxassetid://87719532143821",
     "rbxassetid://89222272583816",
     "rbxassetid://89834733292942"
   ],
@@ -119,8 +119,8 @@
     },
     {
       "path": "roblox/assets/tarot/race-tarot-atlas.png",
-      "bytes": 669056,
-      "sha256": "786fedc82356788b826c251bf5e1b8383cfd8a72b12a4602a0c0b041c8be36ef"
+      "bytes": 1317476,
+      "sha256": "f5624450aacdc75158cf6532635fd283da09f6dcb3b3e76b7fc1436d280cca73"
     },
     {
       "path": "roblox/default.project.json",
@@ -129,13 +129,13 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 132887,
-      "sha256": "176332ac622d7f41acfbdf8f2e2a635c6dcc882366d240c52de8bcbfa681930f"
+      "bytes": 132889,
+      "sha256": "6fc48e7fef4d4c4cf0d86a92ac5b34e0bb87d89877fea778e73e85dc7d0478ec"
     },
     {
       "path": "roblox/src/Assets.luau",
-      "bytes": 4793,
-      "sha256": "938918f847abc70686f8536b23a663b1bf10f19fcc056223ed5a6196db1c74d0"
+      "bytes": 4794,
+      "sha256": "72018b805e3c1f4ea2733db709de3a997ddc57c3d0f1c29ef4cf1d54f2544a7f"
     },
     {
       "path": "roblox/src/Battle.luau",
