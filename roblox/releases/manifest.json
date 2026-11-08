@@ -122,8 +122,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 127667,
-      "sha256": "88bba28e5c25f4bbad7197c9feb4d1a87b0b3c9bfb373f23e5c5c0ae5c78e11d"
+      "bytes": 128476,
+      "sha256": "cb69834bde3d5caef47261e51386bb2d6025e92937efa655484e2d67e506b1c7"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -152,8 +152,8 @@
     },
     {
       "path": "roblox/src/Config.luau",
-      "bytes": 3432,
-      "sha256": "bbadee3a4141e7a97ba547b04ac66845d3a37c3e3a5c9fe7e4b0666a150435a1"
+      "bytes": 3504,
+      "sha256": "d9824ed2d5e7ae1a031b7f047f3d821d96ecffebaeca1dedc35c373eec94c39b"
     },
     {
       "path": "roblox/src/Duel.luau",
@@ -187,8 +187,8 @@
     },
     {
       "path": "roblox/src/RaceBot.luau",
-      "bytes": 3786,
-      "sha256": "ec1f1b822f5eab3df7cb457ab190d6b9e94411010051590b4391366cb554d695"
+      "bytes": 4928,
+      "sha256": "9f80c4c3a10fadcc1cbf292f018c9d64f203d32ea80de8826a73a1e87fdce8b2"
     },
     {
       "path": "roblox/src/RaceTarot.luau",
@@ -227,8 +227,8 @@
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 55497,
-      "sha256": "db8ceb8825ff4263e8a8827a4f74398687253f4874139a43be6b2afe1b9b45ef"
+      "bytes": 55662,
+      "sha256": "fd9819b7580cefe4f6f0a4108520c2b537cbe0174ec26747a9abe1c3a2a3123e"
     },
     {
       "path": "roblox/src/Tarot.luau",

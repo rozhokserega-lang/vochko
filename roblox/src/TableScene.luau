@@ -543,10 +543,11 @@ else
  local tag=(open.rank or "")..(open.suit or "")
  local tl=label(raceOpenFrame,"TL",tag,12,8,80,36,28,ink);tl.TextXAlignment=Enum.TextXAlignment.Left
  local br=label(raceOpenFrame,"BR",tag,328-92,223-44,80,36,28,ink);br.TextXAlignment=Enum.TextXAlignment.Right
+ -- Native readable face under the illustration: blank atlas (private asset) still shows rank+suit.
+ label(raceOpenFrame,"RankCenter",open.rank or "",0,14,328,44,32,ink)
+ label(raceOpenFrame,"SuitCenter",open.suit or "",0,58,328,116,88,ink)
  if open.rankIndex and open.suitIndex then
-  make("ImageLabel",{Name="Illu",Image=Assets.Cards,ImageRectOffset=Vector2.new((open.rankIndex-1)*Assets.CardWidth,(open.suitIndex-1)*Assets.CardHeight),ImageRectSize=Vector2.new(Assets.CardWidth,Assets.CardHeight),BackgroundTransparency=1,Size=UDim2.fromOffset(85,118),Position=UDim2.fromOffset((328-85)/2,(223-118)/2)},raceOpenFrame)
- else
-  label(raceOpenFrame,"SuitCenter",open.suit or "",0,50,328,110,76,ink)
+  make("ImageLabel",{Name="Illu",Image=Assets.Cards,ImageRectOffset=Vector2.new((open.rankIndex-1)*Assets.CardWidth,(open.suitIndex-1)*Assets.CardHeight),ImageRectSize=Vector2.new(Assets.CardWidth,Assets.CardHeight),BackgroundTransparency=1,Size=UDim2.fromOffset(118,164),Position=UDim2.fromOffset((328-118)/2,(223-164)/2)},raceOpenFrame)
  end
 end
 end
