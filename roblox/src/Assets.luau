@@ -2,7 +2,7 @@ local Assets={ Cards = "rbxassetid://116910231927744", CardWidth = 72, CardHeigh
  Portraits = "rbxassetid://134082763828827", PortraitWidth = 200, PortraitHeight = 200,
  LoadoutAtlas="rbxassetid://86798104751689",LoadoutWidth=683,LoadoutHeight=1024,
  Tarot={candle="rbxassetid://137978481106034",tower="rbxassetid://119812479439200",scales="rbxassetid://110912142893854",seal="rbxassetid://88778262837898",echo="rbxassetid://109217339038049",sun="rbxassetid://114121721951074",coin="rbxassetid://128665993134527",rose="rbxassetid://72227471886347",thread="rbxassetid://71467474698283",hourglass="rbxassetid://112005936945493",guardian="rbxassetid://128673203253779",moon="rbxassetid://90050084021940"},
- RaceAtlas="rbxassetid://0",RaceAtlasW=720,RaceAtlasH=960,RaceAtlasCols=5,RaceCellW=144,RaceCellH=240,
+ RaceAtlas="rbxassetid://87719532143821",RaceAtlasW=720,RaceAtlasH=960,RaceAtlasCols=5,RaceCellW=144,RaceCellH=240,
  Source = "Original VOCHKO artwork exported from the repository; see assets/README.md" }
 -- Race arcana atlas order (top-left to bottom-right in race-tarot-atlas.png).
 local raceArtIndex={rose=0,guardian=1,sun=2,moon=3,scales=4,candle=5,clock=6,focus=7,wheel=8,justice=9,
@@ -55,8 +55,7 @@ function Assets.PreloadAll()
   -- Give ContentProvider typed image dependencies, including on cold startup.
   local images={}
   local function add(id)local image=Instance.new('ImageLabel');image.Image=id;table.insert(images,image)end
-  add(Assets.Cards);add(Assets.Portraits);add(Assets.LoadoutAtlas)
-  if Assets.RaceAtlas~="rbxassetid://0"then add(Assets.RaceAtlas)end
+  add(Assets.Cards);add(Assets.Portraits);add(Assets.LoadoutAtlas);add(Assets.RaceAtlas)
   for _,id in Assets.Tarot do add(id)end
   local ok,err=pcall(function()
    game:GetService("ContentProvider"):PreloadAsync(images,function(id,status)

@@ -22,6 +22,7 @@
     "rbxassetid://77289558315048",
     "rbxassetid://78475411009007",
     "rbxassetid://86798104751689",
+    "rbxassetid://87719532143821",
     "rbxassetid://88778262837898",
     "rbxassetid://90050084021940"
   ],
@@ -128,13 +129,13 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 128922,
-      "sha256": "dcf922950028542de51b53bc3bb61821855a725354152d5d46361814583a6c39"
+      "bytes": 128934,
+      "sha256": "8680078599ebd0d0e05d8066c4d8e7563a9a3a2e9a72145566871764cfbc425f"
     },
     {
       "path": "roblox/src/Assets.luau",
-      "bytes": 4828,
-      "sha256": "389a4eada2a24ca2ff26c0c237a59a674c09068afde68a9054cb4142549bbbb3"
+      "bytes": 4794,
+      "sha256": "268862fd0e6e9ea891d3b17d57b163d37633017fb41e13fc423bbd82f52d7c62"
     },
     {
       "path": "roblox/src/Battle.luau",
