@@ -42,7 +42,10 @@ return function()
       mesh.Size=Vector3.new(definition.depth,mesh.Size.Y,18.2)
       mesh.CFrame=CFrame.new(definition.x,1.2+mesh.Size.Y/2,-7)*CFrame.Angles(0,math.pi/2,0)
       mesh.Anchored=true;mesh.CanCollide=false;mesh.CanTouch=false;visual.Parent=station
+      print("[VOCHKO Table] меш добавлен на",definition.key)
      else visual:Destroy()end
+    elseif not legacyMesh and not template then
+     warn("[VOCHKO Table] шаблона TavernTable нет в ServerStorage — таблицы собраны из примитивов")
     end
     local visual=station:FindFirstChild("TavernTable")
     for _,p in station:GetChildren()do
