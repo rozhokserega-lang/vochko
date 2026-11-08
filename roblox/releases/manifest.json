@@ -3,23 +3,23 @@
   "place": "roblox/releases/VochkoPrototype.rbxl",
   "note": "Source GLBs contain embedded geometry and PBR textures. The place loads published Roblox assets by ID; use the same Roblox account or grant access/reimport for a different owner.",
   "robloxAssets": [
+    "rbxassetid://105939024325017",
     "rbxassetid://109217339038049",
     "rbxassetid://110912142893854",
     "rbxassetid://112005936945493",
     "rbxassetid://114121721951074",
     "rbxassetid://116910231927744",
+    "rbxassetid://118189784508321",
     "rbxassetid://119812479439200",
-    "rbxassetid://120113061227864",
+    "rbxassetid://119827633018778",
     "rbxassetid://128665993134527",
     "rbxassetid://128673203253779",
-    "rbxassetid://130051660213969",
-    "rbxassetid://131877755470676",
     "rbxassetid://134082763828827",
     "rbxassetid://137978481106034",
     "rbxassetid://71467474698283",
     "rbxassetid://72227471886347",
-    "rbxassetid://80860405035004",
-    "rbxassetid://86423731367269",
+    "rbxassetid://77289558315048",
+    "rbxassetid://78475411009007",
     "rbxassetid://86798104751689",
     "rbxassetid://88778262837898",
     "rbxassetid://90050084021940"
@@ -98,7 +98,7 @@
     {
       "path": "roblox/assets/models/TavernTable.rbxmx",
       "bytes": 1167,
-      "sha256": "c16ea181f614147e7dd8c11a95a6a2542beba987b83a0e6486cb5cb7fc2d8374"
+      "sha256": "087478d934132974f3be5912c24504b31a8aea2c02a46ef86106f997aab00af7"
     },
     {
       "path": "roblox/assets/models/source-tripo-meshopt.glb",
@@ -123,7 +123,7 @@
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
       "bytes": 124347,
-      "sha256": "8c59583493018d9bf65ab05c4f91e7031b26437a38844992075f35e1e197a13d"
+      "sha256": "ea142b371ee20feab30086fdfb9df82bc29c46a801b93a41f7c87c06593880bd"
     },
     {
       "path": "roblox/src/Assets.luau",
