@@ -10,7 +10,7 @@ local CameraControls = require(remote:WaitForChild("CameraControls"))
 local Inventory=require(remote:WaitForChild("Inventory"))
 local Loadout=require(remote:WaitForChild("Loadout"))
 local HUDControls=require(remote:WaitForChild("HUDControls"))
-local RaceUI=require(remote:WaitForChild("RaceUI"))
+local SoundKit=require(remote:WaitForChild("SoundKit")) -- RaceUI left out: race tables are drawn by TableScene
 local hudControls
 local cameraControls
 local Input, Snapshot = remote:WaitForChild("Input"), remote:WaitForChild("Snapshot")
@@ -33,15 +33,17 @@ local function button(parent,name,content,pos,size,callback,color)
  local b=make("TextButton",{Name=name,Text=content,TextSize=17,Font=Enum.Font.Garamond,TextColor3=C.paper,
   Position=pos,Size=size,BackgroundColor3=color or C.green,BorderSizePixel=0,AutoButtonColor=true},parent)
  stroke(b);b:SetAttribute("Enabled",true)
- b.Activated:Connect(function()if b:GetAttribute("Enabled") then callback() end end);return b
+ b.Activated:Connect(function()if b:GetAttribute("Enabled")then SoundKit.Play("ui")callback()end end);return b
 end
 local function enabled(b,value)
  b:SetAttribute("Enabled",value);b.Active=value;b.AutoButtonColor=value;b.TextTransparency=if value then 0 else .55;b.BackgroundTransparency=if value then 0 else .45
 end
 local sequence,current,selectedItem,battleUI,screenKey=0,nil,nil,nil,nil
+local ACTION_CUES={grab="take",discard="discard",stand="stand",draw="take",stop="stand",play="stand"}
 local function send(kind,extra)
  sequence+=1;local data=extra or {};data.kind=kind;data.requestId=sequence
  if current and current.battle then data.sessionId=current.battle.id end
+ if data.sessionId and ACTION_CUES[kind] then SoundKit.Play(ACTION_CUES[kind]) end
  Input:FireServer(data)
 end
 local function atlas(parent,name,card,pos,size)
@@ -135,6 +137,7 @@ local function buildBattle(s)
  app.BackgroundTransparency=1
  TableScene.Create(player:WaitForChild("PlayerGui"),send,s.mode=="duel"or s.mode=="race",s)
  local raceUI=nil
+ local prevRace={}
  local top=make("Frame",{Name="BattleHUD",Size=UDim2.new(1,0,0,150),BackgroundTransparency=1},app)
  local title=text(top,"Title",if s.mode=="race"then "ВОЧКО / ЗАБЕГ"elseif s.network then 'ВОЧКО / PVP'elseif s.mode=="duel"then "ВОЧКО / ДУЭЛЬ С ИИ"else "ВОЧКО / ТЕМНИЦА",20,UDim2.fromOffset(16,7),UDim2.new(.55,0,0,30));title.TextStrokeTransparency=.5
  local surrenderArmed=false
@@ -254,9 +257,34 @@ local function buildBattle(s)
   end
   hudControls:Apply()
   if raceUI then raceUI.Update(s) end
+  if s.race then
+   local race=s.race
+   local open=race.open
+   local openKey=if open then (if open.kind=="tarot"then (open.id or "tarot")else tostring(open.rank or "")..tostring(open.suit or ""))else ""
+   if prevRace.openKey~=openKey then
+    if openKey~=""then SoundKit.Play("reveal")end
+    prevRace.openKey=openKey
+   end
+   local take=race.lastTake
+   local takeKey=if take and take.card then tostring(take.round).."·"..tostring(take.seat).."·"..tostring(take.card.id or take.card.rank or "")else ""
+   if takeKey~=""and prevRace.takeKey~=takeKey then
+    prevRace.takeKey=takeKey
+    local c=take.card
+    if c.kind=="tarot"and take.seat==race.you then SoundKit.Play(if c.good then "good"else "bad")
+    elseif take.seat~=race.you then SoundKit.Play("take") end
+   end
+   local armor=s.armor or 0
+   if prevRace.armor and armor>prevRace.armor then SoundKit.Play("armor")end
+   prevRace.armor=armor
+   local me=race.seats and race.seats[race.you]or nil
+   local stun=if me then me.stunIn or 0 else 0
+   if prevRace.stun and stun>0 and prevRace.stun<=0 then SoundKit.Play("stun")end
+   prevRace.stun=stun
+  end
  end
  return {update=update,impact=function(value,maxHp,damage,side)
   local mobile=TableScene.IsMobileView(root.AbsoluteSize)
+  if damage and damage>0 then SoundKit.Play(if side=="player"then "hurt"else "hit")elseif damage and damage<0 then SoundKit.Play("heal")end
   if damage and damage<0 then
    local panel=if side=="player"then own else enemy
    local pop=make("TextLabel",{Name="HealEffect",Text="♥ +"..(-damage),Font=Enum.Font.GothamBold,TextSize=if mobile then 19 else 25,TextColor3=Color3.fromRGB(151,255,163),TextStrokeTransparency=.3,BackgroundTransparency=1,AnchorPoint=Vector2.new(.5,1),Position=UDim2.new(.5,0,0,0),Size=UDim2.fromOffset(120,36),ZIndex=80},panel)
@@ -284,7 +312,10 @@ local function render(data,force)
   elseif screen=='pvpwait'then seatedWaiting(data)
   elseif screen=="notice"then simpleNotice(data)
   elseif screen=="battle"and s then
-   if s.phase=="won"or s.phase=="lost"or s.phase=="draw"then result(data)else battleUI=buildBattle(s);TableScene.Camera(root.AbsoluteSize,false)end
+   if s.phase=="won"or s.phase=="lost"or s.phase=="draw"then
+    if s.phase=="won"then SoundKit.Play("win")elseif s.phase=="draw"then SoundKit.Play("ui")else SoundKit.Play("lose")end
+    result(data)
+   else battleUI=buildBattle(s);TableScene.Camera(root.AbsoluteSize,false)end
   end
  elseif screen=="wardrobe"or screen=="duelsetup"or screen=='pvpwardrobe'then local old=app:FindFirstChild("Body");local pos=old and old.CanvasPosition;clearApp();wardrobe(data,screen=="duelsetup");if pos then app.Body.CanvasPosition=pos end end
  if screen=='pvpwait'and app:FindFirstChild('WaitingPanel')then app.WaitingPanel.Status.Text=data.notice.body end
@@ -325,4 +356,5 @@ UIS.InputBegan:Connect(function(input,processed)
  elseif input.KeyCode==Enum.KeyCode.Space then send("draw")elseif input.KeyCode==Enum.KeyCode.F then send("stop")elseif input.KeyCode==Enum.KeyCode.Return then send("play")end
 end)
 Assets.PreloadAll()
+SoundKit.Init()
 send("snapshot")

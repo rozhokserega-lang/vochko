@@ -40,6 +40,9 @@
         },
         "RaceUI": {
           "$path": "src/RaceUI.luau"
+        },
+        "SoundKit": {
+          "$path": "src/SoundKit.luau"
         }
       }
     },
