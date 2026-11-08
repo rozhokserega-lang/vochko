@@ -97,8 +97,23 @@ function Inventory.Build(app,data,duelSetup,send,race)
   if race and d.good~=nil then heading.TextColor3=if d.good then Color3.fromRGB(144,219,161)else Color3.fromRGB(239,180,164);heading.Text=d.name..(if d.good then ' · хорошее'else ' · плохое') end
   local desc=make('ScrollingFrame',{Name='DescriptionScroll',Position=UDim2.fromOffset(12,40),Size=UDim2.new(1,-24,1,-76),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y},info)
   local label=text(desc,'Description',d.desc,0,0,infoW-30,0,if short then 16 else 17);label.AutomaticSize=Enum.AutomaticSize.Y;label.TextYAlignment=Enum.TextYAlignment.Top
+  local botMode=race and data.battle and data.battle.duel and data.battle.duel.opponentKind=='bot'
+  if botMode then
+   text(info,'SkillTitle','СЛОЖНОСТЬ ИИ',12,infoH-58,infoW-24,16,12,C.muted)
+   local names={'ЛАЙТ','НОРМА','СИЛЬНО'}
+   local chipW=math.floor((infoW-24-8)/3)
+   local chosen=math.clamp(math.floor((p.botSkill or 1)+.5),0,2)
+   for i=1,3 do
+    local lvl=i-1
+    local b=button(info,'Skill'..i,names[i],12+(i-1)*(chipW+4),infoH-40,chipW,30,function()
+     p.botSkill=lvl;send('skill',{level=lvl})end,if lvl==chosen then C.gold else C.ink)
+    if lvl==chosen then b.TextColor3=C.ink else b.TextColor3=C.paper end
+    b.BackgroundTransparency=if lvl==chosen then .1 else .35
+   end
+   text(info,'SkillHint','ЛАЙТ · паузы ×2.1 · НОРМА ×1.4 · СИЛЬНО как раньше',12,infoH-6-18,infoW-24,16,10,C.muted)
+  end
   local chosen=selected(p,focus.kind,d.id,race)
-  text(info,'Hint',if frozen then 'Сборка зафиксирована'elseif chosen then '✓ В твоём наборе'else 'Нажми карту, чтобы выбрать',12,infoH-31,infoW-24,26,13,if chosen then C.gold else C.muted)
+  text(info,'Hint',if frozen then 'Сборка зафиксирована'elseif chosen then '✓ В твоём наборе'else 'Нажми карту, чтобы выбрать',12,if botMode then infoH-76 else infoH-31,infoW-24,26,13,if chosen then C.gold else C.muted)
   local dock=make('Frame',{Name='Dock',AnchorPoint=Vector2.new(0,1),Position=UDim2.new(0,12,1,-8),Size=UDim2.fromOffset(w-24,footer),BackgroundColor3=C.panel,BorderSizePixel=0},root);border(dock)
   local valid,why
   if race then valid,why=L.ValidateRace(p.class,p.jokers,raceTarot)else valid,why=L.Validate(p.class,p.jokers,p.duelTarot)end

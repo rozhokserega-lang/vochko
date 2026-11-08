@@ -20,7 +20,7 @@ local sessions, profiles, screens, requests, buckets = {}, {}, {}, {}, {}
 local talents = { sharp = true, healer = true, daring = true }
 task.spawn(Config.Load)
 local function profile(player)
- if not profiles[player] then profiles[player] = { class="sharp",jokers={"crimson","blot"},duelTarot={"rose","guardian","sun"},raceTarot=Loadout.DefaultRaceTarot(Random.new():NextInteger(1,1000000000)),raceSeed=Random.new():NextInteger(1,1000000000),talent = "sharp", deck = "classic", coins = 0, wins = 0, duelWins=0,tarot={},owned={},ach={},played=0,sleeveUses=0 } end
+ if not profiles[player] then profiles[player] = { class="sharp",jokers={"crimson","blot"},duelTarot={"rose","guardian","sun"},raceTarot=Loadout.DefaultRaceTarot(Random.new():NextInteger(1,1000000000)),raceSeed=Random.new():NextInteger(1,1000000000),talent = "sharp", deck = "classic", coins = 0, wins = 0, duelWins=0,tarot={},owned={},ach={},played=0,sleeveUses=0,botSkill=1 } end
  return profiles[player]
 end
 local function allowed(player)
@@ -168,6 +168,12 @@ Input.OnServerEvent:Connect(function(player, data)
    end
   end
   push(player);return
+ elseif kind == "skill" then
+  -- Difficulty of the training race bot: 0 easy, 1 normal, 2 strong.
+  local lvl = tonumber(data.level)
+  if lvl then profile(player).botSkill = math.clamp(math.floor(lvl), 0, 2) end
+  push(player)
+  return
  elseif kind == "talent" then
   local active = sessions[player]
   if active and active.phase ~= "won" and active.phase ~= "lost" and active.phase~="draw"then push(player,"Заверши текущий бой перед сменой таланта"); return end
@@ -186,6 +192,7 @@ Input.OnServerEvent:Connect(function(player, data)
    local botBuild=state.botBuild or RaceBot.Build((seed+7919)%1000000000)
    local fresh=SharedDuel.New(Config.ForDuelRace(),seed,{playerBuild,botBuild},{id=state.id})
    fresh.mode="race";fresh.training=true;fresh.trainingSeed=seed;fresh.botBuild=botBuild;fresh.botNextAt=0
+   fresh.config.BotSkill=p.botSkill or Config.Defaults.DuelRaceBotSkill
    sessions[player]=fresh;duelSessions[player]=fresh;screens[player]="battle"
    SharedDuel.Begin(fresh,workspace:GetServerTimeNow())
    push(player);return

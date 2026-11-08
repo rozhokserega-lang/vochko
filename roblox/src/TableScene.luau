@@ -19,6 +19,34 @@ local impactJob
 local enemyLanes,enemyNodes={},{ }
 local enemyDeckLabel,enemySupplyLabels,playerTarget
 Scene.DuelMode=false;Scene.CanvasHeight=900
+-- Damage feedback: a short colour flash on the screen plus a camera FOV punch.
+local flashLayer,flashTween
+function Scene.ScreenFlash(color,alpha)
+ local gui=Scene.PlayerGui
+ if not gui then return end
+ if not flashLayer or flashLayer.Parent==nil then
+  flashLayer=Instance.new("Frame");flashLayer.Name="VochkoFlash";flashLayer.ZIndex=95
+  flashLayer.AnchorPoint=Vector2.new(.5,.5);flashLayer.Position=UDim2.fromScale(.5,.5)
+  flashLayer.Size=UDim2.fromScale(1,1);flashLayer.BorderSizePixel=0;flashLayer.Parent=gui
+ end
+ flashLayer.BackgroundColor3=color
+ if flashTween then flashTween:Cancel()end
+ flashLayer.BackgroundTransparency=alpha or .45
+ flashTween=TweenService:Create(flashLayer,TweenInfo.new(.38,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{BackgroundTransparency=1})
+ flashTween:Play()
+end
+local punchBase,punchTween
+function Scene.HitPunch(strength)
+ local camera=workspace.CurrentCamera;if not camera then return end
+ -- Re-read the calm FOV only when no punch is in flight, otherwise cumulative
+ -- hit bursts would walk the field of view wider and wider.
+ if punchBase==nil then punchBase=camera.FieldOfView end
+ camera.FieldOfView=math.clamp(punchBase+(strength or 2.2),30,120)
+ if punchTween then punchTween:Cancel()end
+ punchTween=TweenService:Create(camera,TweenInfo.new(.16,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{FieldOfView=punchBase})
+ punchTween.Completed:Once(function()punchBase=nil end)
+ punchTween:Play()
+end
 local cameraPreferences={}
 local cameraLimits={distance={-5,12},height={6,24},pitch={18,70},fov={40,100}}
 function Scene.IsMobileView(viewport)
@@ -181,6 +209,7 @@ end
 end
 function Scene.Create(playerGui,send,duel,presentation)
 Scene.Destroy();dispatch=send;Scene.DuelMode=duel==true;Scene.RaceMode=presentation and presentation.mode=="race" or false;Scene.CanvasHeight=if duel then 1100 else 900
+Scene.PlayerGui=playerGui;Scene.lastHp=nil
 headLook=HeadLook.Create(Scene)
 Scene.Network=presentation and presentation.network==true
 Scene.WorldFrame=if Scene.Network then CFrame.new(0,0,-7)*CFrame.Angles(0,if presentation.seatIndex==2 then math.pi else 0,0)*CFrame.new(0,0,7)*CFrame.new(19,0,0)else CFrame.new()
@@ -513,6 +542,25 @@ for _,card in z.cards do
 end
 return table.concat(lines,"\n")
 end
+-- Candle peek: shows the next few deck cards near the central deck until effects expire.
+local racePeekRow,racePeekSlots=nil,nil
+local function paintPeek(peek)
+ if not racePeekRow then
+  racePeekRow=make("Frame",{Name="RacePeek",Position=UDim2.fromOffset(742,430),Size=UDim2.fromOffset(300,112),BackgroundTransparency=1},board)
+  label(racePeekRow,"PeekTitle","РАЗВЕДКА",0,0,130,22,17,C.gold).TextXAlignment=Enum.TextXAlignment.Left
+  racePeekSlots=make("Frame",{Name="Slots",Position=UDim2.fromOffset(0,24),Size=UDim2.fromOffset(300,88),BackgroundTransparency=1},racePeekRow)
+ end
+ racePeekRow.Visible=peek~=nil and #peek>0
+ racePeekSlots:ClearAllChildren()
+ if not racePeekRow.Visible then return end
+ for i,card in peek do
+  local x=(i-1)*98
+  local slot=make("Frame",{Name="P"..i,Position=UDim2.fromOffset(x,0),Size=UDim2.fromOffset(88,88),BackgroundTransparency=1},racePeekSlots)
+  local face=cardFace(card);face.Size=UDim2.fromOffset(144,200);face.Parent=slot;face.Position=UDim2.fromOffset(0,-52)
+  -- Visual scale maps the 144x200 face into the 88-pixel slot.
+  make("UIScale",{Scale=.615},face)
+ end
+end
 local function paintOpen(open)
 if not raceOpenFrame then return end
 raceOpenFrame:ClearAllChildren()
@@ -534,6 +582,7 @@ if open.kind=="tarot"then
   local sym=if open.symbol then open.symbol else RaceTarot.Symbol(open.id)
   local name=if open.name then open.name else RaceTarot.Name(open.id)
   local good=if open.good~=nil then open.good else RaceTarot.IsGood(open.id)
+  local def=RaceTarot.Def(open.id)
   raceOpenFrame.BackgroundColor3=if good then Color3.fromRGB(35,80,55)else Color3.fromRGB(82,38,35)
   make("UIGradient",{Color=ColorSequence.new(raceOpenFrame.BackgroundColor3,Color3.fromRGB(15,25,20)),Rotation=55},raceOpenFrame)
   label(raceOpenFrame,"Symbol",sym,0,15,170,70,40,C.gold)
@@ -543,6 +592,24 @@ if open.kind=="tarot"then
   local chip=make("Frame",{Name="TitleChip",Position=UDim2.fromOffset(6,168),Size=UDim2.fromOffset(158,58),BackgroundColor3=C.ink,BackgroundTransparency=.18,BorderSizePixel=0},raceOpenFrame)
   local rt=label(chip,"RevealTitle",def and def.name or name,4,2,150,18,14,if good then C.good else Color3.fromRGB(239,180,164));rt.TextXAlignment=Enum.TextXAlignment.Left
   local rd=label(chip,"RevealDesc",if def and def.desc then def.desc else "",4,18,150,38,11,C.paper);rd.TextWrapped=true;rd.TextYAlignment=Enum.TextYAlignment.Top
+  -- One-shot sparkle burst above the deck when a fresh tarot identity is shown.
+  local token=tostring((open.id or "?"))
+  if raceOpenFrame:GetAttribute("BurstToken")~=token and model then
+   raceOpenFrame:SetAttribute("BurstToken",token)
+   local lid=model:FindFirstChild("SharedDeckTop",true)
+   if lid then
+    local burst=Instance.new("Part");burst.Name="TarotBurst";burst.Size=Vector3.new(.1,.1,.1)
+    burst.Transparency=1;burst.CanCollide=false;burst.Anchored=true;burst.CFrame=lid.CFrame*CFrame.new(0,1,0);burst.Parent=model
+    local emitter=Instance.new("ParticleEmitter")
+    emitter.Texture="rbxasset://textures/particles/sparkles_main.dds"
+    emitter.Color=ColorSequence.new(if good then Color3.fromRGB(230,190,96)else Color3.fromRGB(150,50,60),Color3.fromRGB(255,240,200))
+    emitter.LightEmission=1;emitter.LightInfluence=0;emitter.Size=NumberSequence.new(.55,.05)
+    emitter.Lifetime=NumberRange.new(.45,.75);emitter.Rate=0;emitter.Speed=NumberRange.new(5,9)
+    emitter.SpreadAngle=Vector2.new(60,60);emitter.Acceleration=Vector3.new(0,-18,0);emitter.Parent=burst
+    emitter:Emit(if good then 26 else 18)
+    task.delay(1.2,function()burst:Destroy()end)
+   end
+  end
  end
 elseif open.hidden or open.back then
  raceOpenFrame.BackgroundColor3=Color3.fromRGB(110,24,28)
@@ -603,6 +670,13 @@ end
 
 function Scene.Update(s)
 if not model then return end;latest=s
+-- HP feedback: any drop flashes red + FOV punch, a rise flashes soft green.
+if s.hp and Scene.lastHp and s.hp<Scene.lastHp and s.phase~="idle"then
+ Scene.ScreenFlash(Color3.fromRGB(178,34,30),.45);Scene.HitPunch(2.4)
+elseif s.hp and Scene.lastHp and s.hp>Scene.lastHp then
+ Scene.ScreenFlash(Color3.fromRGB(58,132,86),.32)
+end
+if s.hp then Scene.lastHp=s.hp end
 local race=s.mode=="race"
 local mobile=Scene.IsMobileView(workspace.CurrentCamera.ViewportSize)
 roundLabel.Text=(if Scene.DuelMode then s.round else s.roundsLeft).." / "..s.roundsTotal
@@ -691,6 +765,7 @@ if race then
  end
  enable(buttons.stop,armed and zone~=nil and #zone.cards>0 and not contested)
  paintOpen(open)
+ paintPeek(me.peek)
 end
 ownTarotLabel.Visible=false
 if Scene.DuelMode then

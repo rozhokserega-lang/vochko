@@ -318,6 +318,12 @@ local function render(data,force)
    else battleUI=buildBattle(s);TableScene.Camera(root.AbsoluteSize,false)end
   end
  elseif screen=="wardrobe"or screen=="duelsetup"or screen=='pvpwardrobe'then local old=app:FindFirstChild("Body");local pos=old and old.CanvasPosition;clearApp();wardrobe(data,screen=="duelsetup");if pos then app.Body.CanvasPosition=pos end end
+ -- Battle camera guard: if anything reclaims the camera (engine default camera,
+ -- UI tooling) snap the fixed table view back on the next snapshot.
+ if screen=="battle"and s then
+  local cam=workspace.CurrentCamera
+  if cam and cam.CameraType~=Enum.CameraType.Scriptable then TableScene.Camera(root.AbsoluteSize,false) end
+ end
  if screen=='pvpwait'and app:FindFirstChild('WaitingPanel')then app.WaitingPanel.Status.Text=data.notice.body end
  if battleUI and s then battleUI.update(s)end
  message(data.message)

@@ -262,7 +262,14 @@ local function peekTop(state, count)
  local out = {}
  for i = #state.deck, math.max(1, #state.deck - count + 1), -1 do
   local card = state.deck[i]
-  if card then table.insert(out, publicCard(card)) end
+  if not card then continue end
+  if card.kind == "tarot" then
+   -- Candle peek reveals identities: name is needed for the preview strip.
+   table.insert(out, { kind = "tarot", id = card.tarot, name = RaceTarot.Name(card.tarot),
+    symbol = RaceTarot.Symbol(card.tarot), good = card.good })
+  else
+   table.insert(out, publicCard(card))
+  end
  end
  return out
 end

@@ -129,8 +129,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 129678,
-      "sha256": "11edc4f7c6de35ebd06377a3bb8de5463cedaa6f6131ada05e6536df52727927"
+      "bytes": 132884,
+      "sha256": "91f516b6ab0a1baf618038f4d4c24f13dd12d1ab8c7ef6281eb1d442713fbc0f"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -154,8 +154,8 @@
     },
     {
       "path": "roblox/src/Client.client.luau",
-      "bytes": 29450,
-      "sha256": "710808db014d1c87cde0f02cb7827814635a7c05fc2246abc0e938dcfa154f0a"
+      "bytes": 29780,
+      "sha256": "e03d78e060f1859f88e141477111484022e7dad02096cbf2637d5c2c5770af8d"
     },
     {
       "path": "roblox/src/Config.luau",
@@ -179,8 +179,8 @@
     },
     {
       "path": "roblox/src/Inventory.luau",
-      "bytes": 12758,
-      "sha256": "1c6fb8cfe0843a29d9dad53844932215951d36025d7b64e7ffd10367c6f158a0"
+      "bytes": 13667,
+      "sha256": "033de57500feb7a956b3758e5460c294788bb3ac011de5b328d6750f06cc0ea8"
     },
     {
       "path": "roblox/src/Loadout.luau",
@@ -219,13 +219,13 @@
     },
     {
       "path": "roblox/src/Server.server.luau",
-      "bytes": 18653,
-      "sha256": "6672ebd682cdcd4829744c3ca4734a5f65fa60854afdda22e3e6070192d11cfd"
+      "bytes": 18973,
+      "sha256": "128f7b54c1db3dc49851a5cef259db93157db0ccc3779be273a994a609c8d59f"
     },
     {
       "path": "roblox/src/SharedDuel.luau",
-      "bytes": 38007,
-      "sha256": "88e397967693b5e37d8c451f33fd8dbd9d8efb7ca081e91a5dcec357b4c0ef4a"
+      "bytes": 38297,
+      "sha256": "d5827ec07427535c69ef2921bb1d9bd82dda09bfb86430b013025532a9784de5"
     },
     {
       "path": "roblox/src/SoundKit.luau",
@@ -234,8 +234,8 @@
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 57051,
-      "sha256": "d890e3b867da46a0b7b4d898000187baffd46fcf17a849c04828a8a6d44d9ad8"
+      "bytes": 61273,
+      "sha256": "2445edd05ea262590ffd2e80c8db59a5ac3af39e96c635ac421db2fa892a4989"
     },
     {
       "path": "roblox/src/Tarot.luau",
