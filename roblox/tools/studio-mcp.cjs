@@ -14,7 +14,7 @@ const pending = new Map();
 let nextId = 0;
 
 proc.stdout.on('data', (chunk) => {
-	if (process.env.MCP_DEBUG) console.error('RAW', JSON.stringify(chunk.toString().slice(0, 400)));
+	if (process.env.MCP_DEBUG) console.error('RAW', JSON.stringify(chunk.toString()));
 	// MCP servers may frame with SSE-style "data:" lines or raw JSON lines.
 	for (const raw of chunk.toString().split('\n')) {
 		const line = raw.trim();
