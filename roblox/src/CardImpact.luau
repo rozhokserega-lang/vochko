@@ -67,6 +67,13 @@ function Impact.Play(args)
        local spark=make("Part",{Name="ImpactSpark",Size=Vector3.new(.055,.055,.3),CFrame=CFrame.new(goal),Anchored=true,CanCollide=false,CanTouch=false,CanQuery=false,Material=Enum.Material.Neon,Color=Color3.fromRGB(255,205,99)},folder)
        TweenService:Create(spark,TweenInfo.new(.18),{Position=goal+Vector3.new(math.cos(n*1.57)*.5,math.sin(n*1.57)*.5,.2),Transparency=1}):Play();Debris:AddItem(spark,.2)
       end
+      -- Star burst on top of the sparks; local texture, no asset permissions needed.
+      local burst=make("Part",{Name="ImpactBurst",Size=Vector3.new(.2,.2,.2),CFrame=CFrame.new(goal),Anchored=true,CanCollide=false,CanTouch=false,CanQuery=false,Transparency=1},folder)
+      local emitter=make("ParticleEmitter",{Texture="rbxasset://textures/particles/sparkles_main.dds",LightEmission=.9,LightInfluence=0,
+       Color=ColorSequence.new(Color3.fromRGB(255,214,120)),Size=NumberSequence.new(.24),Transparency=NumberSequence.new(0,1),
+       Lifetime=NumberRange.new(.25,.5),Speed=NumberRange.new(3.5,7),SpreadAngle=Vector2.new(180,180),Rate=0,Drag=4},burst)
+      emitter:Emit(14)
+      Debris:AddItem(burst,.7)
      end
      remaining-=1
      if remaining==0 then task.delay(.22,done)end

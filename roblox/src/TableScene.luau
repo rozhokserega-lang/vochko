@@ -262,7 +262,7 @@ for i=1,3 do
  label(lane,"Name","Стол "..i,20,455,270,35,35)
  local click=make("TextButton",{Name="UseItem",Size=UDim2.fromScale(1,1),Text="",BackgroundTransparency=1,ZIndex=50,Visible=false},lane)
  handlers[click]=function()if selected and latest and latest.phase=="combat" then dispatch("consume",{item=selected,zone=i})end end
- lanes[i]={root=lane,sum=sum,status=status,tarot=tarot,border=border,click=click}
+ lanes[i]={root=lane,sum=sum,status=status,tarot=tarot,border=border,click=click,scale=make("UIScale",{Scale=1},sum),prevSum=""}
 end
 -- Real layered stack with a raised burgundy top, bevel-like paper edges and a patterned back.
 placingOnTable=true
@@ -336,6 +336,7 @@ if duel then
   lane.sum.Parent.Parent.Parent:Destroy()
   local sx,sz=positionAt(x+155,595)
   lane.sum=raisedPlaque(playerGui,"ScorePlaque"..i,sx,sz,2.6,.6)
+  lane.scale=make("UIScale",{Scale=1},lane.sum)
   local root=make("Frame",{Name="EnemyZone"..i,Position=UDim2.fromOffset(x,65),Size=UDim2.fromOffset(310,240),BackgroundColor3=C.red,BackgroundTransparency=.9,BorderSizePixel=0},board)
   make("UICorner",{CornerRadius=UDim.new(0,14)},root)
   local border=outline(root,Color3.fromRGB(210,75,65),3)
@@ -344,7 +345,7 @@ if duel then
   local state=label(root,"Status","ГОТОВ",8,0,294,32,20,C.muted)
   label(root,"Name","Стол "..(i+3),12,205,286,30,26)
   local tarot=tarotBox(root,140,36,160,160)
-  enemyLanes[i]={root=root,sum=sum,status=state,border=border,tarot=tarot}
+  enemyLanes[i]={root=root,sum=sum,status=state,border=border,tarot=tarot,scale=make("UIScale",{Scale=1},sum),prevSum=""}
  end
  for _,n in {"DeckLayer4","DeckLayer3","DeckLayer2","DeckLayer1","Deck"}do local o=board:FindFirstChild(n);if o then o:Destroy()end end
  targetLabel.Parent.Parent.Parent:Destroy()
@@ -580,6 +581,12 @@ for i,z in zones do for _,card in z.cards do if card.tarot then
 end end end
 return if #lines>0 then title.."\n"..table.concat(lines,"\n")else ""
 end
+local function pulseSum(lane)
+ if not lane or not lane.scale then return end
+ lane.scale.Scale=1.16
+ TweenService:Create(lane.scale,TweenInfo.new(.28,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Scale=1}):Play()
+end
+
 function Scene.Update(s)
 if not model then return end;latest=s
 local race=s.mode=="race"
@@ -610,8 +617,9 @@ local keep={}
 for i,z in s.zones do
  local r=s.forecast.zones[i];local lane=lanes[i];local active=s.active==i
  lane.tarot.Text=if race then raceZoneText(z)else zoneTarotText(z,r,Scene.DuelMode,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if mobile then 26 elseif #z.cards>=3 then 20 else 22
- lane.sum.Text=(if Scene.DuelMode then "Сумма "else "")..(if #z.cards>0 then tostring(r.sum)else "—")
- lane.sum.TextSize=if Scene.DuelMode then (if mobile then 78 else 67)else (if mobile then 120 else 110)
+ local sumText=(if Scene.DuelMode then "Сумма "else "")..(if #z.cards>0 then tostring(r.sum)else "—")
+ lane.sum.Text=sumText;lane.sum.TextSize=if Scene.DuelMode then (if mobile then 78 else 67)else (if mobile then 120 else 110)
+ if lane.prevSum~=sumText then lane.prevSum=sumText;pulseSum(lane)end
  lane.status.TextSize=if mobile then (if Scene.DuelMode then 26 else 30)else (if Scene.DuelMode then 20 else 24)
  lane.root:FindFirstChild("Name").TextSize=if mobile then (if Scene.DuelMode then 34 else 40)else (if Scene.DuelMode then 27 else 35)
  lane.status.Text=(if r.bust then "ПЕРЕБОР" elseif r.exact then "ТОЧНО" elseif z.stood then "СТОП" elseif active then "НАБОР" else "ЖДЁТ").."   "..#z.cards.."/"..s.slots
@@ -712,7 +720,9 @@ local keep={}
 for i,z in s.duel.enemyZones do
  local lane=enemyLanes[i];local r=z.result
  lane.tarot.Text=if race then raceZoneText(z)else zoneTarotText(z,r,true,s.target);lane.tarot.Visible=lane.tarot.Text~="";lane.tarot.TextSize=if mobile then 26 elseif #z.cards>=3 then 20 else 22
- lane.sum.Text="Сумма "..(if #z.cards>0 and r then tostring(r.sum)else "—");lane.sum.TextSize=if mobile then 78 else 67
+ local enemySumText="Сумма "..(if #z.cards>0 and r then tostring(r.sum)else "—")
+ lane.sum.Text=enemySumText;lane.sum.TextSize=if mobile then 78 else 67
+ if lane.prevSum~=enemySumText then lane.prevSum=enemySumText;pulseSum(lane)end
  lane.status.TextSize=if mobile then 26 else 22;lane.root:FindFirstChild("Name").TextSize=if mobile then 34 else 27
  lane.status.Text=(if r and r.bust then "ПЕРЕБОР"elseif r and r.exact then "ТОЧНО"elseif z.stood then "СТОП"elseif #z.cards==0 then "ЖДЁТ"else "НАБОР").." "..#z.cards.."/"..s.slots
  lane.status.Text..=" · Урон "..(r and r.damage or 0)
