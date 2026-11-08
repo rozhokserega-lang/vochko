@@ -134,7 +134,7 @@ end
 local function buildBattle(s)
  app.BackgroundTransparency=1
  TableScene.Create(player:WaitForChild("PlayerGui"),send,s.mode=="duel"or s.mode=="race",s)
- local raceUI=if s.mode=="race"then RaceUI.Create(app,send)else nil
+ local raceUI=nil
  local top=make("Frame",{Name="BattleHUD",Size=UDim2.new(1,0,0,150),BackgroundTransparency=1},app)
  local title=text(top,"Title",if s.mode=="race"then "ВОЧКО / ЗАБЕГ"elseif s.network then 'ВОЧКО / PVP'elseif s.mode=="duel"then "ВОЧКО / ДУЭЛЬ С ИИ"else "ВОЧКО / ТЕМНИЦА",20,UDim2.fromOffset(16,7),UDim2.new(.55,0,0,30));title.TextStrokeTransparency=.5
  local surrenderArmed=false
