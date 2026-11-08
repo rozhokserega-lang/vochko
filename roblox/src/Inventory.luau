@@ -27,14 +27,12 @@ local function selected(p,kind,id,race)
  return table.find(values,id)~=nil
 end
 local function art(parent,kind,d,mini,race)
- local holder=make('Frame',{Name='Art',Position=UDim2.fromOffset(6,6),Size=UDim2.new(1,-12,1,-12),BackgroundColor3=Color3.fromRGB(225,205,156),BorderSizePixel=0,ClipsDescendants=true},parent);border(holder,C.gold)
+ local holder=make('Frame',{Name='Art',Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(225,205,156),BorderSizePixel=0,ClipsDescendants=true},parent);border(holder,C.gold)
  if kind=='tarot'and race then
-  make('UIGradient',{Color=ColorSequence.new(if d.good then Color3.fromRGB(44,89,62)else Color3.fromRGB(92,43,39),C.ink),Rotation=55},holder)
   local symbol=text(holder,'Symbol',d.symbol,0,0,0,0,24,if d.good then C.gold else Color3.fromRGB(239,180,164));symbol.Size=UDim2.fromScale(1,1);symbol.TextScaled=true;symbol.TextXAlignment=Enum.TextXAlignment.Center
   make('UITextSizeConstraint',{MaxTextSize=if mini then 34 else 70,MinTextSize=14},symbol)
-  -- Race atlas cell over the readable fallback (symbol/type stay visible while art loads).
+  -- Race atlas cell over the readable fallback (art itself carries the printed name).
   A.CreateTarotArt(holder,d.id)
-  if not mini then local label=text(holder,'Type',if d.good then 'ХОРОШЕЕ'else 'ПЛОХОЕ',4,4,0,18,11,if d.good then C.gold else Color3.fromRGB(239,180,164));label.Size=UDim2.new(1,-8,0,18);label.TextXAlignment=Enum.TextXAlignment.Center end
  elseif kind=='tarot'then local image=A.CreateTarotArt(holder,d.id);image.ScaleType=Enum.ScaleType.Fit
  else
   make('UIGradient',{Color=ColorSequence.new(Color3.fromRGB(249,230,180),Color3.fromRGB(157,126,72)),Rotation=45},holder)
@@ -78,12 +76,13 @@ function Inventory.Build(app,data,duelSetup,send,race)
    if tab==e[1]then b.UIStroke.Color=C.gold;b.UIStroke.Thickness=2;b.TextColor3=C.gold end
   end
   local browser=make('ScrollingFrame',{Name='CardBrowser',Position=UDim2.fromOffset(12,if portrait then 0 else mainY),Size=UDim2.fromOffset(browserW,browserH),BackgroundColor3=C.panel,BorderSizePixel=0,ScrollBarThickness=4,ScrollBarImageColor3=C.gold,ScrollingDirection=Enum.ScrollingDirection.X,CanvasSize=UDim2.new()},mainParent);border(browser)
-  local cardH=browserH-16;local cardW=math.clamp(math.floor(cardH*.68),94,170);local cards=list(tab,race)
+  local cardH=browserH-16;local cardW=math.clamp(math.floor(cardH*.62),94,190);local cards=list(tab,race)
   for i,d in cards do
    local chosen=selected(p,tab,d.id,race)
-   local card=button(browser,'Card_'..d.id,'',8+(i-1)*(cardW+12),6,cardW,cardH,function()choose(tab,d.id)end,if chosen then Color3.fromRGB(73,66,37)else C.raised)
-   card.UIStroke.Color=if chosen then C.gold else C.edge;card.UIStroke.Thickness=if chosen then 4 else 1;card.UIStroke.Transparency=if chosen then 0 else .25;art(card,tab,d,false,race)
-   if race and tab=='tarot'then local mark=text(card,'Kind',if d.good then 'ХОРОШЕЕ'else 'ПЛОХОЕ',5,3,cardW-10,20,11,if d.good then Color3.fromRGB(144,219,161)else Color3.fromRGB(239,180,164));mark.TextXAlignment=Enum.TextXAlignment.Center;mark.ZIndex=4 end
+   local card=button(browser,'Card_'..d.id,'',8+(i-1)*(cardW+12),6,cardW,cardH,function()choose(tab,d.id)end,if chosen then Color3.fromRGB(84,74,40)else C.raised)
+   card.UIStroke.Color=if chosen then Color3.fromRGB(255,214,110) else C.edge;card.UIStroke.Thickness=if chosen then 6 else 1;card.UIStroke.Transparency=if chosen then 0 else .3
+   art(card,tab,d,false,race)
+   if race and tab=='tarot'then local mark=text(card,'Kind',if d.good then 'ХОРОШЕЕ'else 'ПЛОХОЕ',0,3,cardW,20,11,if d.good then Color3.fromRGB(144,219,161)else Color3.fromRGB(239,180,164));mark.TextXAlignment=Enum.TextXAlignment.Center;mark.ZIndex=5;mark.BackgroundColor3=C.ink;mark.BackgroundTransparency=.3 end
    -- Race tarot art already has the name printed inside; skip the second label.
    if not (race and tab=='tarot')then local name=text(card,'CardName',d.name,5,cardH-40,cardW-10,36,if short then 15 else 16);name.TextXAlignment=Enum.TextXAlignment.Center;name.BackgroundColor3=C.ink;name.BackgroundTransparency=.1;name.ZIndex=3 end
    if chosen then make('UIGradient',{Color=ColorSequence.new(Color3.fromRGB(255,225,140),Color3.fromRGB(255,225,140)),Transparency=NumberSequence.new(.82,.95),Rotation=90},card)end
