@@ -448,8 +448,8 @@ if racePresentation then
  local lid=part("SharedDeckTop",Vector3.new(2.38,.055,1.66),Vector3.new(),C.red)
  lid.CFrame=stack*CFrame.new(0,.5,0)
  local openGui=make("SurfaceGui",{Name="RaceOpenFace",Adornee=lid,Face=Enum.NormalId.Top,CanvasSize=Vector2.new(340,235),LightInfluence=0.1,ZOffset=.03},lid)
- -- The open card itself is a card (aspect 0.72), not the whole lid: 170x235 centred on the 340x235 canvas.
- raceOpenFrame=make("Frame",{Name="Face",Position=UDim2.fromOffset(85,0),Size=UDim2.fromOffset(170,235),BackgroundColor3=C.red,BorderSizePixel=0},openGui);outline(raceOpenFrame,C.gold,3)
+ -- The open card covers the whole deck top: card-sized footprint matching the lid.
+ raceOpenFrame=make("Frame",{Name="Face",Position=UDim2.fromOffset(0,0),Size=UDim2.fromScale(1,1),BackgroundColor3=C.red,BorderSizePixel=0},openGui);outline(raceOpenFrame,C.gold,3)
  placingOnTable=false
  -- Left of deck: Deck count badge
  board.DeckTitle.Text="ОБЩАЯ КОЛОДА";board.DeckTitle.Position=UDim2.fromOffset(550,435);board.DeckTitle.Size=UDim2.fromOffset(190,26);board.DeckTitle.TextSize=22
@@ -567,17 +567,17 @@ raceOpenFrame:ClearAllChildren()
 if not open then
  raceOpenFrame.BackgroundColor3=Color3.fromRGB(110,24,28)
  make("UIStroke",{Color=C.gold,Thickness=3},raceOpenFrame)
- label(raceOpenFrame,"DeckBackPattern","♠",0,45,170,110,64,C.paper)
- label(raceOpenFrame,"DeckBackTitle","КОЛОДА",0,160,170,40,22,C.paper)
+ label(raceOpenFrame,"DeckBackPattern","♠",0,40,340,110,64,C.paper)
+ label(raceOpenFrame,"DeckBackTitle","КОЛОДА",0,160,340,40,24,C.paper)
  return
 end
 if open.kind=="tarot"then
  raceOpenFrame.BackgroundColor3=Color3.fromRGB(38,30,52)
  make("UIStroke",{Color=C.gold,Thickness=3},raceOpenFrame)
  if open.hidden or open.back then
-  label(raceOpenFrame,"Symbol","?",0,25,170,90,52,C.gold)
-  label(raceOpenFrame,"Title","ТАРО",0,120,170,34,22,C.paper)
-  label(raceOpenFrame,"Hint","при взятии",0,160,170,32,15,C.muted)
+  label(raceOpenFrame,"Symbol","?",0,20,340,90,60,C.gold)
+  label(raceOpenFrame,"Title","ТАРО",0,115,340,34,24,C.paper)
+  label(raceOpenFrame,"Hint","при взятии",0,160,340,30,16,C.muted)
  else
   local sym=if open.symbol then open.symbol else RaceTarot.Symbol(open.id)
   local name=if open.name then open.name else RaceTarot.Name(open.id)
@@ -585,13 +585,13 @@ if open.kind=="tarot"then
   local def=RaceTarot.Def(open.id)
   raceOpenFrame.BackgroundColor3=if good then Color3.fromRGB(35,80,55)else Color3.fromRGB(82,38,35)
   make("UIGradient",{Color=ColorSequence.new(raceOpenFrame.BackgroundColor3,Color3.fromRGB(15,25,20)),Rotation=55},raceOpenFrame)
-  label(raceOpenFrame,"Symbol",sym,0,15,170,70,40,C.gold)
+  label(raceOpenFrame,"Symbol",sym,0,8,340,54,38,C.gold)
   -- Revealed tarot shows the race-atlas skin (aspect 0.6) over the fallback text.
-  local holder=make("Frame",{Name="OpenArt",AnchorPoint=Vector2.new(.5,0),Position=UDim2.fromScale(.5,0),Size=UDim2.fromOffset(139,232),BackgroundTransparency=1},raceOpenFrame)
+  local holder=make("Frame",{Name="OpenArt",Position=UDim2.fromOffset(95,10),Size=UDim2.fromOffset(150,222),BackgroundTransparency=1},raceOpenFrame)
   Assets.CreateTarotArt(holder,open.id)
-  local chip=make("Frame",{Name="TitleChip",Position=UDim2.fromOffset(6,168),Size=UDim2.fromOffset(158,58),BackgroundColor3=C.ink,BackgroundTransparency=.18,BorderSizePixel=0},raceOpenFrame)
-  local rt=label(chip,"RevealTitle",def and def.name or name,4,2,150,18,14,if good then C.good else Color3.fromRGB(239,180,164));rt.TextXAlignment=Enum.TextXAlignment.Left
-  local rd=label(chip,"RevealDesc",if def and def.desc then def.desc else "",4,18,150,38,11,C.paper);rd.TextWrapped=true;rd.TextYAlignment=Enum.TextYAlignment.Top
+  local chip=make("Frame",{Name="TitleChip",Position=UDim2.fromOffset(88,168),Size=UDim2.fromOffset(164,56),BackgroundColor3=C.ink,BackgroundTransparency=.18,BorderSizePixel=0},raceOpenFrame)
+  local rt=label(chip,"RevealTitle",def and def.name or name,6,2,152,18,14,if good then C.good else Color3.fromRGB(239,180,164));rt.TextXAlignment=Enum.TextXAlignment.Left
+  local rd=label(chip,"RevealDesc",if def and def.desc then def.desc else "",6,18,152,36,11,C.paper);rd.TextWrapped=true;rd.TextYAlignment=Enum.TextYAlignment.Top
   -- One-shot sparkle burst above the deck when a fresh tarot identity is shown.
   local token=tostring((open.id or "?"))
   if raceOpenFrame:GetAttribute("BurstToken")~=token and model then
@@ -614,19 +614,19 @@ if open.kind=="tarot"then
 elseif open.hidden or open.back then
  raceOpenFrame.BackgroundColor3=Color3.fromRGB(110,24,28)
  make("UIStroke",{Color=C.gold,Thickness=3},raceOpenFrame)
- label(raceOpenFrame,"Back","♠",0,45,170,110,60,C.paper)
+ label(raceOpenFrame,"Back","♠",0,45,340,110,64,C.paper)
 else
  raceOpenFrame.BackgroundColor3=Color3.fromRGB(246,240,225)
  make("UIStroke",{Color=Color3.fromRGB(80,50,30),Thickness=2},raceOpenFrame)
  local ink=if open.red then Color3.fromRGB(180,30,35)else Color3.fromRGB(25,25,30)
  local tag=(open.rank or "")..(open.suit or "")
- local tl=label(raceOpenFrame,"TL",tag,6,4,58,22,14,ink);tl.TextXAlignment=Enum.TextXAlignment.Left
- local br=label(raceOpenFrame,"BR",tag,170-64,235-28,58,22,14,ink);br.TextXAlignment=Enum.TextXAlignment.Right
+ local tl=label(raceOpenFrame,"TL",tag,10,6,64,28,18,ink);tl.TextXAlignment=Enum.TextXAlignment.Left
+ local br=label(raceOpenFrame,"BR",tag,340-74,235-34,64,28,18,ink);br.TextXAlignment=Enum.TextXAlignment.Right
  -- Native readable face under the illustration: blank atlas still shows rank+suit.
- label(raceOpenFrame,"RankCenter",open.rank or "",0,10,170,24,17,ink)
- label(raceOpenFrame,"SuitCenter",open.suit or "",0,40,170,80,48,ink)
+ label(raceOpenFrame,"RankCenter",open.rank or "",0,10,340,36,22,ink)
+ label(raceOpenFrame,"SuitCenter",open.suit or "",0,52,340,96,62,ink)
  if open.rankIndex and open.suitIndex then
-  -- The atlas cell (72x100) has the exact card aspect 0.72: full-bleed at 170x235 is undistorted.
+  -- The portrait card art covers the whole deck top exactly, as if the deck were the card.
   make("ImageLabel",{Name="Illu",Image=Assets.Cards,ImageRectOffset=Vector2.new((open.rankIndex-1)*Assets.CardWidth,(open.suitIndex-1)*Assets.CardHeight),ImageRectSize=Vector2.new(Assets.CardWidth,Assets.CardHeight),BackgroundTransparency=1,Size=UDim2.fromScale(1,1)},raceOpenFrame)
  end
 end
