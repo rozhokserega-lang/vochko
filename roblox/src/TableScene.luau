@@ -541,7 +541,7 @@ if open.kind=="tarot"then
   local holder=make("Frame",{Name="OpenArt",AnchorPoint=Vector2.new(.5,0),Position=UDim2.fromScale(.5,0),Size=UDim2.fromOffset(139,232),BackgroundTransparency=1},raceOpenFrame)
   Assets.CreateTarotArt(holder,open.id)
   local chip=make("Frame",{Name="TitleChip",Position=UDim2.fromOffset(6,168),Size=UDim2.fromOffset(158,58),BackgroundColor3=C.ink,BackgroundTransparency=.18,BorderSizePixel=0},raceOpenFrame)
-  local rt=label(chip,"RevealTitle",def and def.name or name,4,2,150,18,14,if good then C.good else Color3.fromRGB(239,180,164)).TextXAlignment=Enum.TextXAlignment.Left
+  local rt=label(chip,"RevealTitle",def and def.name or name,4,2,150,18,14,if good then C.good else Color3.fromRGB(239,180,164));rt.TextXAlignment=Enum.TextXAlignment.Left
   local rd=label(chip,"RevealDesc",if def and def.desc then def.desc else "",4,18,150,38,11,C.paper);rd.TextWrapped=true;rd.TextYAlignment=Enum.TextYAlignment.Top
  end
 elseif open.hidden or open.back then
