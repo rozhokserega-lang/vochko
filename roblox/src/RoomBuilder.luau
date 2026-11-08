@@ -26,9 +26,36 @@ return function()
    end
   end
  end
+ local function forEachTablePart(station,action)
+  for _,p in station:GetChildren()do
+   if p:IsA("BasePart")and p.Name~="PlayerSeat"and p.Name~="CardSpace"and p.Name~="OpenCardSlot"
+    and p.Name~="CardDeck"and p.Name~="DeckPaper"and p.Name~="LaneEdge"then
+    action(p)
+   end
+  end
+ end
+ local function stylizePrimitives(station)
+  forEachTablePart(station,function(p)
+   p.Transparency=0
+   if p.Name=="Felt" then
+    p.Color=Color3.fromRGB(24,62,38)
+    p.Material=Enum.Material.Fabric
+   elseif p.Name=="Tabletop" then
+    p.Color=Color3.fromRGB(56,36,22)
+    p.Material=Enum.Material.WoodPlanks
+   elseif p.Name=="BrassEdge" then
+    p.Color=Color3.fromRGB(180,140,65)
+    p.Material=Enum.Material.Metal
+   elseif p.Name=="Leg" then
+    p.Color=Color3.fromRGB(56,36,22)
+    p.Material=Enum.Material.Wood
+   end
+  end)
+ end
  local function ensureTableVisual(root)
   -- Textured tavern mesh from ServerStorage covers the primitives; colored
   -- primitives remain the fallback when the template is unavailable.
+  local ContentProvider=game:GetService("ContentProvider")
   local storage=game:GetService("ServerStorage"):FindFirstChild("VochkoPrototype")
   local template=storage and storage:FindFirstChild("TavernTable")
   for _,definition in {{key="campaign",x=19,depth=9.47247314453125},{key="training",x=-19,depth=12.2},{key="pvp",x=0,depth=12.2}}do
@@ -43,34 +70,29 @@ return function()
       mesh.CFrame=CFrame.new(definition.x,1.2+mesh.Size.Y/2,-7)*CFrame.Angles(0,math.pi/2,0)
       mesh.Anchored=true;mesh.CanCollide=false;mesh.CanTouch=false;visual.Parent=station
       print("[VOCHKO Table] меш добавлен на",definition.key)
+      -- Only hide primitives once the mesh actually downloads; otherwise the
+      -- table would vanish entirely when an asset cannot load.
+      task.delay(1,function()
+       if not mesh.Parent then return end
+       local linked={mesh}
+       local failed=false
+       ContentProvider:PreloadAsync(linked,function(_,status)
+        if status~=Enum.AssetFetchStatus.Success then failed=true end
+       end)
+       if failed then
+        warn("[VOCHKO Table] меш стола "..definition.key.." не загрузился — возвращаю примитивы")
+        visual:Destroy()
+        stylizePrimitives(station)
+       else
+        forEachTablePart(station,function(p) p.Transparency=1 end)
+       end
+      end)
      else visual:Destroy()end
     elseif not legacyMesh and not template then
      warn("[VOCHKO Table] шаблона TavernTable нет в ServerStorage — таблицы собраны из примитивов")
     end
     local visual=station:FindFirstChild("TavernTable")
-    for _,p in station:GetChildren()do
-     if p:IsA("BasePart")and p.Name~="PlayerSeat"and p.Name~="CardSpace"and p.Name~="OpenCardSlot"
-      and p.Name~="CardDeck"and p.Name~="DeckPaper"and p.Name~="LaneEdge"then
-      if visual then
-       p.Transparency=1
-      else
-       p.Transparency=0
-       if p.Name=="Felt" then
-        p.Color=Color3.fromRGB(24,62,38)
-        p.Material=Enum.Material.Fabric
-       elseif p.Name=="Tabletop" then
-        p.Color=Color3.fromRGB(56,36,22)
-        p.Material=Enum.Material.WoodPlanks
-       elseif p.Name=="BrassEdge" then
-        p.Color=Color3.fromRGB(180,140,65)
-        p.Material=Enum.Material.Metal
-       elseif p.Name=="Leg" then
-        p.Color=Color3.fromRGB(56,36,22)
-        p.Material=Enum.Material.Wood
-       end
-      end
-     end
-    end
+    if not visual then stylizePrimitives(station)end
     -- PvP is the only shared-table race: deck lives in the center next to an
     -- empty slot for the currently open card.
     if definition.key=="pvp"then

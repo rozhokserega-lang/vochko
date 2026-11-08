@@ -122,8 +122,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 123785,
-      "sha256": "9dae48f32a663e8b08402314252d223e07ec35db69bb7b9423e813d16fe89af5"
+      "bytes": 124347,
+      "sha256": "8c59583493018d9bf65ab05c4f91e7031b26437a38844992075f35e1e197a13d"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -202,8 +202,8 @@
     },
     {
       "path": "roblox/src/RoomBuilder.luau",
-      "bytes": 18492,
-      "sha256": "a5ade26d26a26fe6851028525e8f6b8226f429659f6cb875e7355b116f00723d"
+      "bytes": 19366,
+      "sha256": "73f02215ffc5cc42cc6598f5b150c32c6c5ac0393582326491ac585d21ecb218"
     },
     {
       "path": "roblox/src/Seating.luau",
