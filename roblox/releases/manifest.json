@@ -3,6 +3,7 @@
   "place": "roblox/releases/VochkoPrototype.rbxl",
   "note": "Source GLBs contain embedded geometry and PBR textures. The place loads published Roblox assets by ID; use the same Roblox account or grant access/reimport for a different owner.",
   "robloxAssets": [
+    "rbxassetid://0",
     "rbxassetid://105939024325017",
     "rbxassetid://109217339038049",
     "rbxassetid://110912142893854",
@@ -116,19 +117,24 @@
       "sha256": "48e332bf253599dc8c483602e796489ba327f9adc8ec5cebb97804c7c1793d8d"
     },
     {
+      "path": "roblox/assets/tarot/race-tarot-atlas.png",
+      "bytes": 669056,
+      "sha256": "786fedc82356788b826c251bf5e1b8383cfd8a72b12a4602a0c0b041c8be36ef"
+    },
+    {
       "path": "roblox/default.project.json",
       "bytes": 4273,
       "sha256": "3a5dd338338b67548093524e21e2741c75e74cf69873db171a9bb09431cb6bc2"
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 128476,
-      "sha256": "cb69834bde3d5caef47261e51386bb2d6025e92937efa655484e2d67e506b1c7"
+      "bytes": 128922,
+      "sha256": "dcf922950028542de51b53bc3bb61821855a725354152d5d46361814583a6c39"
     },
     {
       "path": "roblox/src/Assets.luau",
-      "bytes": 3994,
-      "sha256": "edce1c0623b39f29a0846bae51528422b7935cd5c74a3de4831271968b404e36"
+      "bytes": 4828,
+      "sha256": "389a4eada2a24ca2ff26c0c237a59a674c09068afde68a9054cb4142549bbbb3"
     },
     {
       "path": "roblox/src/Battle.luau",
