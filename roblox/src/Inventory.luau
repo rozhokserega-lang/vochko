@@ -82,10 +82,11 @@ function Inventory.Build(app,data,duelSetup,send,race)
   for i,d in cards do
    local chosen=selected(p,tab,d.id,race)
    local card=button(browser,'Card_'..d.id,'',8+(i-1)*(cardW+12),6,cardW,cardH,function()choose(tab,d.id)end,if chosen then Color3.fromRGB(73,66,37)else C.raised)
-   card.UIStroke.Color=if chosen then C.gold else C.edge;card.UIStroke.Thickness=if chosen then 2 else 1;art(card,tab,d,false,race)
+   card.UIStroke.Color=if chosen then C.gold else C.edge;card.UIStroke.Thickness=if chosen then 4 else 1;card.UIStroke.Transparency=if chosen then 0 else .25;art(card,tab,d,false,race)
    if race and tab=='tarot'then local mark=text(card,'Kind',if d.good then 'ХОРОШЕЕ'else 'ПЛОХОЕ',5,3,cardW-10,20,11,if d.good then Color3.fromRGB(144,219,161)else Color3.fromRGB(239,180,164));mark.TextXAlignment=Enum.TextXAlignment.Center;mark.ZIndex=4 end
-   local name=text(card,'CardName',d.name,5,cardH-40,cardW-10,36,if short then 15 else 16);name.TextXAlignment=Enum.TextXAlignment.Center;name.BackgroundColor3=C.ink;name.BackgroundTransparency=.1;name.ZIndex=3
-   if chosen then local tick=text(card,'Selected','✓',cardW-29,2,26,26,23,C.gold);tick.ZIndex=5;tick.TextXAlignment=Enum.TextXAlignment.Center;tick.BackgroundColor3=C.ink;tick.BackgroundTransparency=.1;border(tick,C.gold)end
+   -- Race tarot art already has the name printed inside; skip the second label.
+   if not (race and tab=='tarot')then local name=text(card,'CardName',d.name,5,cardH-40,cardW-10,36,if short then 15 else 16);name.TextXAlignment=Enum.TextXAlignment.Center;name.BackgroundColor3=C.ink;name.BackgroundTransparency=.1;name.ZIndex=3 end
+   if chosen then make('UIGradient',{Color=ColorSequence.new(Color3.fromRGB(255,225,140),Color3.fromRGB(255,225,140)),Transparency=NumberSequence.new(.82,.95),Rotation=90},card)end
   end
   browser.CanvasSize=UDim2.fromOffset(16+#cards*(cardW+12),0)
   browser.CanvasPosition=Vector2.new(math.clamp(positions[tab]or 0,0,math.max(0,browser.CanvasSize.X.Offset-browserW)),0)

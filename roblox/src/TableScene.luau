@@ -513,7 +513,6 @@ if card.tarot then
   -- Race atlas skin over the fallback symbol. Holder is 5/6 of card width -> aspect always 0.6, matching the atlas cell exactly.
   local holder=make("Frame",{Name="RaceArt",AnchorPoint=Vector2.new(.5,0),Position=UDim2.fromScale(.5,0),Size=UDim2.fromScale(5/6,1),BackgroundTransparency=1,ClipsDescendants=true},node)
   Assets.CreateTarotArt(holder,card.tarot)
-  local title=label(node,"RaceTitle",if def then def.name else "ТАРО",4,168,136,32,15,C.paper);title.BackgroundColor3=C.ink;title.BackgroundTransparency=.15
   return node
  end
  local fallback=label(node,"LoadingTitle",card.rank,5,12,80,105,18,C.ink);fallback.Size=UDim2.new(1,-10,1,-24);fallback.TextXAlignment=Enum.TextXAlignment.Center
@@ -590,8 +589,8 @@ if open.kind=="tarot"then
   local holder=make("Frame",{Name="OpenArt",Position=UDim2.fromOffset(95,10),Size=UDim2.fromOffset(150,222),BackgroundTransparency=1},raceOpenFrame)
   Assets.CreateTarotArt(holder,open.id)
   local chip=make("Frame",{Name="TitleChip",Position=UDim2.fromOffset(88,168),Size=UDim2.fromOffset(164,56),BackgroundColor3=C.ink,BackgroundTransparency=.18,BorderSizePixel=0},raceOpenFrame)
-  local rt=label(chip,"RevealTitle",def and def.name or name,6,2,152,18,14,if good then C.good else Color3.fromRGB(239,180,164));rt.TextXAlignment=Enum.TextXAlignment.Left
-  local rd=label(chip,"RevealDesc",if def and def.desc then def.desc else "",6,18,152,36,11,C.paper);rd.TextWrapped=true;rd.TextYAlignment=Enum.TextYAlignment.Top
+  -- The art itself shows the name; the chip carries the effect text only.
+  local rd=label(chip,"RevealDesc",if def and def.desc then def.desc else "",6,2,152,52,12,if good then C.paper else Color3.fromRGB(239,180,164));rd.TextWrapped=true;rd.TextYAlignment=Enum.TextYAlignment.Center
   -- One-shot sparkle burst above the deck when a fresh tarot identity is shown.
   local token=tostring((open.id or "?"))
   if raceOpenFrame:GetAttribute("BurstToken")~=token and model then
