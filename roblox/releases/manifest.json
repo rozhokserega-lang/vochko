@@ -129,8 +129,8 @@
     },
     {
       "path": "roblox/releases/VochkoPrototype.rbxl",
-      "bytes": 129597,
-      "sha256": "d8a316386ed5fb06887f19d5c3145710119b4dc5d1c1f36deded4b28b220975d"
+      "bytes": 129671,
+      "sha256": "eb36da82f43568de18d5e3d28965a48e4f61102983d4ebd5561a15f8f33cd382"
     },
     {
       "path": "roblox/src/Assets.luau",
@@ -234,8 +234,8 @@
     },
     {
       "path": "roblox/src/TableScene.luau",
-      "bytes": 56847,
-      "sha256": "bc207e43ca4fdb8f20d9867f79c43183cd2b76e59d2a5afb0c9355bf85c955a8"
+      "bytes": 57048,
+      "sha256": "7260f0a7cae6203eb77fd2c440f80945204fe3828c50480d2f3090bf42b18fb1"
     },
     {
       "path": "roblox/src/Tarot.luau",
