@@ -27,26 +27,44 @@ return function()
   end
  end
  local function ensureTableVisual(root)
-  for _,definition in {{key="campaign",x=19},{key="training",x=-19},{key="pvp",x=0}}do
+  -- Textured tavern mesh from ServerStorage covers the primitives; colored
+  -- primitives remain the fallback when the template is unavailable.
+  local storage=game:GetService("ServerStorage"):FindFirstChild("VochkoPrototype")
+  local template=storage and storage:FindFirstChild("TavernTable")
+  for _,definition in {{key="campaign",x=19,depth=9.47247314453125},{key="training",x=-19,depth=12.2},{key="pvp",x=0,depth=12.2}}do
    local station=root:FindFirstChild("Table_"..definition.key)
    if station then
     local legacyMesh=station:FindFirstChild("TavernTable")
-    if legacyMesh then legacyMesh:Destroy() end
+    if not legacyMesh and template then
+     local visual=template:Clone();visual.Name="TavernTable"
+     local mesh=visual:FindFirstChildWhichIsA("MeshPart",true)
+     if mesh then
+      mesh.Size=Vector3.new(definition.depth,mesh.Size.Y,18.2)
+      mesh.CFrame=CFrame.new(definition.x,1.2+mesh.Size.Y/2,-7)*CFrame.Angles(0,math.pi/2,0)
+      mesh.Anchored=true;mesh.CanCollide=false;mesh.CanTouch=false;visual.Parent=station
+     else visual:Destroy()end
+    end
+    local visual=station:FindFirstChild("TavernTable")
     for _,p in station:GetChildren()do
-     if p:IsA("BasePart")and p.Name~="PlayerSeat"and p.Name~="CardSpace"and p.Name~="OpenCardSlot"then
-      p.Transparency=0
-      if p.Name=="Felt" then
-       p.Color=Color3.fromRGB(24,62,38)
-       p.Material=Enum.Material.Fabric
-      elseif p.Name=="Tabletop" then
-       p.Color=Color3.fromRGB(56,36,22)
-       p.Material=Enum.Material.WoodPlanks
-      elseif p.Name=="BrassEdge" then
-       p.Color=Color3.fromRGB(180,140,65)
-       p.Material=Enum.Material.Metal
-      elseif p.Name=="Leg" then
-       p.Color=Color3.fromRGB(56,36,22)
-       p.Material=Enum.Material.Wood
+     if p:IsA("BasePart")and p.Name~="PlayerSeat"and p.Name~="CardSpace"and p.Name~="OpenCardSlot"
+      and p.Name~="CardDeck"and p.Name~="DeckPaper"and p.Name~="LaneEdge"then
+      if visual then
+       p.Transparency=1
+      else
+       p.Transparency=0
+       if p.Name=="Felt" then
+        p.Color=Color3.fromRGB(24,62,38)
+        p.Material=Enum.Material.Fabric
+       elseif p.Name=="Tabletop" then
+        p.Color=Color3.fromRGB(56,36,22)
+        p.Material=Enum.Material.WoodPlanks
+       elseif p.Name=="BrassEdge" then
+        p.Color=Color3.fromRGB(180,140,65)
+        p.Material=Enum.Material.Metal
+       elseif p.Name=="Leg" then
+        p.Color=Color3.fromRGB(56,36,22)
+        p.Material=Enum.Material.Wood
+       end
       end
      end
     end
