@@ -14,29 +14,25 @@ end
 local function list(kind,race)
  if kind=='class'then return L.Classes elseif kind=='joker'then return L.Jokers end
  if race then
-  local wantGood=if kind=='tarotbad' then false elseif kind=='tarotgood' then true elseif kind=='tarot' then nil else nil
   local out={}
-  for _,d in RT.List do
-   if wantGood==nil or d.good==wantGood then table.insert(out,{id=d.id,name=d.name,symbol=d.symbol,desc=d.desc,good=d.good})end
-  end
+  for _,d in RT.List do table.insert(out,{id=d.id,name=d.name,symbol=d.symbol,desc=d.desc,good=d.good})end
   return out
  end
  local out={};for _,id in L.TarotIds do local d=T.Def(id);table.insert(out,{id=id,name=d.name,symbol=d.symbol,desc=T.Caption(id,true)})end;return out
 end
 local function def(kind,id,race)for _,d in list(kind,race)do if d.id==id then return d end end end
-local function isTarotTab(kind)return kind=='tarot' or kind=='tarotgood' or kind=='tarotbad' end
 local function selected(p,kind,id,race)
  if kind=='class'then return p.class==id end
- local values=if isTarotTab(kind)then (if race then (p.raceTarot or {})else p.duelTarot)elseif kind=='joker'then p.jokers else {}
+ local values=if kind=='joker'then p.jokers elseif race then (p.raceTarot or {}) else p.duelTarot
  return table.find(values,id)~=nil
 end
 local function art(parent,kind,d,mini,race)
- local holder=make('Frame',{Name='Art',Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(18,42,33),BorderSizePixel=0,ClipsDescendants=true},parent);border(holder,C.gold)
- if isTarotTab(kind)and race then
+ local holder=make('Frame',{Name='Art',Position=UDim2.fromOffset(6,6),Size=UDim2.new(1,-12,1,-12),BackgroundColor3=Color3.fromRGB(225,205,156),BorderSizePixel=0,ClipsDescendants=true},parent);border(holder,C.gold)
+ if kind=='tarot'and race then
+  make('UIGradient',{Color=ColorSequence.new(if d.good then Color3.fromRGB(44,89,62)else Color3.fromRGB(92,43,39),C.ink),Rotation=55},holder)
   local symbol=text(holder,'Symbol',d.symbol,0,0,0,0,24,if d.good then C.gold else Color3.fromRGB(239,180,164));symbol.Size=UDim2.fromScale(1,1);symbol.TextScaled=true;symbol.TextXAlignment=Enum.TextXAlignment.Center
   make('UITextSizeConstraint',{MaxTextSize=if mini then 34 else 70,MinTextSize=14},symbol)
-  -- Race atlas cell over the readable fallback (art itself carries the printed name).
-  A.CreateTarotArt(holder,d.id)
+  if not mini then local label=text(holder,'Type',if d.good then 'ХОРОШЕЕ'else 'ПЛОХОЕ',4,4,0,18,11,if d.good then C.gold else Color3.fromRGB(239,180,164));label.Size=UDim2.new(1,-8,0,18);label.TextXAlignment=Enum.TextXAlignment.Center end
  elseif kind=='tarot'then local image=A.CreateTarotArt(holder,d.id);image.ScaleType=Enum.ScaleType.Fit
  else
   make('UIGradient',{Color=ColorSequence.new(Color3.fromRGB(249,230,180),Color3.fromRGB(157,126,72)),Rotation=45},holder)
@@ -49,10 +45,7 @@ end
 function Inventory.Build(app,data,duelSetup,send,race)
  race=race==true
  A.PreloadAll();local p=data.profile;local frozen=data.loadoutLocked==true
- local goodCount,badCount=0,0
- if race then for _,id in (p.raceTarot or {})do local df=RT.Def(id);if df and df.good then goodCount+=1 else badCount+=1 end end end
- if race and focus.kind=='tarot'and not RT.Def(focus.id)then focus={kind='tarotgood',id=RT.List[1].id}end
- if race and focus.kind=='tarot'then focus.kind=if RT.Def(focus.id)and RT.Def(focus.id).good==false then 'tarotbad'else 'tarotgood'end
+ if race and focus.kind=='tarot'and not RT.Def(focus.id)then focus={kind='tarot',id=RT.List[1].id}end
  if not race and focus.kind=='tarot'and not T.Def(focus.id)then focus={kind='tarot',id='rose'}end
  local raceTarot=if race then (p.raceTarot or {})else p.duelTarot
  local root=make('Frame',{Name='TacticalMenu',Size=UDim2.fromScale(1,1),BackgroundColor3=C.ink,BorderSizePixel=0},app)
@@ -78,24 +71,19 @@ function Inventory.Build(app,data,duelSetup,send,race)
   text(root,'Title','♠  ВОЧКО',14,if short then 8 else 2,if short then 110 else w-140,32,if short then 19 else 25,C.gold).Font=Enum.Font.GothamBold
   button(root,'Return',if data.seated then 'К столу'else 'В комнату',w-122,2,108,44,function()send(if data.seated then 'closeBuild'else 'return')end)
   local tabX=if short then 138 else 14;local tabW=(w-(if short then 264 else 28))/3
-  local tabs=if race then {{'class','Класс  1/1'},{'joker','Джокеры  '..#p.jokers..'/2'},{'tarotgood','Хорошие  '..goodCount..'/2'},{'tarotbad','Плохие  '..badCount..'/2'}}else {{'class','Класс  1/1'},{'joker','Джокеры  '..#p.jokers..'/2'},{'tarot','Таро  '..#raceTarot..'/3'}}
-  for i,e in tabs do
+  for i,e in {{'class','Класс  1/1'},{'joker','Джокеры  '..#p.jokers..'/2'},{'tarot','Таро  '..#raceTarot..(if race then '/4'else '/3')}}do
    local b=button(root,'Tab_'..e[1],e[2],tabX+(i-1)*tabW,if short then 2 else 52,tabW-8,44,function()tab=e[1];focus={kind=tab,id=list(tab,race)[1].id};draw()end,if tab==e[1]then C.raised else C.ink)
    if tab==e[1]then b.UIStroke.Color=C.gold;b.UIStroke.Thickness=2;b.TextColor3=C.gold end
   end
   local browser=make('ScrollingFrame',{Name='CardBrowser',Position=UDim2.fromOffset(12,if portrait then 0 else mainY),Size=UDim2.fromOffset(browserW,browserH),BackgroundColor3=C.panel,BorderSizePixel=0,ScrollBarThickness=4,ScrollBarImageColor3=C.gold,ScrollingDirection=Enum.ScrollingDirection.X,CanvasSize=UDim2.new()},mainParent);border(browser)
-  -- Card tiles keep the map-card aspect (144x240 cell ~ 0.6): no letterboxing, no giant empty tiles.
-  local cardW=math.clamp(math.floor((browserH-16)/1.72),94,190);local cardH=math.floor(cardW*1.72);local cards=list(tab,race)
+  local cardH=browserH-16;local cardW=math.clamp(math.floor(cardH*.68),94,170);local cards=list(tab,race)
   for i,d in cards do
    local chosen=selected(p,tab,d.id,race)
-   local card=button(browser,'Card_'..d.id,'',8+(i-1)*(cardW+12),6,cardW,cardH,function()choose(tab,d.id)end,if chosen then Color3.fromRGB(84,74,40)else C.raised)
-   card.UIStroke.Color=if chosen then Color3.fromRGB(255,214,110) else C.edge;card.UIStroke.Thickness=if chosen then 7 else 1;card.UIStroke.Transparency=if chosen then 0 else .3
-   art(card,tab,d,false,race)
-   if race and isTarotTab(tab)then local mark=text(card,'Kind',if d.good then 'ХОРОШЕЕ'else 'ПЛОХОЕ',0,3,cardW,20,11,if d.good then Color3.fromRGB(144,219,161)else Color3.fromRGB(239,180,164));mark.TextXAlignment=Enum.TextXAlignment.Center;mark.ZIndex=5;mark.BackgroundColor3=C.ink;mark.BackgroundTransparency=.3 end
-   -- Race tarot art already has the name printed inside; skip the second label.
-   if not (race and isTarotTab(tab))then local name=text(card,'CardName',d.name,5,cardH-40,cardW-10,36,if short then 15 else 16);name.TextXAlignment=Enum.TextXAlignment.Center;name.BackgroundColor3=C.ink;name.BackgroundTransparency=.1;name.ZIndex=3 end
-   -- Selection reads at a glance: chosen stays bright, the rest fade back.
-   if not chosen then make('Frame',{Name='Dim',Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(0,0,0),BackgroundTransparency=.45,BorderSizePixel=0,ZIndex=6},card)end
+   local card=button(browser,'Card_'..d.id,'',8+(i-1)*(cardW+12),6,cardW,cardH,function()choose(tab,d.id)end,if chosen then Color3.fromRGB(73,66,37)else C.raised)
+   card.UIStroke.Color=if chosen then C.gold else C.edge;card.UIStroke.Thickness=if chosen then 2 else 1;art(card,tab,d,false,race)
+   if race and tab=='tarot' then local mark=text(card,'Kind','',1,0,1,1,11) mark.Visible=false end
+   local name=text(card,'CardName',d.name,5,cardH-40,cardW-10,36,if short then 15 else 16);name.TextXAlignment=Enum.TextXAlignment.Center;name.BackgroundColor3=C.ink;name.BackgroundTransparency=.1;name.ZIndex=3
+   if chosen then local tick=text(card,'Selected','✓',cardW-29,2,26,26,23,C.gold);tick.ZIndex=5;tick.TextXAlignment=Enum.TextXAlignment.Center;tick.BackgroundColor3=C.ink;tick.BackgroundTransparency=.1;border(tick,C.gold)end
   end
   browser.CanvasSize=UDim2.fromOffset(16+#cards*(cardW+12),0)
   browser.CanvasPosition=Vector2.new(math.clamp(positions[tab]or 0,0,math.max(0,browser.CanvasSize.X.Offset-browserW)),0)
@@ -106,24 +94,9 @@ function Inventory.Build(app,data,duelSetup,send,race)
   local heading=text(info,'Heading',d.name,12,6,infoW-24,28,if short then 18 else 23,C.gold);heading.Font=Enum.Font.GothamBold
   if race and d.good~=nil then heading.TextColor3=if d.good then Color3.fromRGB(144,219,161)else Color3.fromRGB(239,180,164);heading.Text=d.name..(if d.good then ' · хорошее'else ' · плохое') end
   local desc=make('ScrollingFrame',{Name='DescriptionScroll',Position=UDim2.fromOffset(12,40),Size=UDim2.new(1,-24,1,-76),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y},info)
-  local descLabel=text(desc,'Description',d.desc,0,0,infoW-30,0,if short then 16 else 17);descLabel.AutomaticSize=Enum.AutomaticSize.Y;descLabel.TextYAlignment=Enum.TextYAlignment.Top
+  local label=text(desc,'Description',d.desc,0,0,infoW-30,0,if short then 16 else 17);label.AutomaticSize=Enum.AutomaticSize.Y;label.TextYAlignment=Enum.TextYAlignment.Top
   local chosen=selected(p,focus.kind,d.id,race)
-  local botMode=race and data.battle and data.battle.duel and data.battle.duel.opponentKind=='bot'
-  text(info,'Hint',if frozen then 'Сборка зафиксирована'elseif chosen then '✓ В твоём наборе'else 'Нажми карту, чтобы выбрать',12,if botMode then infoH-76 else infoH-31,infoW-24,26,13,if chosen then C.gold else C.muted)
-  if botMode then
-   text(info,'SkillTitle','СЛОЖНОСТЬ ИИ',12,infoH-64,infoW-24,16,12,C.muted)
-   local names={'ЛАЙТ','НОРМА','СИЛЬНО'}
-   local chipW=math.floor((infoW-24-16)/3)
-   local skill=math.clamp(math.floor((p.botSkill or 1)+.5),0,2)
-   for i=1,3 do
-    local lvl=i-1
-    local b=button(info,'Skill'..i,names[i],12+(i-1)*(chipW+8),infoH-46,chipW,24,function()
-     p.botSkill=lvl;send('skill',{level=lvl})end,if lvl==skill then C.gold else C.ink)
-    if lvl==skill then b.TextColor3=C.ink;b.BackgroundTransparency=.1 else b.TextColor3=C.paper;b.BackgroundTransparency=.35 end
-    b.TextScaled=false;b.TextSize=if short then 10 else 12;b.TextWrapped=false
-   end
-   text(info,'SkillHint','ЛАЙТ · паузы ×2.1 · НОРМА ×1.4 · СИЛЬНО как раньше',12,infoH-18,infoW-24,12,10,C.muted)
-  end
+  text(info,'Hint',if frozen then 'Сборка зафиксирована'elseif chosen then '✓ В твоём наборе'else 'Нажми карту, чтобы выбрать',12,infoH-31,infoW-24,26,13,if chosen then C.gold else C.muted)
   local dock=make('Frame',{Name='Dock',AnchorPoint=Vector2.new(0,1),Position=UDim2.new(0,12,1,-8),Size=UDim2.fromOffset(w-24,footer),BackgroundColor3=C.panel,BorderSizePixel=0},root);border(dock)
   local valid,why
   if race then valid,why=L.ValidateRace(p.class,p.jokers,raceTarot)else valid,why=L.Validate(p.class,p.jokers,p.duelTarot)end
@@ -133,11 +106,7 @@ function Inventory.Build(app,data,duelSetup,send,race)
   local goW=if portrait then w-44 else math.clamp(math.floor(w*.22),142,210)
   local miniH=if portrait then 60 else 58;local miniW=if portrait then math.max(44,math.floor((w-92)/6))else math.clamp(math.floor((w-goW-92)/6),44,50)
   local items={{kind='class',id=p.class},{kind='joker',id=p.jokers[1]},{kind='joker',id=p.jokers[2]}}
-  for i=1,(if race then 4 else 3)do
-   local id=raceTarot[i]
-   local k=if id and RT.Def(id) and RT.Def(id).good==false then 'tarotbad'elseif id and RT.Def(id) then 'tarotgood'else 'tarot'
-   table.insert(items,{kind=k,id=id})
-  end
+  for i=1,(if race then 4 else 3)do table.insert(items,{kind='tarot',id=raceTarot[i]})end
   local strip=make('ScrollingFrame',{Name='SelectedCards',Position=UDim2.fromOffset(10,28),Size=UDim2.fromOffset(if portrait then w-44 else w-goW-54,miniH),CanvasSize=UDim2.fromOffset(#items*(miniW+8)+10,0),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,ScrollingDirection=Enum.ScrollingDirection.X},dock)
   for i,item in items do
    local x=(i-1)*(miniW+8)+(if i>1 then 5 else 0)+(if i>3 then 5 else 0)
